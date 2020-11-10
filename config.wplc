@@ -1,14 +1,11 @@
 [GENERAL]
-version = WickeDB V 0.1 aplha
-title = WickeDB
+version = WickePlc V 0.1 alpha
+title = WickePlc
 font = arial
 
-[COLOR]
-bar = #212121
-frame = #303030
-btn_actbg = #636262
-btn_actfg = #a4a4a4
-txt_fg = #adadad
+[STYLE]
+themepath = Tkinter_Theme/awthemes-9.5.0/
+themename = awdark
 
 [WINDOW]
 fullscreen = False
@@ -25,9 +22,9 @@ logo = Media/logo.gif
 save = Media/save.png
 import = Media/import.png
 export = Media/export.png
-start = Media/start.png
+home = Media/home.png
 plc = Media/plc.png
-daten = Media/daten.png
+data = Media/data.png
 setup = Media/setup.png
 help = Media/help.png
 exit = Media/exit.png

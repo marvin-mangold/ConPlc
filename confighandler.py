@@ -1,7 +1,7 @@
 import configparser
 
 
-def readconfig(filepath="config.wdb"):
+def readconfig(filepath="config.wplc"):
     # read data from configfile
     configfile = configparser.ConfigParser()
     configfile.read(filepath)
@@ -24,23 +24,21 @@ def readconfig(filepath="config.wdb"):
     configdata["Media_save"] = configfile["MEDIA"].get("save")
     configdata["Media_import"] = configfile["MEDIA"].get("import")
     configdata["Media_export"] = configfile["MEDIA"].get("export")
-    configdata["Media_start"] = configfile["MEDIA"].get("start")
+    configdata["Media_home"] = configfile["MEDIA"].get("home")
     configdata["Media_plc"] = configfile["MEDIA"].get("plc")
-    configdata["Media_daten"] = configfile["MEDIA"].get("daten")
+    configdata["Media_data"] = configfile["MEDIA"].get("data")
     configdata["Media_setup"] = configfile["MEDIA"].get("setup")
     configdata["Media_help"] = configfile["MEDIA"].get("help")
     configdata["Media_exit"] = configfile["MEDIA"].get("exit")
     configdata["Media_version"] = configfile["MEDIA"].get("version")
     configdata["Media_clock"] = configfile["MEDIA"].get("clock")
-    # get COLOR settings
-    configdata["Color_bar"] = configfile["COLOR"]["bar"]
-    configdata["Color_frame"] = configfile["COLOR"]["frame"]
-    configdata["Color_btn_actbg"] = configfile["COLOR"]["btn_actbg"]
-    configdata["Color_btn_actfg"] = configfile["COLOR"]["btn_actfg"]
-    configdata["Color_txt_fg"] = configfile["COLOR"]["txt_fg"]
+    # get STYLE settings
+    configdata["Style_themepath"] = configfile["STYLE"]["themepath"]
+    configdata["Style_themename"] = configfile["STYLE"]["themename"]
     return configdata
 
-def writeconfig(configdata, filepath="config.wdb"):
+
+def writeconfig(configdata, filepath="config.wplc"):
     configfile = configparser.ConfigParser()
     # set GENERAL settings
     configfile['GENERAL'] = {}
@@ -61,20 +59,17 @@ def writeconfig(configdata, filepath="config.wdb"):
     configfile["MEDIA"]["save"] = configdata["Media_save"]
     configfile["MEDIA"]["import"] = configdata["Media_import"]
     configfile["MEDIA"]["export"] = configdata["Media_export"]
-    configfile["MEDIA"]["start"] = configdata["Media_start"]
+    configfile["MEDIA"]["home"] = configdata["Media_home"]
     configfile["MEDIA"]["plc"] = configdata["Media_plc"]
-    configfile["MEDIA"]["daten"] = configdata["Media_daten"]
+    configfile["MEDIA"]["data"] = configdata["Media_data"]
     configfile["MEDIA"]["setup"] = configdata["Media_setup"]
     configfile["MEDIA"]["help"] = configdata["Media_help"]
     configfile["MEDIA"]["exit"] = configdata["Media_exit"]
     configfile["MEDIA"]["version"] = configdata["Media_version"]
     configfile["MEDIA"]["clock"] = configdata["Media_clock"]
-    # set COLOR settings
-    configfile["COLOR"]["bar"] = configdata["Color_bar"]
-    configfile["COLOR"]["frame"] = configdata["Color_frame"]
-    configfile["COLOR"]["btn_actbg"] = configdata["Color_btn_actbg"]
-    configfile["COLOR"]["btn_actfg"] = configdata["Color_btn_actfg"]
-    configfile["COLOR"]["txt_fg"] = configdata["Color_txt_fg"]
+    # set STYLE settings
+    configfile["STYLE"]["themepath"] = configdata["Style_themepath"]
+    configfile["STYLE"]["themename"] = configdata["Style_themename"]
     # write data to configfile
     with open(filepath, 'w') as configuration:
         configfile.write(configuration)

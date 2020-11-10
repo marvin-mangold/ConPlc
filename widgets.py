@@ -46,21 +46,3 @@ class Led:  # LED with color, color changes by String
         self.root.itemconfig(self.led,
                              fill=self.ledcolor,
                              outline=self.framecolor)
-
-
-class Button(tk.Button):
-    def __init__(self, master, **kw):
-        tk.Button.__init__(self, master=master, **kw)
-        self.defaultBackground = self["background"]
-        self.bind("<Enter>", lambda x: self.on_enter())
-        self.bind("<Leave>", lambda x: self.on_leave())
-
-    def on_enter(self):
-        self["background"] = self["activebackground"]
-
-    def on_leave(self):
-        self["background"] = self.defaultBackground
-
-    def change_bg(self, new_bg):
-        self.defaultBackground = new_bg
-        self["background"] = self.defaultBackground
