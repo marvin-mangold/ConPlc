@@ -54,13 +54,13 @@ class View:
         # set mainframe to max size
         self.mainframe.place(x=0, y=0, height=self.config["max_height"], width=self.config["max_width"])
 
-         # screens--------------------------------------------------------------
-         # create and place screens on mainframe
-#         self.screens =\
-#             {"ScreenStart": ScreenStart(self)}# ,
-#              "ScreenPLC": ScreenPLC(self),
-#              "ScreenDaten": ScreenDaten(self),
-#              "ScreenSetup": ScreenSetup(self)}
+        # screens--------------------------------------------------------------
+        # create and place screens on mainframe
+        self.screens =\
+            {"ScreenStart": ScreenStart(self),
+             "ScreenPLC": ScreenPLC(self),
+             "ScreenDaten": ScreenDaten(self),
+             "ScreenSetup": ScreenSetup(self)}
 
         # actionbar------------------------------------------------------------
         # create and place actionbar on mainframe
@@ -168,8 +168,8 @@ class View:
                                  posx=751,
                                  posy=0)
 
-        # Infobar--------------------------------------------------------------
-        # create and place Infobar on mainframe
+        # infobar--------------------------------------------------------------
+        # create and place infobar on mainframe
         self.infobar = tk.Canvas(master=self.mainframe,
                                  relief="flat",
                                  bg=self.style_bg_main,
@@ -221,24 +221,13 @@ class View:
                                      anchor="w")
         self.lbl_version.place(x=25, y=2, width=150, height=18)
 
-#         # open Startscreen-----------------------------------------------------
-#         self.screen_change("ScreenStart")
-#
-#     def screen_change(self, screenname):
-#         # open Screen by name (String)
-#         self.screens[screenname].screenframe.tkraise()
-#         self.btn_start.change_bg(new_bg= self.color_bar)
-#         self.btn_plc.change_bg(new_bg= self.color_bar)
-#         self.btn_daten.change_bg(new_bg= self.color_bar)
-#         self.btn_setup.change_bg(new_bg= self.color_bar)
-#         if screenname == "ScreenStart":
-#             self.btn_start.change_bg(new_bg= self.color_frame)
-#         elif screenname == "ScreenPLC":
-#             self.btn_plc.change_bg(new_bg= self.color_frame)
-#         elif screenname == "ScreenDaten":
-#             self.btn_daten.change_bg(new_bg= self.color_frame)
-#         elif screenname == "ScreenSetup":
-#             self.btn_setup.change_bg(new_bg= self.color_frame)
+        # open startscreen-----------------------------------------------------
+        self.screen_change("ScreenStart")
+
+        def screen_change(self, screenname):
+            # open Screen by name (String)
+            self.screens[screenname].screenframe.tkraise()
+
 #
 #     def scale(self):
 #         # calculate difference between minimal size and actual size
