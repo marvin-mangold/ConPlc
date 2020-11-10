@@ -5,7 +5,9 @@ import widgets
 
 
 class View:
-    def __init__(self, config):
+    def __init__(self, controller, config):
+        self.controller = controller
+        self.model = None
         self.config = config
 
         # general window settings----------------------------------------------
@@ -116,7 +118,8 @@ class View:
                                    text="Home",
                                    compound=tk.TOP,
                                    image=self.icon_home,
-                                   style="style_actionbar.TButton")
+                                   style="style_actionbar.TButton",
+                                   command=self.screen_change("ScreenStart"))
         self.btn_home.place(x=170, y=0, width=50, height=50)
 
         # create and place plc button on actionbar
@@ -126,7 +129,8 @@ class View:
                                   text="Plc",
                                   compound=tk.TOP,
                                   image=self.icon_plc,
-                                  style="style_actionbar.TButton")
+                                  style="style_actionbar.TButton",
+                                  command=self.screen_change("ScreenPLC"))
         self.btn_plc.place(x=225, y=0, width=50, height=50)
 
         # create and place data button on actionbar
@@ -136,7 +140,8 @@ class View:
                                    text="Data",
                                    compound=tk.TOP,
                                    image=self.icon_data,
-                                   style="style_actionbar.TButton")
+                                   style="style_actionbar.TButton",
+                                   command=self.screen_change("ScreenData"))
         self.btn_data.place(x=280, y=0, width=50, height=50)
 
         # create and place setup button on actionbar
@@ -340,8 +345,12 @@ class ScreenData:
         self.datatree.configure(xscrollcommand=self.datatree_scrollx.set)
         self.datatree.configure(yscrollcommand=self.datatree_scrolly.set)
 
-        for x in range(0, 100):
-            self.datatree.insert("", "end", text="photo1.png", values=("23-Jun-17 11:28", "PNG file", "2.6 KB"))
+        # create button for datasructure import
+        self.btn_import_datasructure = ttk.Button(master=self.screenframe,
+                                                  takefocus=0,
+                                                  text='Datenstruktur einlesen',
+                                                  style='Fun.TButton')
+        self.btn_import_datasructure.place(x=50, y=120, height=25, width=150)
 
     def scale(self, ox, oy):
         # scale GUI elements
