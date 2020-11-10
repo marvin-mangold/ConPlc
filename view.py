@@ -56,14 +56,12 @@ class View:
 
         # style customisation--------------------------------------------------
         self.style_btn_actionbar = ttk.Style()
-        self.style_btn_actionbar.configure("style_actionbar.TButton",
-                                           font=("arial", 8),
-                                           relief="flat")
+        self.style_btn_actionbar.configure("style_actionbar.TButton", font=("arial", 8), relief="flat")
         self.style_lbl_infobar = ttk.Style()
-        self.style_lbl_infobar.configure("style_infobar.TLabel",
-                                         foreground=self.color_btn_fg_main,
+        self.style_lbl_infobar.configure("style_infobar.TLabel", foreground=self.color_btn_fg_main,
                                          background=self.color_btn_bg_main)
-
+        self.style_btn_screen = ttk.Style()
+        self.style_btn_screen.configure("style_screen.TButton", font=("arial", 10), relief="flat")
         # screens--------------------------------------------------------------
         # create and place screens on mainframe
         self.screens =\
@@ -336,12 +334,12 @@ class ScreenData:
         self.datatree.heading("#0", text="Name", anchor=tk.W)
         self.datatree.heading("Datentyp", text="Datentyp", anchor=tk.W)
         self.datatree.heading("Kommentar", text="Kommentar", anchor=tk.W)
-        self.datatree.place(x=50, y=200, height=324, width=690)
+        self.datatree.place(x=50, y=140, height=324, width=690)
         # add scrollbar to treeview
         self.datatree_scrollx = ttk.Scrollbar(self.screenframe, orient="horizontal", command=self.datatree.xview)
-        self.datatree_scrollx.place(x=50, y=475, width=691)
+        self.datatree_scrollx.place(x=50, y=465, width=691)
         self.datatree_scrolly = ttk.Scrollbar(self.screenframe, orient="vertical", command=self.datatree.yview)
-        self.datatree_scrolly.place(x=740, y=152, height=337)
+        self.datatree_scrolly.place(x=740, y=142, height=337)
         self.datatree.configure(xscrollcommand=self.datatree_scrollx.set)
         self.datatree.configure(yscrollcommand=self.datatree_scrolly.set)
 
@@ -349,17 +347,17 @@ class ScreenData:
         self.btn_import_datasructure = ttk.Button(master=self.screenframe,
                                                   takefocus=0,
                                                   text='Datenstruktur einlesen',
-                                                  style='Fun.TButton')
-        self.btn_import_datasructure.place(x=50, y=120, height=25, width=150)
+                                                  style="style_screen.TButton")
+        self.btn_import_datasructure.place(x=50, y=650, height=30, width=150)
 
     def scale(self, ox, oy):
         # scale GUI elements
         # ox, oy: offset width (ox) and offset height (oy)
         self.screenframe.place(x=0, y=50, height=526 + oy, width=800 + ox)
         self.background.place(x=0, y=0, height=1080 + oy, width=1924 + ox)
-        self.datatree.place(x=50, y=150, height=325 + oy, width=691 + ox)
-        self.datatree_scrollx.place(x=50, y=475 + oy, width=691 + ox)
-        self.datatree_scrolly.place(x=740 + ox, y=152, height=337 + oy)
+        self.datatree.place(x=50, y=140, height=325 + oy, width=691 + ox)
+        self.datatree_scrollx.place(x=50, y=465 + oy, width=691 + ox)
+        self.datatree_scrolly.place(x=740 + ox, y=142, height=337 + oy)
 
 
 class ScreenSetup:
