@@ -1,0 +1,35 @@
+[GENERAL]
+version = WickeDB V 0.1 aplha
+title = WickeDB
+font = arial
+
+[COLOR]
+bar = #212121
+frame = #303030
+btn_actbg = #636262
+btn_actfg = #a4a4a4
+txt_fg = #adadad
+
+[WINDOW]
+fullscreen = False
+min_width = 800
+min_height = 600
+max_width = 1920
+max_height = 1080
+start_width = 1024
+start_height = 768
+
+[MEDIA]
+icon = Media/logo.gif
+logo = Media/logo.gif
+save = Media/save.png
+import = Media/import.png
+export = Media/export.png
+start = Media/start.png
+plc = Media/plc.png
+daten = Media/daten.png
+setup = Media/setup.png
+help = Media/help.png
+exit = Media/exit.png
+version = Media/version.gif
+clock = Media/clock.gif

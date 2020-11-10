@@ -1,0 +1,7 @@
+tkinter
+pymysql
+time
+random
+pathlib
+configparser
+tkinter - tcl-awthemes
