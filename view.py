@@ -44,7 +44,7 @@ class View:
         # copy colorcodes
         self.color_btn_fg_main = self.style_main.lookup('TButton', 'foreground')
         self.color_btn_bg_main = self.style_main.lookup('TButton', 'background')
-        self.color_frame_bg_main = self.style_main.lookup('TFrame', 'background')
+        self.color_bg_contrast = "#3d4145"
 
         # mainframe------------------------------------------------------------
         # set mainframe for window
@@ -263,7 +263,7 @@ class ScreenStart:
         # create and place screenframe background
         self.background = tk.Canvas(master=self.screenframe,
                                     relief="flat",
-                                    bg=self.master.color_frame_bg_main,
+                                    bg=self.master.color_bg_contrast,
                                     highlightthickness=0,
                                     highlightbackground="black")
         self.background.place(x=0, y=0, height=1080, width=1924)
@@ -290,7 +290,7 @@ class ScreenPLC:
         # create and place screenframe background
         self.background = tk.Canvas(master=self.screenframe,
                                     relief="flat",
-                                    bg=self.master.color_frame_bg_main,
+                                    bg=self.master.color_bg_contrast,
                                     highlightthickness=0,
                                     highlightbackground="black")
         self.background.place(x=0, y=0, height=1080, width=1924)
@@ -317,22 +317,40 @@ class ScreenData:
         # create and place screenframe background
         self.background = tk.Canvas(master=self.screenframe,
                                     relief="flat",
-                                    bg=self.master.color_frame_bg_main,
+                                    bg=self.master.color_bg_contrast,
                                     highlightthickness=0,
                                     highlightbackground="black")
         self.background.place(x=0, y=0, height=1080, width=1924)
 
-        self.lbl_data = ttk.Label(master=self.background,
-                                  style="TLabel",
-                                  text="Datascreen",
-                                  anchor="w")
-        self.lbl_data.place(x=400, y=400, width=150, height=25)
+        # create and place treeview for data structure
+        self.datatree = ttk.Treeview(self.screenframe)
+        self.datatree["columns"] = ("Datentyp", "Kommentar")
+        self.datatree.column("#0", width=200, minwidth=100, stretch=tk.NO)
+        self.datatree.column("Datentyp", width=200, minwidth=100, stretch=tk.NO)
+        self.datatree.column("Kommentar", width=200, minwidth=100, stretch=tk.YES)
+        self.datatree.heading("#0", text="Name", anchor=tk.W)
+        self.datatree.heading("Datentyp", text="Datentyp", anchor=tk.W)
+        self.datatree.heading("Kommentar", text="Kommentar", anchor=tk.W)
+        self.datatree.place(x=50, y=200, height=324, width=690)
+        # add scrollbar to treeview
+        self.datatree_scrollx = ttk.Scrollbar(self.screenframe, orient="horizontal", command=self.datatree.xview)
+        self.datatree_scrollx.place(x=50, y=475, width=691)
+        self.datatree_scrolly = ttk.Scrollbar(self.screenframe, orient="vertical", command=self.datatree.yview)
+        self.datatree_scrolly.place(x=740, y=152, height=337)
+        self.datatree.configure(xscrollcommand=self.datatree_scrollx.set)
+        self.datatree.configure(yscrollcommand=self.datatree_scrolly.set)
+
+        for x in range(0, 100):
+            self.datatree.insert("", "end", text="photo1.png", values=("23-Jun-17 11:28", "PNG file", "2.6 KB"))
 
     def scale(self, ox, oy):
         # scale GUI elements
         # ox, oy: offset width (ox) and offset height (oy)
         self.screenframe.place(x=0, y=50, height=526 + oy, width=800 + ox)
         self.background.place(x=0, y=0, height=1080 + oy, width=1924 + ox)
+        self.datatree.place(x=50, y=150, height=325 + oy, width=691 + ox)
+        self.datatree_scrollx.place(x=50, y=475 + oy, width=691 + ox)
+        self.datatree_scrolly.place(x=740 + ox, y=152, height=337 + oy)
 
 
 class ScreenSetup:
@@ -344,7 +362,7 @@ class ScreenSetup:
         # create and place screenframe background
         self.background = tk.Canvas(master=self.screenframe,
                                     relief="flat",
-                                    bg=self.master.color_frame_bg_main,
+                                    bg=self.master.color_bg_contrast,
                                     highlightthickness=0,
                                     highlightbackground="black")
         self.background.place(x=0, y=0, height=1080, width=1924)

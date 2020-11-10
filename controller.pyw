@@ -23,7 +23,7 @@ class Controller:
         self.view.btn_plc.bind(
             "<ButtonRelease>", lambda x: self.view.screen_change("ScreenPLC"))
         self.view.btn_data.bind(
-            "<ButtonRelease>", lambda x: self.view.screen_change("ScreenDaten"))
+            "<ButtonRelease>", lambda x: self.view.screen_change("ScreenData"))
         self.view.btn_setup.bind(
             "<ButtonRelease>", lambda x: self.view.screen_change("ScreenSetup"))
         self.view.btn_exit.bind(
