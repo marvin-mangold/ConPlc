@@ -68,6 +68,9 @@ class View:
                                          background=self.color_btn_bg_main)
         self.style_btn_screen = ttk.Style()
         self.style_btn_screen.configure("style_screen.TButton", font=("arial", 10), relief="flat")
+        self.style_lbl_screen = ttk.Style()
+        self.style_lbl_screen.configure("style_screen.TLabel", font=("arial", 10), relief="flat",
+                                        background=self.color_bg_contrast)
         # screens--------------------------------------------------------------
         # create and place screens on mainframe
         self.screens =\
@@ -363,6 +366,58 @@ class ScreenData:
                                                   style="style_screen.TButton")
         self.btn_import_datasructure.place(x=50, y=650, height=30, width=150)
 
+        # create and place label for UDT name
+        self.udt_name = tk.StringVar()
+        self.lbl_udt_name_info = ttk.Label(master=self.background,
+                                           style="style_screen.TLabel",
+                                           text="Name:",
+                                           anchor="w")
+        self.lbl_udt_name_info.place(x=50, y=75, width=50, height=25)
+        self.lbl_udt_name = ttk.Label(master=self.background,
+                                      style="style_screen.TLabel",
+                                      textvariable=self.udt_name,
+                                      anchor="w")
+        self.lbl_udt_name.place(x=100, y=75, width=250, height=25)
+
+        # create and place label for UDT description
+        self.udt_description = tk.StringVar()
+        self.lbl_udt_description_info = ttk.Label(master=self.background,
+                                                  style="style_screen.TLabel",
+                                                  text="Beschreibung:",
+                                                  anchor="w")
+        self.lbl_udt_description_info.place(x=380, y=75, width=85, height=25)
+        self.lbl_udt_description = ttk.Label(master=self.background,
+                                             style="style_screen.TLabel",
+                                             textvariable=self.udt_description,
+                                             anchor="w")
+        self.lbl_udt_description.place(x=465, y=75, width=500, height=25)
+
+        # create and place label for UDT version
+        self.udt_version = tk.StringVar()
+        self.lbl_udt_version_info = ttk.Label(master=self.background,
+                                              style="style_screen.TLabel",
+                                              text="Version:",
+                                              anchor="w")
+        self.lbl_udt_version_info.place(x=50, y=108, width=50, height=25)
+        self.lbl_udt_version = ttk.Label(master=self.background,
+                                         style="style_screen.TLabel",
+                                         textvariable=self.udt_version,
+                                         anchor="w")
+        self.lbl_udt_version.place(x=100, y=108, width=250, height=25)
+
+        # create and place label for UDT info
+        self.udt_info = tk.StringVar()
+        self.lbl_udt_info_info = ttk.Label(master=self.background,
+                                           style="style_screen.TLabel",
+                                           text="Info:",
+                                           anchor="w")
+        self.lbl_udt_info_info.place(x=380, y=108, width=85, height=25)
+        self.lbl_udt_info = ttk.Label(master=self.background,
+                                      style="style_screen.TLabel",
+                                      textvariable=self.udt_info,
+                                      anchor="w")
+        self.lbl_udt_info.place(x=465, y=108, width=500, height=25)
+
     def scale(self, ox, oy):
         # scale GUI elements
         # ox, oy: offset width (ox) and offset height (oy)
@@ -372,11 +427,19 @@ class ScreenData:
         self.datatree_scrollx.place(x=50, y=465 + oy, width=691 + ox)
         self.datatree_scrolly.place(x=740 + ox, y=142, height=337 + oy)
 
-    def clear_datatree(self):
+    def clear_data(self):
         for element in self.datatree.get_children():
             self.datatree.delete(element)
+        self.udt_name.set("")
+        self.udt_description.set("")
+        self.udt_version.set("")
+        self.udt_info.set("")
 
     def fill_datatree(self, name, description, version, info, data):
+        self.udt_name.set(name)
+        self.udt_description.set(description)
+        self.udt_version.set(version)
+        self.udt_info.set(info)
         # check every element,
         # if element is standard datatype --> insert
         # elif element is special datatype --> insert in folder

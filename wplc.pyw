@@ -48,7 +48,7 @@ class Controller:
     def import_datastructure(self):
         error = False
         # clear data in datatree
-        self.view.screens["ScreenData"].clear_datatree()
+        self.view.screens["ScreenData"].clear_data()
         # get filepath if main UDT
         self.model.udt_path = self.view.get_filepath()
         if self.model.udt_path == "":
