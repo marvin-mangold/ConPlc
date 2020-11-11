@@ -1,5 +1,8 @@
+import os
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import filedialog
+from tkinter import messagebox
 from pathlib import Path
 import widgets
 
@@ -9,6 +12,9 @@ class View:
         self.controller = controller
         self.model = None
         self.config = config
+
+        # other variables------------------------------------------------------
+        self.desktoppath = os.path.expanduser(r"~\Desktop")
 
         # general window settings----------------------------------------------
         # set title
@@ -256,6 +262,13 @@ class View:
         for screen in self.screens:
             self.screens[screen].scale(ox, oy)
 
+    def get_filepath(self, message=None):
+        if message is not None:
+            tk.messagebox.showinfo(title=None, message=message)
+        path = tk.filedialog.askopenfilename(initialdir=self.desktoppath, title="UDT auswählen",
+                                             filetypes=(("UDT Files", "*.udt"),))
+        return path
+
 
 class ScreenStart:
     def __init__(self, master):
@@ -358,6 +371,29 @@ class ScreenData:
         self.datatree.place(x=50, y=140, height=325 + oy, width=691 + ox)
         self.datatree_scrollx.place(x=50, y=465 + oy, width=691 + ox)
         self.datatree_scrolly.place(x=740 + ox, y=142, height=337 + oy)
+
+    def clear_datatree(self):
+        for element in self.datatree.get_children():
+            self.datatree.delete(element)
+
+    def fill_datatree(self, name, description, version, info, data):
+        # check every element,
+        # if element is standard datatype --> insert
+        # elif element is special datatype --> insert in folder
+        elementid = 0
+        depth = 0
+        depthlist = [""]
+        for element in data:
+            elementid += 1   # identify each element with an id
+            if element[0] > depth:   # open new folder
+                print("new folder")
+                depthlist.append(str(elementid))
+            elif element[0] < depth:   # close folder
+                print("close Folder")
+                depthlist.pop()
+            else:   # keep folder
+                print("keep folder")
+            self.datatree.insert(depthlist[-1], "end", text=element[1], values=(element[2], element[3]))
 
 
 class ScreenSetup:

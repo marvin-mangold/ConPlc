@@ -1,17 +1,4 @@
 import re
-import os
-import tkinter as tk
-from tkinter import filedialog
-from tkinter import messagebox
-
-
-def get_filepath(message=None):
-    desktoppath = os.path.expanduser(r"~\Desktop")
-    if message is not None:
-        tk.messagebox.showinfo(title=None, message=message)
-    path = tk.filedialog.askopenfilename(initialdir=desktoppath, title="UDT auswählen",
-                                         filetypes=(("UDT Files", "*.udt"),))
-    return path
 
 
 def read_udt_file(path):
@@ -177,7 +164,7 @@ def save_udt_element(data, depthname, element):
     data.append(newelement)
 
 
-def get_udt_data(data=None, structdepth=0, structdepthname=None):
+def get_udt_data(data=None, structdepth=0, structdepthname=None, path="", dependencies=None):
     if data is None:
         data = []
     if structdepthname is None:
@@ -192,11 +179,6 @@ def get_udt_data(data=None, structdepth=0, structdepthname=None):
                       "Int", "UInt", "DInt", "UDInt", "LInt", "ULInt", "Real",
                       "LReal", "Char", "WChar", "String", "WString"]
     special_types = ["DTL", "Array", "Struct"]
-    # get path from udt-File
-    message = "udt auswählen"
-    if len(data) > 0:
-        message = "udt {name} auswählen!".format(name=data[-1][2])
-    path = get_filepath(message)
     # read Data from udt-File
     udt = read_udt_file(path)
     # analyse Data from udt-File
@@ -283,10 +265,23 @@ def get_udt_data(data=None, structdepth=0, structdepthname=None):
                         save_udt_element(data, structdepthname, element)
                         structdepth += 1
                         structdepthname.append(element[1]+".")
+                        _path = dependencies[datatype]
                         _name, _description, _version, _info, data = get_udt_data(
-                            data, structdepth, structdepthname)
+                            data, structdepth, structdepthname, _path, dependencies)
                         structdepthname.pop()
                         structdepth -= 1
                 else:
                     print("Datentyp {datatype} nicht implementiert!".format(datatype=datatype))
     return name, description, version, info, data
+
+
+def get_udt_dependencies(path):
+    dependencies = {}
+    udt = read_udt_file(path)
+    for line in udt:
+        result, datatype = get_udt_datatype(line)
+        if result:
+            if element_is_udt(datatype):
+                dependencies[datatype] = ""
+    return dependencies
+
