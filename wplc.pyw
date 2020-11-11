@@ -46,25 +46,31 @@ class Controller:
         self.view.timestamp.set(self.model.get_time())
 
     def import_datastructure(self):
+        error = False
         # clear data in datatree
         self.view.screens["ScreenData"].clear_datatree()
         # get filepath if main UDT
         self.model.udt_path = self.view.get_filepath()
-        # check if UDT consists of sub-UDTs
-        self.model.get_udt_dependencies()
+        if self.model.udt_path == "":
+            error = True
+        if not error:
+            # check if UDT consists of sub-UDTs
+            self.model.get_udt_dependencies()
         # get filepath of sub-UDTs
         for dep in self.model.udt_dependencies:
             self.model.udt_dependencies[dep] = self.view.get_filepath("UDT {dep} auswählen".format(dep=dep))
-        # get datastructure of main UDT and sub-UDTs
-        self.model.get_udt_data()
-        self.view.screens["ScreenData"].fill_datatree(self.model.udt_name,
-                                                      self.model.udt_description,
-                                                      self.model.udt_version,
-                                                      self.model.udt_info,
-                                                      self.model.udt_data)
+            if self.model.udt_dependencies[dep] == "":
+                error = True
+        if not error:
+            # get datastructure of main UDT and sub-UDTs
+            self.model.get_udt_data()
+            self.view.screens["ScreenData"].fill_datatree(self.model.udt_name,
+                                                          self.model.udt_description,
+                                                          self.model.udt_version,
+                                                          self.model.udt_info,
+                                                          self.model.udt_data)
 
 
 if __name__ == '__main__':
     app = Controller()
     app.run()
-

@@ -380,20 +380,27 @@ class ScreenData:
         # check every element,
         # if element is standard datatype --> insert
         # elif element is special datatype --> insert in folder
-        elementid = 0
         depth = 0
         depthlist = [""]
+        elementlist = []
         for element in data:
-            elementid += 1   # identify each element with an id
-            if element[0] > depth:   # open new folder
-                print("new folder")
-                depthlist.append(str(elementid))
-            elif element[0] < depth:   # close folder
-                print("close Folder")
+            # open new folder if structure depth increases
+            if element[0] > depth:
+                # mark last data as folder
+                depthlist.append(elementlist[-1])
+            # close folder if structure depth decreases
+            elif element[0] < depth:
+                # unmark last folder
                 depthlist.pop()
-            else:   # keep folder
-                print("keep folder")
-            self.datatree.insert(depthlist[-1], "end", text=element[1], values=(element[2], element[3]))
+            # else keep folder
+            else:
+                pass
+            # put actual data in datatree in the actual folder
+            data = self.datatree.insert(depthlist[-1], "end", text=element[1], values=(element[2], element[3]))
+            # save actual data in list
+            elementlist.append(data)
+            # buffer actual structure depth for next loop
+            depth = element[0]
 
 
 class ScreenSetup:
