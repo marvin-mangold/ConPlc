@@ -1,7 +1,7 @@
 import configparser
 
 
-def readconfig(filepath="config.wplc"):
+def readconfig(filepath="wplc.conf"):
     # read data from configfile
     configfile = configparser.ConfigParser()
     configfile.read(filepath)
@@ -38,7 +38,7 @@ def readconfig(filepath="config.wplc"):
     return configdata
 
 
-def writeconfig(configdata, filepath="config.wplc"):
+def writeconfig(configdata, filepath="wplc.conf"):
     configfile = configparser.ConfigParser()
     # set GENERAL settings
     configfile['GENERAL'] = {}

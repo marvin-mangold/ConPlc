@@ -1,4 +1,17 @@
 import re
+import os
+import tkinter as tk
+from tkinter import filedialog
+from tkinter import messagebox
+
+
+def get_filepath(message=None):
+    desktoppath = os.path.expanduser(r"~\Desktop")
+    if message is not None:
+        tk.messagebox.showinfo(title=None, message=message)
+    path = tk.filedialog.askopenfilename(initialdir=desktoppath, title="UDT auswählen",
+                                         filetypes=(("UDT Files", "*.udt"),))
+    return path
 
 
 def read_udt_file(path):
@@ -16,7 +29,7 @@ def get_udt_name(line):
     # -->TYPE "udt Name"
     result = False
     name = ""
-    regex = re.search(r"TYPE '(.*?)'", line)
+    regex = re.search(r'TYPE "(.*?)"', line)
     if regex is not None:
         result = True
         name = regex.group(1)
@@ -28,7 +41,7 @@ def get_udt_description(line):
     # -->TITLE = udt with variables
     result = False
     description = ""
-    regex = re.search(r"TITLE = (.*)", line)
+    regex = re.search(r'TITLE = (.*)', line)
     if regex is not None:
         result = True
         description = regex.group(1)
@@ -40,7 +53,7 @@ def get_udt_version(line):
     # -->VERSION : 0.1
     result = False
     version = ""
-    regex = re.search(r"VERSION : (.*)", line)
+    regex = re.search(r'VERSION : (.*)', line)
     if regex is not None:
         result = True
         version = regex.group(1)
@@ -52,7 +65,7 @@ def get_udt_info(line):
     # -->//Information about this udt
     result = False
     info = ""
-    regex = re.search(r"^/{2}(.*)", line)
+    regex = re.search(r'^/{2}(.*)', line)
     if regex is not None:
         result = True
         info = regex.group(1)
@@ -63,7 +76,7 @@ def get_udt_headerend(line):
     # get last part of the header
     # -->STRUCT
     result = False
-    regex = re.search(r"STRUCT", line)
+    regex = re.search(r'STRUCT', line)
     if regex is not None:
         result = True
     return result
@@ -74,7 +87,7 @@ def get_udt_datatype(line):
     # -->name : Bool;   // comment
     result = False
     datatype = ""
-    regex = re.search(r"(.*) : ([^;\/\[ ]*)", line)
+    regex = re.search(r'(.*) : ([^;\/\[ ]*)', line)
     if regex is not None:
         result = True
         datatype = regex.group(2)
@@ -84,7 +97,7 @@ def get_udt_datatype(line):
 def clean_udt_varname(varname):
     # erase additional info in Varname (internal settings in {} brackets)
     # -->name {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment
-    regex = re.search(r"(.*) {", varname)
+    regex = re.search(r'(.*) {', varname)
     if regex is not None:
         varname = regex.group(1)
     return varname
@@ -95,7 +108,7 @@ def get_udt_struct(line, depth):
     # -->name : Struct   // comment
     result = False
     element = []
-    regex = re.search(r"(.*) : (Struct)(?:   // )?(.*)?", line)
+    regex = re.search(r'(.*) : (Struct)(?:   // )?(.*)?', line)
     if regex is not None:
         result = True
         name = clean_udt_varname(regex.group(1))
@@ -109,7 +122,7 @@ def get_udt_endstruct(line):
     # get end of Struct declaration (must have string "END_STRUCT;")
     # -->END_STRUCT;
     result = False
-    regex = re.search(r"END_STRUCT;", line)
+    regex = re.search(r'END_STRUCT;', line)
     if regex is not None:
         result = True
     return result 
@@ -120,7 +133,7 @@ def get_udt_var(line, depth):
     # -->name : Bool;   // comment
     result = False
     element = []
-    regex = re.search(r"(.*) : (.*);(?:   // )?(.*)?", line)
+    regex = re.search(r'(.*) : (.*);(?:   // )?(.*)?', line)
     if regex is not None:
         result = True
         name = clean_udt_varname(regex.group(1))
@@ -135,7 +148,7 @@ def get_array_data(line):
     start = 0
     end = 0
     datatype = ""
-    regex = re.search(r"(?:Array\[)(.*)(?:\.\.)(.*)(?:\] of )(.*);", line)
+    regex = re.search(r'(?:Array\[)(.*)(?:\.\.)(.*)(?:\] of )(.*);', line)
     if regex is not None:
         start = int(regex.group(1))
         end = int(regex.group(2)) + 1
@@ -147,7 +160,7 @@ def element_is_udt(datatype):
     # check if element datatype is special udt type
     # -->"someName"
     result = False
-    regex = re.search(r"'(.*)'", datatype)
+    regex = re.search(r'"(.*)"', datatype)
     if regex is not None:
         result = True
     return result
@@ -164,7 +177,7 @@ def save_udt_element(data, depthname, element):
     data.append(newelement)
 
 
-def get_udt_data(data=None, structdepth=0, structdepthname=None, getfilepath=None):
+def get_udt_data(data=None, structdepth=0, structdepthname=None):
     if data is None:
         data = []
     if structdepthname is None:
@@ -183,7 +196,7 @@ def get_udt_data(data=None, structdepth=0, structdepthname=None, getfilepath=Non
     message = "udt auswählen"
     if len(data) > 0:
         message = "udt {name} auswählen!".format(name=data[-1][2])
-    path = getfilepath(message)
+    path = get_filepath(message)
     # read Data from udt-File
     udt = read_udt_file(path)
     # analyse Data from udt-File
@@ -271,7 +284,7 @@ def get_udt_data(data=None, structdepth=0, structdepthname=None, getfilepath=Non
                         structdepth += 1
                         structdepthname.append(element[1]+".")
                         _name, _description, _version, _info, data = get_udt_data(
-                            data, structdepth, structdepthname, getfilepath)
+                            data, structdepth, structdepthname)
                         structdepthname.pop()
                         structdepth -= 1
                 else:

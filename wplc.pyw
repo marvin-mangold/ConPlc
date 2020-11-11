@@ -6,7 +6,7 @@ import model
 class Controller:
     def __init__(self):
         # get Configdata from Configfile
-        self.config = confighandler.readconfig("config.wplc")
+        self.config = confighandler.readconfig("wplc.conf")
         # call view (handles the graphics of GUI)
         self.view = view.View(self, self.config)
         # call model (handles the functions of GUI)
@@ -27,7 +27,7 @@ class Controller:
         self.view.btn_exit.bind(
             "<ButtonRelease>", lambda x: self.stop())
         self.view.screens["ScreenData"].btn_import_datasructure.bind(
-            "<ButtonRelease>", lambda x: self.import_datasructure())
+            "<ButtonRelease>", lambda x: self.import_datastructure())
 
     def run(self):
         # initial trigger for 500ms loop
@@ -45,19 +45,11 @@ class Controller:
         # get actual time and save it to variable
         self.view.timestamp.set(self.model.get_time())
 
+    def import_datastructure(self):
+        self.model.get_udt_data()
+
 
 if __name__ == '__main__':
     app = Controller()
     app.run()
 
-#import os
-#        self.desktoppath = os.path.expanduser(r"~\Desktop")
-#from tkinter import filedialog
-#from tkinter import messagebox
-
-#def get_filepath(message=None):
-#    if message is not None:
-#        tk.messagebox.showinfo(title=None, message=message)
-#    path = tk.filedialog.askopenfilename(initialdir=self.desktoppath, title="UDT auswählen",
-#                                         filetypes=(("UDT Files", "*.udt"),))
-#    return path
