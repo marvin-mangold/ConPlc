@@ -322,7 +322,7 @@ class View:
                                              filetypes=(("UDT Files", "*.udt"),))
         return path
 
-    def clear_data(self):
+    def clear_udt_data(self):
         for element in self.datatree.get_children():
             self.datatree.delete(element)
         self.udt_name.set("")
@@ -330,7 +330,7 @@ class View:
         self.udt_version.set("")
         self.udt_info.set("")
 
-    def fill_datatree(self, name, description, version, info, data):
+    def fill_udt_data(self, name, description, version, info, data):
         self.udt_name.set(name)
         self.udt_description.set(description)
         self.udt_version.set(version)
