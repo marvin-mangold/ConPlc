@@ -16,17 +16,9 @@ class Controller:
         # call scale function when windowsize gets changed
         self.view.windowframe.bind(
             "<Configure>", lambda x: self.view.scale())
-        self.view.btn_home.bind(
-            "<ButtonRelease>", lambda x: self.view.screen_change("ScreenStart"))
-        self.view.btn_plc.bind(
-            "<ButtonRelease>", lambda x: self.view.screen_change("ScreenPLC"))
-        self.view.btn_data.bind(
-            "<ButtonRelease>", lambda x: self.view.screen_change("ScreenData"))
-        self.view.btn_setup.bind(
-            "<ButtonRelease>", lambda x: self.view.screen_change("ScreenSetup"))
         self.view.btn_exit.bind(
             "<ButtonRelease>", lambda x: self.stop())
-        self.view.screens["ScreenData"].btn_import_datasructure.bind(
+        self.view.btn_import_datasructure.bind(
             "<ButtonRelease>", lambda x: self.import_datastructure())
 
     def run(self):
@@ -43,7 +35,8 @@ class Controller:
         # trigger every 500ms
         self.view.windowframe.after(500, self.trigger_500ms)
         # get actual time and save it to variable
-        self.view.timestamp.set(self.model.get_time())
+        self.model.get_time()
+        self.view.timestamp.set(self.model.time)
 
     def import_datastructure(self):
         error = False

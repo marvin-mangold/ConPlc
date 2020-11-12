@@ -4,7 +4,35 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from pathlib import Path
-import widgets
+
+
+class Led:  # LED with color, color changes by String
+    def __init__(self, master, posx, posy, diameter, framewidth,
+                 framecolor, ledcolor):
+        self.root = master
+        self.ledcolor = ledcolor
+        self.framecolor = framecolor
+        self.diameter = diameter
+        self.framewidth = framewidth
+        self.offsetx = 0
+        self.offsety = 0
+        self.led = self.root.create_oval(
+            posx, posy, posx + self.diameter, posy + self.diameter,
+            width=self.framewidth, fill=self.ledcolor, outline=self.framecolor)
+
+    def update(self, offsetx=0, offsety=0):
+        differenzx = offsetx - self.offsetx
+        differenzy = offsety - self.offsety
+        self.offsetx = self.offsetx + differenzx
+        self.offsety = self.offsety + differenzy
+        self.root.move(self.led, differenzx, differenzy)
+
+    def colorchange(self, ledcolor="yellow", framecolor="black"):
+        self.ledcolor = ledcolor
+        self.framecolor = framecolor
+        self.root.itemconfig(self.led,
+                             fill=self.ledcolor,
+                             outline=self.framecolor)
 
 
 class View:
@@ -61,132 +89,74 @@ class View:
         self.mainframe.place(x=0, y=0, height=self.config["max_height"], width=self.config["max_width"])
 
         # style customisation--------------------------------------------------
+        # actionbar
         self.style_btn_actionbar = ttk.Style()
-        self.style_btn_actionbar.configure("style_actionbar.TButton", font=("arial", 8), relief="flat")
+        self.style_btn_actionbar.configure("style_actionbar.TButton",
+                                           font=("arial", 8),
+                                           relief="flat")
+        # infobar
         self.style_lbl_infobar = ttk.Style()
-        self.style_lbl_infobar.configure("style_infobar.TLabel", foreground=self.color_btn_fg_main,
+        self.style_lbl_infobar.configure("style_infobar.TLabel",
+                                         foreground=self.color_btn_fg_main,
                                          background=self.color_btn_bg_main)
+        # screen
         self.style_btn_screen = ttk.Style()
-        self.style_btn_screen.configure("style_screen.TButton", font=("arial", 10), relief="flat")
+        self.style_btn_screen.configure("style_screen.TButton",
+                                        font=("arial", 10),
+                                        relief="flat")
         self.style_lbl_screen = ttk.Style()
-        self.style_lbl_screen.configure("style_screen.TLabel", font=("arial", 10), relief="flat",
+        self.style_lbl_screen.configure("style_screen.TLabel",
+                                        font=("arial", 10),
+                                        relief="flat",
+                                        background=self.color_btn_bg_main)
+        self.style_text_screen = ttk.Style()
+        self.style_text_screen.configure("style_text_screen.TLabel",
+                                         font=("arial", 10),
+                                         relief="flat",
+                                         background=self.color_bg_contrast)
+        self.style_btn_screen = ttk.Style()
+        self.style_btn_screen.configure("style_screen.TFrame",
                                         background=self.color_bg_contrast)
-        # screens--------------------------------------------------------------
-        # create and place screens on mainframe
-        self.screens =\
-            {"ScreenStart": ScreenStart(self),
-             "ScreenPLC": ScreenPLC(self),
-             "ScreenData": ScreenData(self),
-             "ScreenSetup": ScreenSetup(self)}
+        self.style_btn_screen = ttk.Style()
+        self.style_btn_screen.configure("style_screen.TNotebook",
+                                        background=self.color_btn_bg_main,
+                                        relief="flat")
+        self.style_treeview = ttk.Style()
+        self.style_treeview.configure("Treeview.Heading",
+                                      font=("arial", 10))
+
+        # create Tabs----------------------------------------------------------
+        self.screens = ttk.Notebook(self.mainframe, style="style_screen.TNotebook")
+        self.screen_home = ttk.Frame(self.screens, style="style_screen.TFrame")
+        self.screen_plc = ttk.Frame(self.screens, style="style_screen.TFrame")
+        self.screen_data = ttk.Frame(self.screens, style="style_screen.TFrame")
+        self.screen_setup = ttk.Frame(self.screens, style="style_screen.TFrame")
+        self.img_home = tk.PhotoImage(file=Path(self.config["Media_home"]))
+        self.img_plc = tk.PhotoImage(file=Path(self.config["Media_plc"]))
+        self.img_data = tk.PhotoImage(file=Path(self.config["Media_data"]))
+        self.img_setup = tk.PhotoImage(file=Path(self.config["Media_setup"]))
+        self.screens.add(self.screen_home, text="Home", image=self.img_home, compound=tk.TOP)
+        self.screens.add(self.screen_plc, text="PLC", image=self.img_plc, compound=tk.TOP)
+        self.screens.add(self.screen_data, text="Data", image=self.img_data, compound=tk.TOP)
+        self.screens.add(self.screen_setup, text="Setup", image=self.img_setup, compound=tk.TOP)
+        self.screens.place(x=0, y=0, width=802, height=578)
 
         # actionbar------------------------------------------------------------
-        # create and place actionbar on mainframe
-        self.actionbar = tk.Canvas(master=self.mainframe,
-                                   relief="flat",
-                                   bg=self.color_btn_bg_main,
-                                   highlightthickness=0,
-                                   highlightbackground="black")
-        self.actionbar.place(x=0, y=0, height=50, width=800)
-
-        # create and place save button on actionbar
-        self.icon_save = tk.PhotoImage(file=Path(self.config["Media_save"]))
-        self.btn_save = ttk.Button(master=self.actionbar,
-                                   takefocus=0,
-                                   text="Save",
-                                   compound=tk.TOP,
-                                   image=self.icon_save,
-                                   style="style_actionbar.TButton")
-        self.btn_save.place(x=5, y=0, width=50, height=50)
-
-        # create and place import button on actionbar
-        self.icon_import = tk.PhotoImage(file=Path(self.config["Media_import"]))
-        self.btn_import = ttk.Button(master=self.actionbar,
-                                     takefocus=0,
-                                     text="Import",
-                                     compound=tk.TOP,
-                                     image=self.icon_import,
-                                     style="style_actionbar.TButton")
-        self.btn_import.place(x=60, y=0, width=50, height=50)
-
-        # create and place export button on actionbar
-        self.icon_export = tk.PhotoImage(file=Path(self.config["Media_export"]))
-        self.btn_export = ttk.Button(master=self.actionbar,
-                                     takefocus=0,
-                                     text="Export",
-                                     compound=tk.TOP,
-                                     image=self.icon_export,
-                                     style="style_actionbar.TButton")
-        self.btn_export.place(x=115, y=0, width=50, height=50)
-
-        # create and place home button on actionbar
-        self.icon_home = tk.PhotoImage(file=Path(self.config["Media_home"]))
-        self.btn_home = ttk.Button(master=self.actionbar,
-                                   takefocus=0,
-                                   text="Home",
-                                   compound=tk.TOP,
-                                   image=self.icon_home,
-                                   style="style_actionbar.TButton",
-                                   command=self.screen_change("ScreenStart"))
-        self.btn_home.place(x=170, y=0, width=50, height=50)
-
-        # create and place plc button on actionbar
-        self.icon_plc = tk.PhotoImage(file=Path(self.config["Media_plc"]))
-        self.btn_plc = ttk.Button(master=self.actionbar,
-                                  takefocus=0,
-                                  text="Plc",
-                                  compound=tk.TOP,
-                                  image=self.icon_plc,
-                                  style="style_actionbar.TButton",
-                                  command=self.screen_change("ScreenPLC"))
-        self.btn_plc.place(x=225, y=0, width=50, height=50)
-
-        # create and place data button on actionbar
-        self.icon_data = tk.PhotoImage(file=Path(self.config["Media_data"]))
-        self.btn_data = ttk.Button(master=self.actionbar,
-                                   takefocus=0,
-                                   text="Data",
-                                   compound=tk.TOP,
-                                   image=self.icon_data,
-                                   style="style_actionbar.TButton",
-                                   command=self.screen_change("ScreenData"))
-        self.btn_data.place(x=280, y=0, width=50, height=50)
-
-        # create and place setup button on actionbar
-        self.icon_setup = tk.PhotoImage(file=Path(self.config["Media_setup"]))
-        self.btn_setup = ttk.Button(master=self.actionbar,
-                                    takefocus=0,
-                                    text="Setup",
-                                    compound=tk.TOP,
-                                    image=self.icon_setup,
-                                    style="style_actionbar.TButton")
-        self.btn_setup.place(x=335, y=0, width=50, height=50)
-
-        # create and place help button on actionbar
-        self.icon_help = tk.PhotoImage(file=Path(self.config["Media_help"]))
-        self.btn_help = ttk.Button(master=self.actionbar,
-                                   takefocus=0,
-                                   text="Help",
-                                   compound=tk.TOP,
-                                   image=self.icon_help,
-                                   style="style_actionbar.TButton")
-        self.btn_help.place(x=390, y=0, width=50, height=50)
-
         # create and place exit button on actionbar
         self.icon_exit = tk.PhotoImage(file=Path(self.config["Media_exit"]))
-        self.btn_exit = ttk.Button(master=self.actionbar,
+        self.btn_exit = ttk.Button(master=self.mainframe,
                                    takefocus=0,
                                    text="Exit",
                                    compound=tk.TOP,
                                    image=self.icon_exit,
                                    style="style_actionbar.TButton")
-        self.btn_exit.place(x=695, y=0, width=50, height=50)
+        self.btn_exit.place(x=679, y=0, width=58, height=58)
 
-        # create and place Logo on Actionbar
-        image = Path(self.config["Media_logo"])
-        self.logo = widgets.Icon(master=self.actionbar,
-                                 image=image,
-                                 posx=751,
-                                 posy=0)
+        # create and place Logo on top
+        self.img_logo = tk.PhotoImage(file=Path(self.config["Media_logo"]))
+        self.icon_logo = tk.Canvas(master=self.mainframe, relief="flat", highlightthickness=0)
+        self.icon_logo.create_image(0, 0, image=self.img_logo, anchor="nw")
+        self.icon_logo.place(x=743, y=0, height=58, width=58)
 
         # infobar--------------------------------------------------------------
         # create and place infobar on mainframe
@@ -198,11 +168,10 @@ class View:
         self.infobar.place(x=0, y=576, height=24, width=800)
 
         # create and place clock and timestamp on infobar
-        image = Path(self.config["Media_clock"])
-        self.icon_clock = widgets.Icon(master=self.infobar,
-                                       image=image,
-                                       posx=670,
-                                       posy=2)
+        self.img_clock = tk.PhotoImage(file=Path(self.config["Media_clock"]))
+        self.icon_clock = tk.Canvas(master=self.infobar, relief="flat", highlightthickness=0, bg=self.color_btn_bg_main)
+        self.icon_clock.create_image(0, 0, image=self.img_clock, anchor="nw")
+        self.icon_clock.place(x=670, y=2, height=20, width=20)
 
         self.timestamp = tk.StringVar()
         self.lbl_timestamp = ttk.Label(master=self.infobar,
@@ -212,13 +181,13 @@ class View:
         self.lbl_timestamp.place(x=690, y=0, width=150, height=24)
 
         # create and place LED and label for PLC state on infobar
-        self.led_plc = widgets.Led(master=self.infobar,
-                                   posx=250,
-                                   posy=3,
-                                   diameter=16,
-                                   framewidth=1,
-                                   framecolor="black",
-                                   ledcolor="yellow")
+        self.led_plc = Led(master=self.infobar,
+                           posx=250,
+                           posy=3,
+                           diameter=16,
+                           framewidth=1,
+                           framecolor="black",
+                           ledcolor="yellow")
 
         self.lbl_led_plc = ttk.Label(master=self.infobar,
                                      style="style_infobar.TLabel",
@@ -227,11 +196,13 @@ class View:
         self.lbl_led_plc.place(x=270, y=2, width=50, height=18)
 
         # create and place versionnumber and icon on infobar
-        image = Path(self.config["Media_version"])
-        self.icon_version = widgets.Icon(master=self.infobar,
-                                         image=image,
-                                         posx=5,
-                                         posy=2)
+        self.img_version = tk.PhotoImage(file=Path(self.config["Media_version"]))
+        self.icon_version = tk.Canvas(master=self.infobar,
+                                      relief="flat",
+                                      highlightthickness=0,
+                                      bg=self.color_btn_bg_main)
+        self.icon_version.create_image(0, 0, image=self.img_version, anchor="nw")
+        self.icon_version.place(x=5, y=2, height=20, width=20)
 
         self.version = tk.StringVar()
         self.version.set(self.config["version"])
@@ -241,108 +212,9 @@ class View:
                                      anchor="w")
         self.lbl_version.place(x=25, y=2, width=150, height=18)
 
-        # open startscreen-----------------------------------------------------
-        self.screen_change("ScreenStart")
-
-    def screen_change(self, screenname):
-        # open Screen by name (String)
-        self.screens[screenname].screenframe.tkraise()
-
-    def scale(self):
-        # calculate difference between minimal size and actual size
-        # so the right scale can be calculated with individual size on startup
-        # ox, oy: offset width (ox) and offset height (oy)
-        ox = int(self.windowframe.winfo_width()) - self.config["min_width"]
-        oy = int(self.windowframe.winfo_height()) - self.config["min_height"]
-        # scale GUI elements from Mainframe, Actionbar and Infobar
-        self.actionbar.place(x=0, y=0, height=50, width=800 + ox)
-        self.logo.update(offsetx=ox, offsety=0)
-        self.infobar.place(x=0, y=576 + oy, height=24, width=800 + ox)
-        self.icon_clock.update(offsetx=ox, offsety=0)
-        self.lbl_timestamp.place(x=690 + ox, y=0, width=150, height=24)
-        self.btn_exit.place(x=695 + ox, y=0, width=50, height=50)
-        # scale GUI elements from all the other Screens
-        for screen in self.screens:
-            self.screens[screen].scale(ox, oy)
-
-    def get_filepath(self, message=None):
-        if message is not None:
-            tk.messagebox.showinfo(title=None, message=message)
-        path = tk.filedialog.askopenfilename(initialdir=self.desktoppath, title="UDT auswählen",
-                                             filetypes=(("UDT Files", "*.udt"),))
-        return path
-
-
-class ScreenStart:
-    def __init__(self, master):
-        self.master = master
-        self.screenframe = ttk.Frame(master=self.master.mainframe, style="TFrame")
-        self.screenframe.place(x=0, y=50, height=526, width=800)
-
-        # create and place screenframe background
-        self.background = tk.Canvas(master=self.screenframe,
-                                    relief="flat",
-                                    bg=self.master.color_bg_contrast,
-                                    highlightthickness=0,
-                                    highlightbackground="black")
-        self.background.place(x=0, y=0, height=1080, width=1924)
-
-        self.lbl_start = ttk.Label(master=self.background,
-                                   style="TLabel",
-                                   text="Startscreen",
-                                   anchor="w")
-        self.lbl_start.place(x=400, y=400, width=150, height=25)
-
-    def scale(self, ox, oy):
-        # scale GUI elements
-        # ox, oy: offset width (ox) and offset height (oy)
-        self.screenframe.place(x=0, y=50, height=526 + oy, width=800 + ox)
-        self.background.place(x=0, y=0, height=1080 + oy, width=1924 + ox)
-
-
-class ScreenPLC:
-    def __init__(self, master):
-        self.master = master
-        self.screenframe = ttk.Frame(master=self.master.mainframe, style="TFrame")
-        self.screenframe.place(x=0, y=50, height=526, width=800)
-
-        # create and place screenframe background
-        self.background = tk.Canvas(master=self.screenframe,
-                                    relief="flat",
-                                    bg=self.master.color_bg_contrast,
-                                    highlightthickness=0,
-                                    highlightbackground="black")
-        self.background.place(x=0, y=0, height=1080, width=1924)
-
-        self.lbl_plc = ttk.Label(master=self.background,
-                                 style="TLabel",
-                                 text="PLCscreen",
-                                 anchor="w")
-        self.lbl_plc.place(x=400, y=400, width=150, height=25)
-
-    def scale(self, ox, oy):
-        # scale GUI elements
-        # ox, oy: offset width (ox) and offset height (oy)
-        self.screenframe.place(x=0, y=50, height=526 + oy, width=800 + ox)
-        self.background.place(x=0, y=0, height=1080 + oy, width=1924 + ox)
-
-
-class ScreenData:
-    def __init__(self, master):
-        self.master = master
-        self.screenframe = ttk.Frame(master=self.master.mainframe, style="TFrame")
-        self.screenframe.place(x=0, y=50, height=526, width=800)
-
-        # create and place screenframe background
-        self.background = tk.Canvas(master=self.screenframe,
-                                    relief="flat",
-                                    bg=self.master.color_bg_contrast,
-                                    highlightthickness=0,
-                                    highlightbackground="black")
-        self.background.place(x=0, y=0, height=1080, width=1924)
-
+        # screen data----------------------------------------------------------
         # create and place treeview for data structure
-        self.datatree = ttk.Treeview(self.screenframe)
+        self.datatree = ttk.Treeview(self.screen_data)
         self.datatree["columns"] = ("Datentyp", "Kommentar")
         self.datatree.column("#0", width=200, minwidth=100, stretch=tk.NO)
         self.datatree.column("Datentyp", width=200, minwidth=100, stretch=tk.NO)
@@ -352,80 +224,103 @@ class ScreenData:
         self.datatree.heading("Kommentar", text="Kommentar", anchor=tk.W)
         self.datatree.place(x=50, y=140, height=324, width=690)
         # add scrollbar to treeview
-        self.datatree_scrollx = ttk.Scrollbar(self.screenframe, orient="horizontal", command=self.datatree.xview)
+        self.datatree_scrollx = ttk.Scrollbar(self.screen_data, orient="horizontal", command=self.datatree.xview)
         self.datatree_scrollx.place(x=50, y=465, width=691)
-        self.datatree_scrolly = ttk.Scrollbar(self.screenframe, orient="vertical", command=self.datatree.yview)
+        self.datatree_scrolly = ttk.Scrollbar(self.screen_data, orient="vertical", command=self.datatree.yview)
         self.datatree_scrolly.place(x=740, y=142, height=337)
         self.datatree.configure(xscrollcommand=self.datatree_scrollx.set)
         self.datatree.configure(yscrollcommand=self.datatree_scrolly.set)
 
         # create button for datasructure import
-        self.btn_import_datasructure = ttk.Button(master=self.screenframe,
+        self.btn_import_datasructure = ttk.Button(master=self.screen_data,
                                                   takefocus=0,
                                                   text='Datenstruktur einlesen',
                                                   style="style_screen.TButton")
         self.btn_import_datasructure.place(x=50, y=650, height=30, width=150)
 
+        # create frame on screen data for UDT name + description + version + info
         # create and place label for UDT name
+        self.udt_infos = tk.Canvas(master=self.screen_data,
+                                   relief="flat",
+                                   highlightthickness=0,
+                                   bg=self.color_bg_contrast)
+        self.udt_infos.place(x=50, y=75, height=58, width=690)
+
         self.udt_name = tk.StringVar()
-        self.lbl_udt_name_info = ttk.Label(master=self.background,
+        self.lbl_udt_name_info = ttk.Label(master=self.udt_infos,
                                            style="style_screen.TLabel",
                                            text="Name:",
                                            anchor="w")
-        self.lbl_udt_name_info.place(x=50, y=75, width=50, height=25)
-        self.lbl_udt_name = ttk.Label(master=self.background,
+        self.lbl_udt_name_info.place(x=0, y=0, width=50, height=25)
+        self.lbl_udt_name = ttk.Label(master=self.udt_infos,
                                       style="style_screen.TLabel",
                                       textvariable=self.udt_name,
                                       anchor="w")
-        self.lbl_udt_name.place(x=100, y=75, width=250, height=25)
+        self.lbl_udt_name.place(x=50, y=0, width=250, height=25)
 
         # create and place label for UDT description
         self.udt_description = tk.StringVar()
-        self.lbl_udt_description_info = ttk.Label(master=self.background,
+        self.lbl_udt_description_info = ttk.Label(master=self.udt_infos,
                                                   style="style_screen.TLabel",
                                                   text="Beschreibung:",
                                                   anchor="w")
-        self.lbl_udt_description_info.place(x=380, y=75, width=85, height=25)
-        self.lbl_udt_description = ttk.Label(master=self.background,
+        self.lbl_udt_description_info.place(x=330, y=0, width=85, height=25)
+        self.lbl_udt_description = ttk.Label(master=self.udt_infos,
                                              style="style_screen.TLabel",
                                              textvariable=self.udt_description,
                                              anchor="w")
-        self.lbl_udt_description.place(x=465, y=75, width=500, height=25)
+        self.lbl_udt_description.place(x=415, y=0, width=500, height=25)
 
         # create and place label for UDT version
         self.udt_version = tk.StringVar()
-        self.lbl_udt_version_info = ttk.Label(master=self.background,
+        self.lbl_udt_version_info = ttk.Label(master=self.udt_infos,
                                               style="style_screen.TLabel",
                                               text="Version:",
                                               anchor="w")
-        self.lbl_udt_version_info.place(x=50, y=108, width=50, height=25)
-        self.lbl_udt_version = ttk.Label(master=self.background,
+        self.lbl_udt_version_info.place(x=0, y=33, width=50, height=25)
+        self.lbl_udt_version = ttk.Label(master=self.udt_infos,
                                          style="style_screen.TLabel",
                                          textvariable=self.udt_version,
                                          anchor="w")
-        self.lbl_udt_version.place(x=100, y=108, width=250, height=25)
+        self.lbl_udt_version.place(x=50, y=33, width=250, height=25)
 
         # create and place label for UDT info
         self.udt_info = tk.StringVar()
-        self.lbl_udt_info_info = ttk.Label(master=self.background,
+        self.lbl_udt_info_info = ttk.Label(master=self.udt_infos,
                                            style="style_screen.TLabel",
                                            text="Info:",
                                            anchor="w")
-        self.lbl_udt_info_info.place(x=380, y=108, width=85, height=25)
-        self.lbl_udt_info = ttk.Label(master=self.background,
+        self.lbl_udt_info_info.place(x=330, y=33, width=85, height=25)
+        self.lbl_udt_info = ttk.Label(master=self.udt_infos,
                                       style="style_screen.TLabel",
                                       textvariable=self.udt_info,
                                       anchor="w")
-        self.lbl_udt_info.place(x=465, y=108, width=500, height=25)
+        self.lbl_udt_info.place(x=415, y=33, width=500, height=25)
 
-    def scale(self, ox, oy):
-        # scale GUI elements
+    def scale(self):
+        # calculate difference between minimal size and actual size
+        # so the right scale can be calculated with individual size on startup
         # ox, oy: offset width (ox) and offset height (oy)
-        self.screenframe.place(x=0, y=50, height=526 + oy, width=800 + ox)
-        self.background.place(x=0, y=0, height=1080 + oy, width=1924 + ox)
+        ox = int(self.windowframe.winfo_width()) - self.config["min_width"]
+        oy = int(self.windowframe.winfo_height()) - self.config["min_height"]
+        # scale GUI elements from Mainframe
+        self.screens.place(x=0, y=0, width=802 + ox, height=578 + oy)
+        self.btn_exit.place(x=679 + ox, y=0, width=58, height=58)
+        self.icon_logo.place(x=743 + ox, y=0, height=58, width=58)
+        self.infobar.place(x=0, y=576 + oy, height=24, width=800 + ox)
+        self.icon_clock.place(x=670 + ox, y=2, height=20, width=20)
+        self.lbl_timestamp.place(x=690 + ox, y=0, width=150, height=24)
+        # scale GUI elements from screen data
         self.datatree.place(x=50, y=140, height=325 + oy, width=691 + ox)
         self.datatree_scrollx.place(x=50, y=465 + oy, width=691 + ox)
         self.datatree_scrolly.place(x=740 + ox, y=142, height=337 + oy)
+
+    def get_filepath(self, message=None):
+        if message is not None:
+            tk.messagebox.showinfo(title=None, message=message)
+        path = tk.filedialog.askopenfilename(initialdir=self.desktoppath, title="UDT auswählen",
+                                             filetypes=(("UDT Files", "*.udt"),))
+        return path
 
     def clear_data(self):
         for element in self.datatree.get_children():
@@ -464,30 +359,3 @@ class ScreenData:
             elementlist.append(data)
             # buffer actual structure depth for next loop
             depth = element[0]
-
-
-class ScreenSetup:
-    def __init__(self, master):
-        self.master = master
-        self.screenframe = ttk.Frame(master=self.master.mainframe, style="TFrame")
-        self.screenframe.place(x=0, y=50, height=526, width=800)
-
-        # create and place screenframe background
-        self.background = tk.Canvas(master=self.screenframe,
-                                    relief="flat",
-                                    bg=self.master.color_bg_contrast,
-                                    highlightthickness=0,
-                                    highlightbackground="black")
-        self.background.place(x=0, y=0, height=1080, width=1924)
-
-        self.lbl_setup = ttk.Label(master=self.background,
-                                   style="TLabel",
-                                   text="Setupscreen",
-                                   anchor="w")
-        self.lbl_setup.place(x=400, y=400, width=150, height=25)
-
-    def scale(self, ox, oy):
-        # scale GUI elements
-        # ox, oy: offset width (ox) and offset height (oy)
-        self.screenframe.place(x=0, y=50, height=526 + oy, width=800 + ox)
-        self.background.place(x=0, y=0, height=1080 + oy, width=1924 + ox)
