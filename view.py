@@ -91,39 +91,41 @@ class View:
         # style customisation--------------------------------------------------
         # actionbar
         self.style_btn_actionbar = ttk.Style()
-        self.style_btn_actionbar.configure("style_actionbar.TButton",
-                                           font=("arial", 8),
-                                           relief="flat")
+        self.style_btn_actionbar.configure(
+            "style_actionbar.TButton", font=("arial", 8), relief="flat")
+        self.style_btn_actionbar.map(
+            "style_actionbar.TButton", background=[('selected', self.color_bg_contrast), ('active', "#000000")])
         # infobar
         self.style_lbl_infobar = ttk.Style()
-        self.style_lbl_infobar.configure("style_infobar.TLabel",
-                                         foreground=self.color_btn_fg_main,
-                                         background=self.color_btn_bg_main)
+        self.style_lbl_infobar.configure(
+            "style_infobar.TLabel", foreground=self.color_btn_fg_main, background=self.color_btn_bg_main)
         # screen
         self.style_btn_screen = ttk.Style()
-        self.style_btn_screen.configure("style_screen.TButton",
-                                        font=("arial", 10),
-                                        relief="flat")
+        self.style_btn_screen.configure(
+            "style_screen.TButton", font=("arial", 10), relief="flat")
+        self.style_btn_screen.map(
+            "style_screen.TButton", background=[('selected', self.color_bg_contrast), ('active', "#000000")])
         self.style_lbl_screen = ttk.Style()
-        self.style_lbl_screen.configure("style_screen.TLabel",
-                                        font=("arial", 10),
-                                        relief="flat",
-                                        background=self.color_btn_bg_main)
+        self.style_lbl_screen.configure(
+            "style_screen.TLabel", font=("arial", 10), relief="flat", background=self.color_btn_bg_main)
         self.style_text_screen = ttk.Style()
-        self.style_text_screen.configure("style_text_screen.TLabel",
-                                         font=("arial", 10),
-                                         relief="flat",
-                                         background=self.color_bg_contrast)
-        self.style_btn_screen = ttk.Style()
-        self.style_btn_screen.configure("style_screen.TFrame",
-                                        background=self.color_bg_contrast)
-        self.style_btn_screen = ttk.Style()
-        self.style_btn_screen.configure("style_screen.TNotebook",
-                                        background=self.color_btn_bg_main,
-                                        relief="flat")
+        self.style_text_screen.configure(
+            "style_text_screen.TLabel", font=("arial", 10), relief="flat", background=self.color_bg_contrast)
+        self.style_screen = ttk.Style()
+        self.style_screen.configure(
+            "style_screen.TFrame", background=self.color_bg_contrast)
+        self.style_nb_screen = ttk.Style()
+        self.style_nb_screen.configure(
+            "style_screen.TNotebook", background=self.color_btn_bg_main, relief="flat")
+        self.style_nb_screen.configure(
+            "style_screen.TNotebook.Tab", focuscolor=self.style_nb_screen.configure(".")["background"])
+        self.style_nb_screen.map(
+            "style_screen.TNotebook.Tab", background=[('selected', self.color_bg_contrast), ('active', "#000000")])
         self.style_treeview = ttk.Style()
-        self.style_treeview.configure("Treeview.Heading",
-                                      font=("arial", 10))
+        self.style_treeview.configure(
+            "Treeview.Heading", font=("arial", 10))
+
+
 
         # create Tabs----------------------------------------------------------
         self.screens = ttk.Notebook(self.mainframe, style="style_screen.TNotebook")
@@ -213,38 +215,13 @@ class View:
         self.lbl_version.place(x=25, y=2, width=150, height=18)
 
         # screen data----------------------------------------------------------
-        # create and place treeview for data structure
-        self.datatree = ttk.Treeview(self.screen_data)
-        self.datatree["columns"] = ("Datentyp", "Kommentar")
-        self.datatree.column("#0", width=200, minwidth=100, stretch=tk.NO)
-        self.datatree.column("Datentyp", width=200, minwidth=100, stretch=tk.NO)
-        self.datatree.column("Kommentar", width=200, minwidth=100, stretch=tk.YES)
-        self.datatree.heading("#0", text="Name", anchor=tk.W)
-        self.datatree.heading("Datentyp", text="Datentyp", anchor=tk.W)
-        self.datatree.heading("Kommentar", text="Kommentar", anchor=tk.W)
-        self.datatree.place(x=50, y=140, height=324, width=690)
-        # add scrollbar to treeview
-        self.datatree_scrollx = ttk.Scrollbar(self.screen_data, orient="horizontal", command=self.datatree.xview)
-        self.datatree_scrollx.place(x=50, y=465, width=691)
-        self.datatree_scrolly = ttk.Scrollbar(self.screen_data, orient="vertical", command=self.datatree.yview)
-        self.datatree_scrolly.place(x=740, y=142, height=337)
-        self.datatree.configure(xscrollcommand=self.datatree_scrollx.set)
-        self.datatree.configure(yscrollcommand=self.datatree_scrolly.set)
-
-        # create button for datasructure import
-        self.btn_import_datasructure = ttk.Button(master=self.screen_data,
-                                                  takefocus=0,
-                                                  text='Datenstruktur einlesen',
-                                                  style="style_screen.TButton")
-        self.btn_import_datasructure.place(x=50, y=650, height=30, width=150)
-
         # create frame on screen data for UDT name + description + version + info
         # create and place label for UDT name
         self.udt_infos = tk.Canvas(master=self.screen_data,
                                    relief="flat",
                                    highlightthickness=0,
                                    bg=self.color_bg_contrast)
-        self.udt_infos.place(x=50, y=75, height=58, width=690)
+        self.udt_infos.place(x=50, y=25, height=58, width=690)
 
         self.udt_name = tk.StringVar()
         self.lbl_udt_name_info = ttk.Label(master=self.udt_infos,
@@ -297,6 +274,31 @@ class View:
                                       anchor="w")
         self.lbl_udt_info.place(x=415, y=33, width=500, height=25)
 
+        # create and place treeview for data structure
+        self.datatree = ttk.Treeview(self.screen_data)
+        self.datatree["columns"] = ("Datentyp", "Kommentar")
+        self.datatree.column("#0", width=200, minwidth=100, stretch=tk.NO)
+        self.datatree.column("Datentyp", width=200, minwidth=100, stretch=tk.NO)
+        self.datatree.column("Kommentar", width=200, minwidth=100, stretch=tk.YES)
+        self.datatree.heading("#0", text="Name", anchor=tk.W)
+        self.datatree.heading("Datentyp", text="Datentyp", anchor=tk.W)
+        self.datatree.heading("Kommentar", text="Kommentar", anchor=tk.W)
+        self.datatree.place(x=50, y=90, height=324, width=690)
+        # add scrollbar to treeview
+        self.datatree_scrollx = ttk.Scrollbar(self.screen_data, orient="horizontal", command=self.datatree.xview)
+        self.datatree_scrollx.place(x=50, y=415, width=691)
+        self.datatree_scrolly = ttk.Scrollbar(self.screen_data, orient="vertical", command=self.datatree.yview)
+        self.datatree_scrolly.place(x=740, y=92, height=337)
+        self.datatree.configure(xscrollcommand=self.datatree_scrollx.set)
+        self.datatree.configure(yscrollcommand=self.datatree_scrolly.set)
+
+        # create button for datasructure import
+        self.btn_import_datasructure = ttk.Button(master=self.screen_data,
+                                                  takefocus=0,
+                                                  text='Datenstruktur einlesen',
+                                                  style="style_screen.TButton")
+        self.btn_import_datasructure.place(x=50, y=437, height=30, width=150)
+
     def scale(self):
         # calculate difference between minimal size and actual size
         # so the right scale can be calculated with individual size on startup
@@ -311,9 +313,10 @@ class View:
         self.icon_clock.place(x=670 + ox, y=2, height=20, width=20)
         self.lbl_timestamp.place(x=690 + ox, y=0, width=150, height=24)
         # scale GUI elements from screen data
-        self.datatree.place(x=50, y=140, height=325 + oy, width=691 + ox)
-        self.datatree_scrollx.place(x=50, y=465 + oy, width=691 + ox)
-        self.datatree_scrolly.place(x=740 + ox, y=142, height=337 + oy)
+        self.datatree.place(x=50, y=90, height=325 + oy, width=691 + ox)
+        self.datatree_scrollx.place(x=50, y=415 + oy, width=691 + ox)
+        self.datatree_scrolly.place(x=740 + ox, y=92, height=337 + oy)
+        self.btn_import_datasructure.place(x=50, y=437 + oy, height=30, width=150)
 
     def get_filepath(self, message=None):
         if message is not None:
