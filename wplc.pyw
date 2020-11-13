@@ -14,7 +14,7 @@ class Controller:
         # ---------------------------------------------------------------------
         # connect view and model and controller (Buttons, Events, Functions)
         # call scale function when windowsize gets changed
-        self.view.windowframe.bind(
+        self.view.window.bind(
             "<Configure>", lambda x: self.view.scale())
         self.view.btn_exit.bind(
             "<ButtonRelease>", lambda x: self.stop())
@@ -23,17 +23,17 @@ class Controller:
 
     def run(self):
         # initial trigger for 500ms loop
-        self.view.windowframe.after(0, self.trigger_500ms)
+        self.view.window.after(0, self.trigger_500ms)
         # start window
-        self.view.windowframe.mainloop()
+        self.view.window.mainloop()
 
     def stop(self):
         # stop window
-        self.view.windowframe.destroy()
+        self.view.window.destroy()
 
     def trigger_500ms(self):
         # trigger every 500ms
-        self.view.windowframe.after(500, self.trigger_500ms)
+        self.view.window.after(500, self.trigger_500ms)
         # get actual time and save it to variable
         self.model.get_time()
         self.view.timestamp.set(self.model.time)
