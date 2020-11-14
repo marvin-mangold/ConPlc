@@ -281,14 +281,12 @@ class View:
 
         # create and place treeview for data structure
         self.datatree = ttk.Treeview(self.screen_data)
-        self.datatree["columns"] = ("Datentyp", "Wert", "Kommentar")
+        self.datatree["columns"] = ("Datentyp", "Kommentar")
         self.datatree.column("#0", width=200, minwidth=100, stretch=tk.NO)
         self.datatree.column("Datentyp", width=200, minwidth=100, stretch=tk.NO)
-        self.datatree.column("Wert", width=200, minwidth=100, stretch=tk.NO)
         self.datatree.column("Kommentar", width=200, minwidth=100, stretch=tk.YES)
         self.datatree.heading("#0", text="Name", anchor=tk.W)
         self.datatree.heading("Datentyp", text="Datentyp", anchor=tk.W)
-        self.datatree.heading("Wert", text="Wert", anchor=tk.W)
         self.datatree.heading("Kommentar", text="Kommentar", anchor=tk.W)
         # add scrollbar to treeview
         self.datatree_scrollx = ttk.Scrollbar(self.screen_data, orient="horizontal", command=self.datatree.xview)
@@ -361,12 +359,11 @@ class View:
             name = element["name"]
             datatype = element["datatype"]
             comment = element["comment"]
-            value = element["value"]
             visible = element["visible"]
             action = element["action"]
             # insert element if element has "visible" flag
             if visible:
-                data = self.datatree.insert(folderpath[-1], "end", text=name, values=(datatype, value, comment))
+                data = self.datatree.insert(folderpath[-1], "end", text=name, values=(datatype, comment))
             # open new folder if element has "open" flag
             if action == "open":
                 # save name to folderpath
