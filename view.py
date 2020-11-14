@@ -319,15 +319,15 @@ class View:
         self.icon_version.place(x=5, y=2, height=20, width=20)
         self.lbl_version.place(x=25, y=2, width=150, height=18)
         # scale GUI elements from screen data
-        self.udt_infos.place(x=50, y=25, height=58, width=690)
+        self.udt_infos.place(x=50, y=25, height=58, width=690 + ox)
         self.lbl_udt_name_info.place(x=0, y=0, width=50, height=25)
         self.lbl_udt_name.place(x=50, y=0, width=250, height=25)
         self.lbl_udt_description_info.place(x=330, y=0, width=85, height=25)
-        self.lbl_udt_description.place(x=415, y=0, width=500, height=25)
+        self.lbl_udt_description.place(x=415, y=0, width=500 + ox, height=25)
         self.lbl_udt_version_info.place(x=0, y=33, width=50, height=25)
         self.lbl_udt_version.place(x=50, y=33, width=250, height=25)
         self.lbl_udt_info_info.place(x=330, y=33, width=85, height=25)
-        self.lbl_udt_info.place(x=415, y=33, width=500, height=25)
+        self.lbl_udt_info.place(x=415, y=33, width=500 + ox, height=25)
         # scale Gui elements from treeview
         self.datatree.place(x=50, y=90, height=325 + oy, width=691 + ox)
         self.datatree_scrollx.place(x=50, y=415 + oy, width=691 + ox)

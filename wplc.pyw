@@ -1,4 +1,4 @@
-import confighandler
+import json
 import view
 import model
 
@@ -6,7 +6,9 @@ import model
 class Controller:
     def __init__(self):
         # get Configdata from Configfile
-        self.config = confighandler.readconfig("wplc.conf")
+        with open("wplc.conf") as configfile:
+            self.config = json.load(configfile)
+
         # call view (handles the graphics of GUI)
         self.view = view.View(self, self.config)
         # call model (handles the functions of GUI)
