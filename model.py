@@ -7,6 +7,7 @@ class Model:
         self.controller = controller
         self.config = config
         self.time = ""
+        # udt data
         self.udt_path = ""
         self.udt_dependencies = {}
         self.udt_name = ""
@@ -23,11 +24,10 @@ class Model:
 
     def get_udt_data(self):
         name, description, version, info, data = readudt.get_udt_data(
-            path=self.udt_path,
+            filepath=self.udt_path,
             dependencies=self.udt_dependencies)
         self.udt_name = name
         self.udt_description = description
         self.udt_version = version
         self.udt_info = info
         self.udt_data = data
-

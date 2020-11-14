@@ -90,18 +90,18 @@ def clean_udt_varname(varname):
     return varname
 
 
-def get_udt_struct(line, depth):
+def get_udt_struct(line):
     # get Struct declaration (must have ":" and "Struct" and can have "// comment")
     # -->name : Struct   // comment
     result = False
-    element = []
+    element = {}
     regex = re.search(r'(.*) : (Struct)(?:   // )?(.*)?', line)
     if regex is not None:
         result = True
-        name = clean_udt_varname(regex.group(1))
-        datatype = regex.group(2)
-        comment = regex.group(3)
-        element = [depth, name, datatype, comment]
+        name, datatype, comment = clean_udt_varname(regex.group(1)), regex.group(2), regex.group(3)
+        # first part of struct (declaration line)
+        element = {
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": False, "action": "open"}
     return result, element
 
 
@@ -109,25 +109,71 @@ def get_udt_endstruct(line):
     # get end of Struct declaration (must have string "END_STRUCT;")
     # -->END_STRUCT;
     result = False
+    element = {}
     regex = re.search(r'END_STRUCT;', line)
     if regex is not None:
         result = True
-    return result 
+        # last part of struct (end indicator)
+        element = {
+            "name": "", "datatype": "", "comment": "", "visible": False, "access": False, "action": "close"}
+    return result, element
 
 
-def get_udt_var(line, depth):
+def get_udt_var(line):
     # get VAR declaration (must have ":" and can have "// comment")
     # -->name : Bool;   // comment
     result = False
-    element = []
+    element = {}
     regex = re.search(r'(.*) : (.*);(?:   // )?(.*)?', line)
     if regex is not None:
         result = True
-        name = clean_udt_varname(regex.group(1))
-        datatype = regex.group(2)
-        comment = regex.group(3)
-        element = [depth, name, datatype, comment]
+        name, datatype, comment = clean_udt_varname(regex.group(1)), regex.group(2), regex.group(3)
+        element = {
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"}
     return result, element
+
+
+def get_udt_dtl(line):
+    # get VAR declaration (must have ":" and can have "// comment")
+    # -->name : Bool;   // comment
+    result = False
+    elements = []
+    regex = re.search(r'(.*) : (.*);(?:   // )?(.*)?', line)
+    if regex is not None:
+        result = True
+        name, datatype, comment = clean_udt_varname(regex.group(1)), regex.group(2), regex.group(3)
+        # first part of dtl (declaration line)
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": False, "action": "open"})
+        name, datatype, comment = "YEAR", "UInt", "Year"
+        # middle part of dtl (data)
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
+        name, datatype, comment = "MONTH", "USInt", "Month"
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
+        name, datatype, comment = "DAY", "USInt", "Day"
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
+        name, datatype, comment = "WEEKDAY", "USInt", "Weekday"
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
+        name, datatype, comment = "HOUR", "USInt", "Hour"
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
+        name, datatype, comment = "MINUTE", "USInt", "Minute"
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
+        name, datatype, comment = "SECOND", "USInt", "Second"
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
+        name, datatype, comment = "NANOSECOND", "UDint", "Nanosecond"
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
+        # last part of dtl (end indicator)
+        elements.append({
+            "name": "", "datatype": "", "comment": "", "visible": False, "access": False, "action": "close"})
+    return result, elements
 
 
 def get_array_data(line):
@@ -143,6 +189,31 @@ def get_array_data(line):
     return start, end, datatype
 
 
+def get_udt_array(line):
+    # get VAR declaration (must have ":" and can have "// comment")
+    # -->name : Bool;   // comment
+    result = False
+    elements = []
+    regex = re.search(r'(.*) : (.*);(?:   // )?(.*)?', line)
+    if regex is not None:
+        result = True
+        name, datatype, comment = clean_udt_varname(regex.group(1)), regex.group(2), regex.group(3)
+        # first part of array (declaration line)
+        elements.append({
+            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": False, "action": "open"})
+        start, end, datatype = get_array_data(line)
+        for entry in range(start, end):
+            name, datatype = "[" + str(entry) + "]", datatype
+            # middle part of array (data)
+            elements.append({
+                "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True,
+                "action": "none"})
+        # last part of array (end indicator)
+        elements.append({
+            "name": "", "datatype": "", "comment": "", "visible": False, "access": False, "action": "close"})
+    return result, elements
+
+
 def element_is_udt(datatype):
     # check if element datatype is special udt type
     # -->"someName"
@@ -153,22 +224,24 @@ def element_is_udt(datatype):
     return result
     
 
-def save_udt_element(data, depthname, element):
+def save_udt_element(data, foldernames, element):
     # put prefix to varname
     varname = ""
-    newelement = element[:]
-    for prefix in depthname:
+    newelement = element.copy()
+    for prefix in foldernames:
         varname += prefix
-    newelement[1] = varname + newelement[1]
+    newelement["name"] = varname + newelement["name"]
+    # add value parameter to element
+    newelement["value"] = ""
     # save element
     data.append(newelement)
 
 
-def get_udt_data(data=None, structdepth=0, structdepthname=None, path="", dependencies=None):
+def get_udt_data(data=None, foldernames=None, filepath="", dependencies=None):
     if data is None:
         data = []
-    if structdepthname is None:
-        structdepthname = []
+    if foldernames is None:
+        foldernames = []
     name = ""
     description = ""
     version = ""
@@ -180,7 +253,7 @@ def get_udt_data(data=None, structdepth=0, structdepthname=None, path="", depend
                       "LReal", "Char", "WChar", "String", "WString"]
     special_types = ["DTL", "Array", "Struct"]
     # read Data from udt-File
-    udt = read_udt_file(path)
+    udt = read_udt_file(filepath)
     # analyse Data from udt-File
     for line in udt:
         # read header
@@ -205,71 +278,70 @@ def get_udt_data(data=None, structdepth=0, structdepthname=None, path="", depend
             result = get_udt_headerend(line)
             if result:
                 readheader = False
-                structdepthname.append("")
+                foldernames.append("")
         # read data
         else:
             # get udt endstruct
-            result = get_udt_endstruct(line)
+            result, element = get_udt_endstruct(line)
             if result:
-                structdepth -= 1
-                structdepthname.pop()
+                foldernames.pop()
+                save_udt_element(data, foldernames, element)
             # check datatype of udt element
             result, datatype = get_udt_datatype(line)
             if result:
                 # standard datatype
                 if datatype in standard_types:
-                    result, element = get_udt_var(line, structdepth)
+                    result, element = get_udt_var(line)
                     if result:
-                        save_udt_element(data, structdepthname, element)
+                        save_udt_element(data, foldernames, element)
                 # special datatype
                 elif datatype in special_types:
                     # get udt struct
                     if datatype == "Struct":
-                        result, element = get_udt_struct(line, structdepth)
+                        result, element = get_udt_struct(line)
                         if result:
-                            save_udt_element(data, structdepthname, element)
-                            structdepth += 1
-                            structdepthname.append(element[1]+".")
+                            save_udt_element(data, foldernames, element)
+                            foldernames.append(element["name"]+".")
                     elif datatype == "DTL":
-                        result, element = get_udt_var(line, structdepth)
+                        result, elements = get_udt_dtl(line)
                         if result:
-                            save_udt_element(data, structdepthname, element)
-                            structdepth += 1
-                            structdepthname.append(element[1]+".")
-                            save_udt_element(data, structdepthname, [structdepth, "YEAR", "UInt", "Year"])
-                            save_udt_element(data, structdepthname, [structdepth, "MONTH", "USInt", "Month"])
-                            save_udt_element(data, structdepthname, [structdepth, "DAY", "USInt", "Day"])
-                            save_udt_element(data, structdepthname, [structdepth, "WEEKDAY", "USInt", "Weekday"])
-                            save_udt_element(data, structdepthname, [structdepth, "HOUR", "USInt", "Hour"])
-                            save_udt_element(data, structdepthname, [structdepth, "MINUTE", "USInt", "Minute"])
-                            save_udt_element(data, structdepthname, [structdepth, "SECOND", "USInt", "Second"])
-                            save_udt_element(data, structdepthname, [structdepth, "NANOSECOND", "UDint", "Nanosecond"])
-                            structdepthname.pop()
-                            structdepth -= 1
+                            firstrun = True
+                            for element in elements:
+                                save_udt_element(data, foldernames, element)
+                                if firstrun:
+                                    foldernames.append(element["name"] + ".")
+                                    firstrun = False
+                            foldernames.pop()
                     elif datatype == "Array":
-                        result, element = get_udt_var(line, structdepth)
+                        result, elements = get_udt_array(line)
                         if result:
-                            save_udt_element(data, structdepthname, element)
-                            structdepth += 1
-                            structdepthname.append(element[1])
-                            start, end, datatype = get_array_data(line)
-                            for entry in range(start, end):
-                                save_udt_element(data, structdepthname,
-                                                 [structdepth, "[" + str(entry) + "]", datatype, element[3]])
-                            structdepthname.pop()
-                            structdepth -= 1
+                            firstrun = True
+                            for element in elements:
+                                save_udt_element(data, foldernames, element)
+                                if firstrun:
+                                    foldernames.append(element["name"])
+                                    firstrun = False
+                            foldernames.pop()
                 # special datatype udt type
                 elif element_is_udt(datatype):
-                    result, element = get_udt_var(line, structdepth)
+                    result, element = get_udt_var(line)
                     if result:
-                        save_udt_element(data, structdepthname, element)
-                        structdepth += 1
-                        structdepthname.append(element[1]+".")
+                        # first part of udt (declaration line)
+                        element["access"] = False
+                        element["action"] = "open"
+                        save_udt_element(data, foldernames, element)
+                        foldernames.append(element["name"] + ".")
+                        # middle part of udt (data)
                         _path = dependencies[datatype]
-                        _name, _description, _version, _info, data = get_udt_data(
-                            data, structdepth, structdepthname, _path, dependencies)
-                        structdepthname.pop()
-                        structdepth -= 1
+                        _name, _description, _version, _info, data = get_udt_data(data=data,
+                                                                                  foldernames=foldernames,
+                                                                                  filepath=_path,
+                                                                                  dependencies=dependencies)
+                        # last part of udt (end indicator)
+                        element = {"name": "", "datatype": "", "comment": "",
+                                   "visible": False, "access": False, "action": "close"}
+                        save_udt_element(data, foldernames, element)
+                        foldernames.pop()
                 else:
                     print("Datentyp {datatype} nicht implementiert!".format(datatype=datatype))
     return name, description, version, info, data
@@ -284,4 +356,3 @@ def get_udt_dependencies(path):
             if element_is_udt(datatype):
                 dependencies[datatype] = ""
     return dependencies
-

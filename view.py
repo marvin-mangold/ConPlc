@@ -281,12 +281,14 @@ class View:
 
         # create and place treeview for data structure
         self.datatree = ttk.Treeview(self.screen_data)
-        self.datatree["columns"] = ("Datentyp", "Kommentar")
+        self.datatree["columns"] = ("Datentyp", "Wert", "Kommentar")
         self.datatree.column("#0", width=200, minwidth=100, stretch=tk.NO)
         self.datatree.column("Datentyp", width=200, minwidth=100, stretch=tk.NO)
+        self.datatree.column("Wert", width=200, minwidth=100, stretch=tk.NO)
         self.datatree.column("Kommentar", width=200, minwidth=100, stretch=tk.YES)
         self.datatree.heading("#0", text="Name", anchor=tk.W)
         self.datatree.heading("Datentyp", text="Datentyp", anchor=tk.W)
+        self.datatree.heading("Wert", text="Wert", anchor=tk.W)
         self.datatree.heading("Kommentar", text="Kommentar", anchor=tk.W)
         # add scrollbar to treeview
         self.datatree_scrollx = ttk.Scrollbar(self.screen_data, orient="horizontal", command=self.datatree.xview)
@@ -353,26 +355,26 @@ class View:
         self.udt_version.set(version)
         self.udt_info.set(info)
         # check every element,
-        # if element is standard datatype --> insert
-        # elif element is special datatype --> insert in folder
-        depth = 0
-        depthlist = [""]
-        elementlist = []
+        folderpath = ["", ""]
         for element in data:
-            # open new folder if structure depth increases
-            if element[0] > depth:
-                # mark last data as folder
-                depthlist.append(elementlist[-1])
-            # close folder if structure depth decreases
-            elif element[0] < depth:
-                # unmark last folder
-                depthlist.pop()
+            # put actual data in datatree in the actual folder
+            name = element["name"]
+            datatype = element["datatype"]
+            comment = element["comment"]
+            value = element["value"]
+            visible = element["visible"]
+            action = element["action"]
+            # insert element if element has "visible" flag
+            if visible:
+                data = self.datatree.insert(folderpath[-1], "end", text=name, values=(datatype, value, comment))
+            # open new folder if element has "open" flag
+            if action == "open":
+                # save name to folderpath
+                folderpath.append(data)
+            # close folder if element has "close" flag
+            elif action == "close":
+                # delete name from folderpath
+                folderpath.pop()
             # else keep folder
             else:
                 pass
-            # put actual data in datatree in the actual folder
-            data = self.datatree.insert(depthlist[-1], "end", text=element[1], values=(element[2], element[3]))
-            # save actual data in list
-            elementlist.append(data)
-            # buffer actual structure depth for next loop
-            depth = element[0]
