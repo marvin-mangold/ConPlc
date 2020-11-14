@@ -50,7 +50,7 @@ class View:
         self.window.title(self.config["title"])
 
         # set window icon
-        icon = tk.PhotoImage(file=Path(self.config["Media_icon"]))
+        icon = tk.PhotoImage(file=Path(self.config["media_icon"]))
         self.window.iconphoto(True, icon)
 
         # set min/max windowsize
@@ -73,10 +73,10 @@ class View:
 
         # style settings-general-----------------------------------------------
         # load tkinter ttk style theme
-        self.window.tk.call("lappend", "auto_path", Path(self.config["Style_themepath"]))
-        self.window.tk.call("package", "require", Path(self.config["Style_themename"]))
+        self.window.tk.call("lappend", "auto_path", Path(self.config["style_themepath"]))
+        self.window.tk.call("package", "require", Path(self.config["style_themename"]))
         self.style_main = ttk.Style()
-        self.style_main.theme_use(Path(self.config["Style_themename"]))
+        self.style_main.theme_use(Path(self.config["style_themename"]))
         # copy colorcodes
         self.color_btn_fg_main = self.style_main.lookup('TButton', 'foreground')
         self.color_btn_bg_main = self.style_main.lookup('TButton', 'background')
@@ -89,14 +89,14 @@ class View:
         self.mainframe.place(x=0, y=0, height=self.config["max_height"], width=self.config["max_width"])
 
         # load icons-----------------------------------------------------------
-        self.img_home = tk.PhotoImage(file=Path(self.config["Media_home"]))
-        self.img_plc = tk.PhotoImage(file=Path(self.config["Media_plc"]))
-        self.img_data = tk.PhotoImage(file=Path(self.config["Media_data"]))
-        self.img_setup = tk.PhotoImage(file=Path(self.config["Media_setup"]))
-        self.img_logo = tk.PhotoImage(file=Path(self.config["Media_logo"]))
-        self.icon_exit = tk.PhotoImage(file=Path(self.config["Media_exit"]))
-        self.img_clock = tk.PhotoImage(file=Path(self.config["Media_clock"]))
-        self.img_version = tk.PhotoImage(file=Path(self.config["Media_version"]))
+        self.img_home = tk.PhotoImage(file=Path(self.config["media_home"]))
+        self.img_plc = tk.PhotoImage(file=Path(self.config["media_plc"]))
+        self.img_data = tk.PhotoImage(file=Path(self.config["media_data"]))
+        self.img_setup = tk.PhotoImage(file=Path(self.config["media_setup"]))
+        self.img_logo = tk.PhotoImage(file=Path(self.config["media_logo"]))
+        self.icon_exit = tk.PhotoImage(file=Path(self.config["media_exit"]))
+        self.img_clock = tk.PhotoImage(file=Path(self.config["media_clock"]))
+        self.img_version = tk.PhotoImage(file=Path(self.config["media_version"]))
 
         # style customisation--------------------------------------------------
         # actionbar
@@ -153,14 +153,16 @@ class View:
         # file menu
         self.filemenu = tk.Menu(self.menu)
         self.menu.add_cascade(label="File", menu=self.filemenu)
-        self.filemenu.add_command(label="New")
-        self.filemenu.add_command(label="Open...")
+        self.filemenu.add_command(label="New", command=self.controller.new_file)
+        self.filemenu.add_command(label="Open", command=self.controller.open_file)
+        self.filemenu.add_command(label="Save", command=self.controller.save_file)
+        self.filemenu.add_command(label="Save As", command=self.controller.save_as_file)
         self.filemenu.add_separator()
         self.filemenu.add_command(label="Exit", command=self.controller.stop)
         # help menu
         self.helpmenu = tk.Menu(self.menu)
         self.menu.add_cascade(label="Help", menu=self.helpmenu)
-        self.helpmenu.add_command(label="About...")
+        self.helpmenu.add_command(label="About", command=self.about)
 
         # actionbar------------------------------------------------------------
         # create and place exit button on actionbar
@@ -339,7 +341,14 @@ class View:
                                              filetypes=(("UDT Files", "*.udt"),))
         return path
 
-    def clear_udt_data(self):
+    def about(self):
+        version = self.config["version"]
+        name = self.config["customer_name"]
+        mail = self.config["customer_mail"]
+        message = "{version}\n{name}\n{mail}".format(version=version, name=name, mail=mail)
+        tk.messagebox.showinfo(title="About", message=message)
+
+    def clear_datatree(self):
         for element in self.datatree.get_children():
             self.datatree.delete(element)
         self.udt_name.set("")
@@ -347,7 +356,7 @@ class View:
         self.udt_version.set("")
         self.udt_info.set("")
 
-    def fill_udt_data(self, name, description, version, info, data):
+    def fill_datatree(self, name, description, version, info, data):
         self.udt_name.set(name)
         self.udt_description.set(description)
         self.udt_version.set(version)

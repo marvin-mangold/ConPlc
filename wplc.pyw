@@ -21,7 +21,7 @@ class Controller:
         self.view.btn_exit.bind(
             "<ButtonRelease>", lambda x: self.stop())
         self.view.btn_import_datasructure.bind(
-            "<ButtonRelease>", lambda x: self.import_udt_data())
+            "<ButtonRelease>", lambda x: self.import_datastructure())
 
     def run(self):
         # initial trigger for 500ms loop
@@ -33,6 +33,18 @@ class Controller:
         # stop window
         self.view.window.destroy()
 
+    def new_file(self):
+        print("new file")
+
+    def open_file(self):
+        print("open file")
+
+    def save_file(self):
+        print("save file")
+
+    def save_as_file(self):
+        print("save as file")
+
     def trigger_500ms(self):
         # trigger every 500ms
         self.view.window.after(500, self.trigger_500ms)
@@ -40,10 +52,10 @@ class Controller:
         self.model.get_time()
         self.view.timestamp.set(self.model.time)
 
-    def import_udt_data(self):
+    def import_datastructure(self):
         error = False
         # clear data in datatree
-        self.view.clear_udt_data()
+        self.view.clear_datatree()
         self.model.udt_dependencies = {}
         # get filepath if main UDT
         self.model.udt_path = self.view.get_filepath()
@@ -60,7 +72,7 @@ class Controller:
         if not error:
             # get datastructure of main UDT and sub-UDTs
             self.model.get_udt_data()
-            self.view.fill_udt_data(self.model.udt_name, self.model.udt_description, self.model.udt_version,
+            self.view.fill_datatree(self.model.udt_name, self.model.udt_description, self.model.udt_version,
                                     self.model.udt_info, self.model.udt_data)
 
 
