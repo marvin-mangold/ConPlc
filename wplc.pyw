@@ -21,17 +21,17 @@ class Controller:
         # connect view and controller (Buttons, Events, Functions)
         # call scale function when windowsize gets changed
         self.view.window.bind(
-            "<Configure>", lambda x: self.windowscale())
+            "<Configure>", lambda x: self.window_scale())
         # call stop when exit button is pressed
         self.view.btn_exit.bind(
             "<ButtonRelease>", lambda x: self.stop())
         # call import datastructure when button is pressed
         self.view.btn_import_datasructure.bind(
-            "<ButtonRelease>", lambda x: self.import_datastructure())
+            "<ButtonRelease>", lambda x: self.datastructure_get())
 
     def run(self):
         # refresh data
-        self.refresh_data()
+        self.data_refresh()
         # initial trigger for 500ms loop
         self.view.window.after(0, self.trigger_500ms)
         # start window
@@ -41,88 +41,88 @@ class Controller:
         # stop window
         self.view.window.destroy()
 
-    def new_file(self):
+    def file_new(self):
         # read JSON file
         with open("empty.wplc") as file:
             self.parameter = json.load(file)
-        self.refresh_data()
+        self.data_refresh()
 
-    def open_file(self):
-        path = self.view.get_open_filepath(filetypes=(("wplc Files", "*.wplc"),))
+    def file_open(self):
+        path = self.view.filepath_open(filetypes=(("wplc Files", "*.wplc"),))
         # read JSON file
         with open(path) as file:
             self.parameter = json.load(file)
-        self.refresh_data()
+        self.data_refresh()
 
-    def save_file(self):
+    def file_save(self):
         # write JSON file
         with open('default.wplc', 'w', encoding='utf-8') as f:
             json.dump(self.parameter, f, ensure_ascii=False, indent=4)
 
-    def save_as_file(self):
-        path = self.view.get_save_as_filepath(filetypes=(("wplc Files", "*.wplc"),))
+    def file_saveas(self):
+        path = self.view.filepath_saveas(filetypes=(("wplc Files", "*.wplc"),))
         # write JSON file
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.parameter, f, ensure_ascii=False, indent=4)
 
-    def refresh_data(self):
+    def data_refresh(self):
         self.view.parameter = self.parameter
-        self.refresh_datastructure()
+        self.datastructure_refresh()
 
     def trigger_500ms(self):
         # trigger every 500ms
         self.view.window.after(500, self.trigger_500ms)
         # get actual time and save it to variable
-        self.view.timestamp.set(model.get_time())
+        self.view.timestamp.set(model.time_get())
 
-    def windowscale(self):
-        width, height = self.view.windowscale()
+    def window_scale(self):
+        width, height = self.view.window_scale()
         if not self.parameter["opt_fullscreen"]:
             self.parameter["opt_windowwidth"] = width
             self.parameter["opt_windowheight"] = height
 
-    def fullscreen(self):
+    def window_fullscreen(self):
         self.parameter["opt_fullscreen"] = self.view.opt_fullscreen.get()
-        self.view.windowsize()
+        self.view.window_size()
 
-    def import_datastructure(self):
+    def datastructure_get(self):
         dependencies = {}
         error = False
         # clear data in datatree
-        self.view.clear_datatree()
+        self.view.datatree_clear()
         # get filepath if main UDT
-        filepath = self.view.get_open_filepath(message=None, filetypes=(("UDT Files", "*.udt"),))
+        filepath = self.view.filepath_open(message=None, filetypes=(("UDT Files", "*.udt"),))
         if filepath == "":
             error = True
         if not error:
             # check if UDT consists of sub-UDTs
-            dependencies = model.get_udt_dependencies(filepath)
+            dependencies = model.udt_dependencies_get(filepath)
             # get filepath of sub-UDTs
             for dep in dependencies:
-                dependencies[dep] = self.view.get_open_filepath(message="select UDT: {dep}".format(dep=dep),
-                                                                filetypes=(("UDT Files", "*.udt"),))
+                dependencies[dep] = self.view.filepath_open(message="select UDT: {dep}".format(dep=dep),
+                                                            filetypes=(("UDT Files", "*.udt"),))
                 if dependencies[dep] == "":
                     error = True
             if not error:
                 # get datastructure of main UDT and sub-UDTs
-                name, description, version, info, data = model.get_udt_data(filepath, dependencies)
+                name, description, version, info, data = model.udt_data_get(filepath, dependencies)
                 self.parameter["udt_name"] = name
                 self.parameter["udt_description"] = description
                 self.parameter["udt_version"] = version
                 self.parameter["udt_info"] = info
                 self.parameter["udt_data"] = data
-                self.refresh_datastructure()
+                self.datastructure_refresh()
 
-    def refresh_datastructure(self):
+    def datastructure_refresh(self):
         name = self.parameter["udt_name"]
         description = self.parameter["udt_description"]
         version = self.parameter["udt_version"]
         info = self.parameter["udt_info"]
         data = self.parameter["udt_data"]
         # clear data in datatree
-        self.view.clear_datatree()
+        self.view.datatree_clear()
         # fill data in datatree
-        self.view.fill_datatree(name, description, version, info, data)
+        self.view.datatree_fill(name, description, version, info, data)
 
 
 if __name__ == '__main__':

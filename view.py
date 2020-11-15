@@ -60,7 +60,7 @@ class View:
 
         # set window startposisiton and startsize
         # window zoomed without titlebar optional
-        self.windowsize()
+        self.window_size()
 
         # style settings-general-----------------------------------------------
         # load tkinter ttk style theme
@@ -147,16 +147,16 @@ class View:
         # file menu
         self.filemenu = tk.Menu(self.menu)
         self.menu.add_cascade(label="File", menu=self.filemenu)
-        self.filemenu.add_command(label="New", command=self.controller.new_file)
-        self.filemenu.add_command(label="Open", command=self.controller.open_file)
-        self.filemenu.add_command(label="Save", command=self.controller.save_file)
-        self.filemenu.add_command(label="Save As", command=self.controller.save_as_file)
+        self.filemenu.add_command(label="New", command=self.controller.file_new)
+        self.filemenu.add_command(label="Open", command=self.controller.file_open)
+        self.filemenu.add_command(label="Save", command=self.controller.file_save)
+        self.filemenu.add_command(label="Save As", command=self.controller.file_saveas)
         self.filemenu.add_separator()
         self.filemenu.add_command(label="Exit", command=self.controller.stop)
         # help menu
         self.helpmenu = tk.Menu(self.menu)
         self.menu.add_cascade(label="Help", menu=self.helpmenu)
-        self.helpmenu.add_command(label="About", command=self.about)
+        self.helpmenu.add_command(label="About", command=self.about_show)
 
         # actionbar------------------------------------------------------------
         # create and place exit button on actionbar
@@ -303,10 +303,10 @@ class View:
         self.cbx_fullscreen = ttk.Checkbutton(master=self.screen_setup,
                                               text="Fullscreen",
                                               variable=self.opt_fullscreen,
-                                              command=self.controller.fullscreen,
+                                              command=self.controller.window_fullscreen,
                                               style="style_screen.TCheckbutton")
 
-    def windowscale(self):
+    def window_scale(self):
         # calculate difference between minimal size and actual size
         # so the right scale can be calculated with individual size on startup
         # ox, oy: offset width (ox) and offset height (oy)
@@ -341,7 +341,7 @@ class View:
         self.cbx_fullscreen.place(x=50, y=25)
         return self.window.winfo_width(), self.window.winfo_height()
 
-    def windowsize(self):
+    def window_size(self):
         if self.parameter["opt_fullscreen"]:
             self.window.overrideredirect(True)
             self.window.state("zoomed")
@@ -357,27 +357,27 @@ class View:
             windowstartposy = (screenheight / 2) - (windowheight / 2)
             self.window.geometry("%dx%d+%d+%d" % (windowwidth, windowheight, windowstartposx, windowstartposy))
 
-    def get_open_filepath(self, message=None, filetypes=((), ("all files", "*.*"))):
+    def filepath_open(self, message=None, filetypes=((), ("all files", "*.*"))):
         if message is not None:
             tk.messagebox.showinfo(title=None, message=message)
         path = tk.filedialog.askopenfilename(initialdir=self.desktoppath, title="select File",
                                              filetypes=filetypes)
         return path
 
-    def get_save_as_filepath(self, filetypes=((), ("all files", "*.*"))):
+    def filepath_saveas(self, filetypes=((), ("all files", "*.*"))):
         path = tk.filedialog.asksaveasfilename(initialdir=self.desktoppath, title="Save as...",
                                                filetypes=filetypes,
                                                defaultextension=filetypes[0][1])
         return path
 
-    def about(self):
+    def about_show(self):
         version = self.config["version"]
         name = self.config["customer_name"]
         mail = self.config["customer_mail"]
         message = "{version}\n{name}\n{mail}".format(version=version, name=name, mail=mail)
         tk.messagebox.showinfo(title="About", message=message)
 
-    def clear_datatree(self):
+    def datatree_clear(self):
         for element in self.datatree.get_children():
             self.datatree.delete(element)
         self.udt_name.set("")
@@ -385,7 +385,7 @@ class View:
         self.udt_version.set("")
         self.udt_info.set("")
 
-    def fill_datatree(self, name, description, version, info, data):
+    def datatree_fill(self, name, description, version, info, data):
         self.udt_name.set(name)
         self.udt_description.set(description)
         self.udt_version.set(version)
