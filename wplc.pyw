@@ -14,22 +14,24 @@ class Controller:
         with open("default.wplc") as file:
             self.parameter = json.load(file)
         # call view (handles the graphics of GUI)
-        self.view = view.View(self, self.config)
+        self.view = view.View(self, self.config, self.parameter)
         # call model (handles the functions of GUI)
-        self.model = model.Model(self, self.config)
+        self.model = model.Model()
         # ---------------------------------------------------------------------
-        # connect view and model and controller (Buttons, Events, Functions)
+        # connect view and controller (Buttons, Events, Functions)
         # call scale function when windowsize gets changed
         self.view.window.bind(
-            "<Configure>", lambda x: self.view.scale())
+            "<Configure>", lambda x: self.windowscale())
+        # call stop when exit button is pressed
         self.view.btn_exit.bind(
             "<ButtonRelease>", lambda x: self.stop())
+        # call import datastructure when button is pressed
         self.view.btn_import_datasructure.bind(
             "<ButtonRelease>", lambda x: self.import_datastructure())
 
     def run(self):
         # refresh data
-        self.refresh()
+        self.refresh_data()
         # initial trigger for 500ms loop
         self.view.window.after(0, self.trigger_500ms)
         # start window
@@ -43,14 +45,14 @@ class Controller:
         # read JSON file
         with open("empty.wplc") as file:
             self.parameter = json.load(file)
-        self.refresh()
+        self.refresh_data()
 
     def open_file(self):
         path = self.view.get_open_filepath(filetypes=(("wplc Files", "*.wplc"),))
         # read JSON file
         with open(path) as file:
             self.parameter = json.load(file)
-        self.refresh()
+        self.refresh_data()
 
     def save_file(self):
         # write JSON file
@@ -59,12 +61,12 @@ class Controller:
 
     def save_as_file(self):
         path = self.view.get_save_as_filepath(filetypes=(("wplc Files", "*.wplc"),))
-        path = path + ".wplc"
         # write JSON file
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.parameter, f, ensure_ascii=False, indent=4)
 
-    def refresh(self):
+    def refresh_data(self):
+        self.view.parameter = self.parameter
         self.refresh_datastructure()
 
     def trigger_500ms(self):
@@ -72,6 +74,16 @@ class Controller:
         self.view.window.after(500, self.trigger_500ms)
         # get actual time and save it to variable
         self.view.timestamp.set(model.get_time())
+
+    def windowscale(self):
+        width, height = self.view.windowscale()
+        if not self.parameter["opt_fullscreen"]:
+            self.parameter["opt_windowwidth"] = width
+            self.parameter["opt_windowheight"] = height
+
+    def fullscreen(self):
+        self.parameter["opt_fullscreen"] = self.view.opt_fullscreen.get()
+        self.view.windowsize()
 
     def import_datastructure(self):
         dependencies = {}

@@ -36,10 +36,11 @@ class Led:  # LED with color, color changes by String
 
 
 class View:
-    def __init__(self, controller, config):
+    def __init__(self, controller, config, parameter):
         self.controller = controller
         self.model = None
         self.config = config
+        self.parameter = parameter
 
         # other variables------------------------------------------------------
         self.desktoppath = os.path.expanduser(r"~\Desktop")
@@ -58,18 +59,8 @@ class View:
         self.window.wm_maxsize(self.config["max_width"], self.config["max_height"])
 
         # set window startposisiton and startsize
-        screenwidth = self.window.winfo_screenwidth()
-        screenheight = self.window.winfo_screenheight()
-        windowwidth = self.config["start_width"]
-        windowheight = self.config["start_height"]
-        windowstartposx = (screenwidth / 2) - (windowwidth / 2)
-        windowstartposy = (screenheight / 2) - (windowheight / 2)
-        self.window.geometry("%dx%d+%d+%d" % (windowwidth, windowheight, windowstartposx, windowstartposy))
-
         # window zoomed without titlebar optional
-        if self.config["fullscreen"]:
-            self.window.overrideredirect(True)
-            self.window.state("zoomed")
+        self.windowsize()
 
         # style settings-general-----------------------------------------------
         # load tkinter ttk style theme
@@ -121,6 +112,9 @@ class View:
         self.style_text_screen = ttk.Style()
         self.style_text_screen.configure(
             "style_text_screen.TLabel", font=("arial", 10), relief="flat", background=self.color_bg_contrast)
+        self.style_cbx_screen = ttk.Style()
+        self.style_cbx_screen.configure(
+            "style_screen.TCheckbutton", font=("arial", 10), relief="flat", background=self.color_bg_contrast)
         self.style_screen = ttk.Style()
         self.style_screen.configure(
             "style_screen.TFrame", background=self.color_bg_contrast)
@@ -302,7 +296,17 @@ class View:
                                                   text='Datenstruktur einlesen',
                                                   style="style_screen.TButton")
 
-    def scale(self):
+        # screen setup---------------------------------------------------------
+        # create checkbox for option fullscreen
+        self.opt_fullscreen = tk.BooleanVar()
+        self.opt_fullscreen.set(self.parameter["opt_fullscreen"])
+        self.cbx_fullscreen = ttk.Checkbutton(master=self.screen_setup,
+                                              text="Fullscreen",
+                                              variable=self.opt_fullscreen,
+                                              command=self.controller.fullscreen,
+                                              style="style_screen.TCheckbutton")
+
+    def windowscale(self):
         # calculate difference between minimal size and actual size
         # so the right scale can be calculated with individual size on startup
         # ox, oy: offset width (ox) and offset height (oy)
@@ -333,6 +337,25 @@ class View:
         self.datatree_scrollx.place(x=50, y=415 + oy, width=691 + ox)
         self.datatree_scrolly.place(x=740 + ox, y=92, height=337 + oy)
         self.btn_import_datasructure.place(x=50, y=437 + oy, height=30, width=150)
+        # scale Gui elements from screen setup
+        self.cbx_fullscreen.place(x=50, y=25)
+        return self.window.winfo_width(), self.window.winfo_height()
+
+    def windowsize(self):
+        if self.parameter["opt_fullscreen"]:
+            self.window.overrideredirect(True)
+            self.window.state("zoomed")
+        else:
+            self.window.overrideredirect(False)
+            self.window.state("normal")
+            # set window startposisiton and startsize
+            screenwidth = self.window.winfo_screenwidth()
+            screenheight = self.window.winfo_screenheight()
+            windowwidth = self.parameter["opt_windowwidth"]
+            windowheight = self.parameter["opt_windowheight"]
+            windowstartposx = (screenwidth / 2) - (windowwidth / 2)
+            windowstartposy = (screenheight / 2) - (windowheight / 2)
+            self.window.geometry("%dx%d+%d+%d" % (windowwidth, windowheight, windowstartposx, windowstartposy))
 
     def get_open_filepath(self, message=None, filetypes=((), ("all files", "*.*"))):
         if message is not None:
@@ -341,9 +364,10 @@ class View:
                                              filetypes=filetypes)
         return path
 
-    def get_save_as_filepath(self, filetypes):
+    def get_save_as_filepath(self, filetypes=((), ("all files", "*.*"))):
         path = tk.filedialog.asksaveasfilename(initialdir=self.desktoppath, title="Save as...",
-                                               filetypes=filetypes)
+                                               filetypes=filetypes,
+                                               defaultextension=filetypes[0][1])
         return path
 
     def about(self):

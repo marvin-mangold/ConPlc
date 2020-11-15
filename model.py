@@ -3,9 +3,8 @@ import time
 
 
 class Model:
-    def __init__(self, controller, config):
-        self.controller = controller
-        self.config = config
+    def __init__(self):
+        pass
 
 
 def get_udt_data(filepath, dependencies):

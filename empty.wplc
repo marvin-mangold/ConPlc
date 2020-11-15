@@ -3,5 +3,8 @@
     "udt_description": "",
     "udt_version": "",
     "udt_info": "",
-    "udt_data": []
+    "udt_data": [],
+    "opt_windowwidth": 1015,
+    "opt_windowheight": 710,
+    "opt_fullscreen": false
 }
