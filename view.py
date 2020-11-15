@@ -334,11 +334,16 @@ class View:
         self.datatree_scrolly.place(x=740 + ox, y=92, height=337 + oy)
         self.btn_import_datasructure.place(x=50, y=437 + oy, height=30, width=150)
 
-    def get_filepath(self, message=None):
+    def get_open_filepath(self, message=None, filetypes=((), ("all files", "*.*"))):
         if message is not None:
             tk.messagebox.showinfo(title=None, message=message)
-        path = tk.filedialog.askopenfilename(initialdir=self.desktoppath, title="UDT auswählen",
-                                             filetypes=(("UDT Files", "*.udt"),))
+        path = tk.filedialog.askopenfilename(initialdir=self.desktoppath, title="select File",
+                                             filetypes=filetypes)
+        return path
+
+    def get_save_as_filepath(self, filetypes):
+        path = tk.filedialog.asksaveasfilename(initialdir=self.desktoppath, title="Save as...",
+                                               filetypes=filetypes)
         return path
 
     def about(self):
