@@ -7,3 +7,9 @@ standard library module: pathlib | no license restriction
 standard library module: time | no license restriction
 standard library module: re | no license restriction
 standard library module: json | no license restriction
+
+
+noch nicht genutzt
+3rd party : matplotlib | BSD
+3rd party : pandas | BSD 3
+3rd party : numpy | All NumPy wheels distributed on PyPI are BSD licensed.
