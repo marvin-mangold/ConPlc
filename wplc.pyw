@@ -1,7 +1,7 @@
 import json
 import view
 import model
-
+import random
 
 class Controller:
     def __init__(self):
@@ -74,6 +74,7 @@ class Controller:
         self.view.window.after(500, self.trigger_500ms)
         # get actual time and save it to variable
         self.view.timestamp.set(model.time_get())
+        self.view.led_state(random.choice(["error","warn","ok"]))
 
     def window_scale(self):
         width, height = self.view.window_scale()

@@ -6,35 +6,6 @@ from tkinter import messagebox
 from pathlib import Path
 
 
-class Led:  # LED with color, color changes by String
-    def __init__(self, master, posx, posy, diameter, framewidth,
-                 framecolor, ledcolor):
-        self.root = master
-        self.ledcolor = ledcolor
-        self.framecolor = framecolor
-        self.diameter = diameter
-        self.framewidth = framewidth
-        self.offsetx = 0
-        self.offsety = 0
-        self.led = self.root.create_oval(
-            posx, posy, posx + self.diameter, posy + self.diameter,
-            width=self.framewidth, fill=self.ledcolor, outline=self.framecolor)
-
-    def update(self, offsetx=0, offsety=0):
-        differenzx = offsetx - self.offsetx
-        differenzy = offsety - self.offsety
-        self.offsetx = self.offsetx + differenzx
-        self.offsety = self.offsety + differenzy
-        self.root.move(self.led, differenzx, differenzy)
-
-    def colorchange(self, ledcolor="yellow", framecolor="black"):
-        self.ledcolor = ledcolor
-        self.framecolor = framecolor
-        self.root.itemconfig(self.led,
-                             fill=self.ledcolor,
-                             outline=self.framecolor)
-
-
 class View:
     def __init__(self, controller, config, parameter):
         self.controller = controller
@@ -88,6 +59,9 @@ class View:
         self.icon_exit = tk.PhotoImage(file=Path(self.config["media_exit"]))
         self.img_clock = tk.PhotoImage(file=Path(self.config["media_clock"]))
         self.img_version = tk.PhotoImage(file=Path(self.config["media_version"]))
+        self.img_led_gn = tk.PhotoImage(file=Path(self.config["media_led_gn"]))
+        self.img_led_ye = tk.PhotoImage(file=Path(self.config["media_led_ye"]))
+        self.img_led_rd = tk.PhotoImage(file=Path(self.config["media_led_rd"]))
 
         # style customisation--------------------------------------------------
         # actionbar
@@ -193,18 +167,15 @@ class View:
                                        anchor="w")
 
         # create and place LED and label for PLC state on infobar
-        self.led_plc = Led(master=self.infobar,
-                           posx=250,
-                           posy=3,
-                           diameter=16,
-                           framewidth=1,
-                           framecolor="black",
-                           ledcolor="yellow")
-
         self.lbl_led_plc = ttk.Label(master=self.infobar,
                                      style="style_infobar.TLabel",
                                      text="PLC",
                                      anchor="w")
+
+        self.icon_led = tk.Canvas(master=self.infobar, relief="flat", highlightthickness=0, bg=self.color_btn_bg_main)
+        self.icon_led.create_image(0, 0, image=self.img_led_gn, anchor="nw")
+        self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
+        self.icon_led.create_image(0, 0, image=self.img_led_ye, anchor="nw")
 
         # create and place versionnumber and icon on infobar
         self.icon_version = tk.Canvas(master=self.infobar,
@@ -319,6 +290,7 @@ class View:
         self.infobar.place(x=0, y=576 + oy, height=24, width=800 + ox)
         self.icon_clock.place(x=670 + ox, y=2, height=20, width=20)
         self.lbl_timestamp.place(x=690 + ox, y=0, width=150, height=24)
+        self.icon_led.place(x=246, y=2, width=20, height=20)
         self.lbl_led_plc.place(x=270, y=2, width=50, height=18)
         self.icon_version.place(x=5, y=2, height=20, width=20)
         self.lbl_version.place(x=25, y=2, width=150, height=18)
@@ -413,3 +385,13 @@ class View:
             # else keep folder
             else:
                 pass
+
+    def led_state(self, state="error"):
+        if state == "error":
+            self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
+        elif state == "warn":
+            self.icon_led.create_image(0, 0, image=self.img_led_ye, anchor="nw")
+        elif state == "ok":
+            self.icon_led.create_image(0, 0, image=self.img_led_gn, anchor="nw")
+        else:
+            self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
