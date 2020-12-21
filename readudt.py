@@ -74,7 +74,7 @@ def get_udt_datatype(line):
     # -->name : Bool;   // comment
     result = False
     datatype = ""
-    regex = re.search(r'(.*) : ([^;\/\[ ]*)', line)
+    regex = re.search(r'(.*) : ([^;/\[ ]*)', line)
     if regex is not None:
         result = True
         datatype = regex.group(2)
@@ -95,7 +95,7 @@ def get_udt_struct(line):
     # -->name : Struct   // comment
     result = False
     element = {}
-    regex = re.search(r'(.*) : (Struct)(?:   // )?(.*)?', line)
+    regex = re.search(r'(.*) : (Struct)(?:\s{3}// )?(.*)?', line)
     if regex is not None:
         result = True
         name, datatype, comment = clean_udt_varname(regex.group(1)), regex.group(2), regex.group(3)
@@ -124,7 +124,7 @@ def get_udt_var(line):
     # -->name : Bool;   // comment
     result = False
     element = {}
-    regex = re.search(r'(.*) : (.*);(?:   // )?(.*)?', line)
+    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', line)
     if regex is not None:
         result = True
         name, datatype, comment = clean_udt_varname(regex.group(1)), regex.group(2), regex.group(3)
@@ -138,7 +138,7 @@ def get_udt_dtl(line):
     # -->name : Bool;   // comment
     result = False
     elements = []
-    regex = re.search(r'(.*) : (.*);(?:   // )?(.*)?', line)
+    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', line)
     if regex is not None:
         result = True
         name, datatype, comment = clean_udt_varname(regex.group(1)), regex.group(2), regex.group(3)
@@ -181,7 +181,7 @@ def get_array_data(line):
     start = 0
     end = 0
     datatype = ""
-    regex = re.search(r'(?:Array\[)(.*)(?:\.\.)(.*)(?:\] of )(.*);', line)
+    regex = re.search(r'(?:Array\[)(.*)(?:\.\.)(.*)(?:] of )(.*);', line)
     if regex is not None:
         start = int(regex.group(1))
         end = int(regex.group(2)) + 1
@@ -194,7 +194,7 @@ def get_udt_array(line):
     # -->name : Bool;   // comment
     result = False
     elements = []
-    regex = re.search(r'(.*) : (.*);(?:   // )?(.*)?', line)
+    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', line)
     if regex is not None:
         result = True
         name, datatype, comment = clean_udt_varname(regex.group(1)), regex.group(2), regex.group(3)
