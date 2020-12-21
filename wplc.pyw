@@ -3,6 +3,7 @@ import view
 import model
 import random
 
+
 class Controller:
     def __init__(self):
         # get configdata from configfile

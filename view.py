@@ -39,10 +39,6 @@ class View:
         self.window.tk.call("package", "require", Path(self.config["style_themename"]))
         self.style_main = ttk.Style()
         self.style_main.theme_use(Path(self.config["style_themename"]))
-        # copy colorcodes
-        self.color_btn_fg_main = self.style_main.lookup('TButton', 'foreground')
-        self.color_btn_bg_main = self.style_main.lookup('TButton', 'background')
-        self.color_bg_contrast = "#3d4145"
 
         # mainframe------------------------------------------------------------
         # set mainframe for window
@@ -64,41 +60,46 @@ class View:
         self.img_led_rd = tk.PhotoImage(file=Path(self.config["media_led_rd"]))
 
         # style customisation--------------------------------------------------
+        # define main colors
+        self.backcolor = self.style_main.lookup('TButton', 'background')
+        self.midcolor = "#3d4145"
+        self.frontcolor = self.style_main.lookup('TTreeview', 'background')
+        self.textcolor = self.style_main.lookup('TButton', 'foreground')
         # actionbar
         self.style_btn_actionbar = ttk.Style()
         self.style_btn_actionbar.configure(
             "style_actionbar.TButton", font=("arial", 8), relief="flat")
         self.style_btn_actionbar.map(
-            "style_actionbar.TButton", background=[('selected', self.color_bg_contrast), ('active', "#000000")])
+            "style_actionbar.TButton", background=[('selected', self.midcolor), ('active', "#000000")])
         # infobar
         self.style_lbl_infobar = ttk.Style()
         self.style_lbl_infobar.configure(
-            "style_infobar.TLabel", foreground=self.color_btn_fg_main, background=self.color_btn_bg_main)
+            "style_infobar.TLabel", foreground=self.textcolor, background=self.backcolor)
         # screen
         self.style_btn_screen = ttk.Style()
         self.style_btn_screen.configure(
             "style_screen.TButton", font=("arial", 10), relief="flat")
         self.style_btn_screen.map(
-            "style_screen.TButton", background=[('selected', self.color_bg_contrast), ('active', "#000000")])
+            "style_screen.TButton", background=[('selected', self.midcolor), ('active', "#000000")])
         self.style_lbl_screen = ttk.Style()
         self.style_lbl_screen.configure(
-            "style_screen.TLabel", font=("arial", 10), relief="flat", background=self.color_btn_bg_main)
+            "style_screen.TLabel", font=("arial", 10), relief="flat", background=self.backcolor)
         self.style_text_screen = ttk.Style()
         self.style_text_screen.configure(
-            "style_text_screen.TLabel", font=("arial", 10), relief="flat", background=self.color_bg_contrast)
+            "style_text_screen.TLabel", font=("arial", 10), relief="flat", background=self.midcolor)
         self.style_cbx_screen = ttk.Style()
         self.style_cbx_screen.configure(
-            "style_screen.TCheckbutton", font=("arial", 10), relief="flat", background=self.color_bg_contrast)
+            "style_screen.TCheckbutton", font=("arial", 10), relief="flat", background=self.midcolor)
         self.style_screen = ttk.Style()
         self.style_screen.configure(
-            "style_screen.TFrame", background=self.color_bg_contrast)
+            "style_screen.TFrame", background=self.midcolor)
         self.style_nb_screen = ttk.Style()
         self.style_nb_screen.configure(
-            "style_screen.TNotebook", background=self.color_btn_bg_main, relief="flat")
+            "style_screen.TNotebook", background=self.backcolor, relief="flat")
         self.style_nb_screen.configure(
             "style_screen.TNotebook.Tab", focuscolor=self.style_nb_screen.configure(".")["background"])
         self.style_nb_screen.map(
-            "style_screen.TNotebook.Tab", background=[('selected', self.color_bg_contrast), ('active', "#000000")])
+            "style_screen.TNotebook.Tab", background=[('selected', self.midcolor), ('active', "#000000")])
         self.style_treeview = ttk.Style()
         self.style_treeview.configure(
             "Treeview.Heading", font=("arial", 10))
@@ -149,7 +150,7 @@ class View:
         # create and place infobar on mainframe
         self.infobar = tk.Canvas(master=self.mainframe,
                                  relief="flat",
-                                 bg=self.color_btn_bg_main,
+                                 bg=self.backcolor,
                                  highlightthickness=0,
                                  highlightbackground="black")
 
@@ -157,7 +158,7 @@ class View:
         self.icon_clock = tk.Canvas(master=self.infobar,
                                     relief="flat",
                                     highlightthickness=0,
-                                    bg=self.color_btn_bg_main)
+                                    bg=self.backcolor)
         self.icon_clock.create_image(0, 0, image=self.img_clock, anchor="nw")
 
         self.timestamp = tk.StringVar()
@@ -172,7 +173,7 @@ class View:
                                      text="PLC",
                                      anchor="w")
 
-        self.icon_led = tk.Canvas(master=self.infobar, relief="flat", highlightthickness=0, bg=self.color_btn_bg_main)
+        self.icon_led = tk.Canvas(master=self.infobar, relief="flat", highlightthickness=0, bg=self.backcolor)
         self.icon_led.create_image(0, 0, image=self.img_led_gn, anchor="nw")
         self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
         self.icon_led.create_image(0, 0, image=self.img_led_ye, anchor="nw")
@@ -181,7 +182,7 @@ class View:
         self.icon_version = tk.Canvas(master=self.infobar,
                                       relief="flat",
                                       highlightthickness=0,
-                                      bg=self.color_btn_bg_main)
+                                      bg=self.backcolor)
         self.icon_version.create_image(0, 0, image=self.img_version, anchor="nw")
 
         self.version = tk.StringVar()
@@ -197,7 +198,7 @@ class View:
         self.udt_infos = tk.Canvas(master=self.screen_data,
                                    relief="flat",
                                    highlightthickness=0,
-                                   bg=self.color_bg_contrast)
+                                   bg=self.midcolor)
 
         self.udt_name = tk.StringVar()
         self.lbl_udt_name_info = ttk.Label(master=self.udt_infos,
@@ -288,12 +289,12 @@ class View:
         self.btn_exit.place(x=623 + ox, y=0, width=58, height=58)
         self.icon_logo.place(x=687 + ox, y=0, width=114, height=58)
         self.infobar.place(x=0, y=576 + oy, height=24, width=800 + ox)
-        self.icon_clock.place(x=670 + ox, y=2, height=20, width=20)
-        self.lbl_timestamp.place(x=690 + ox, y=0, width=150, height=24)
-        self.icon_led.place(x=246, y=2, width=20, height=20)
-        self.lbl_led_plc.place(x=270, y=2, width=50, height=18)
-        self.icon_version.place(x=5, y=2, height=20, width=20)
-        self.lbl_version.place(x=25, y=2, width=150, height=18)
+        self.icon_clock.place(x=670 + ox, y=3, height=20, width=20)
+        self.lbl_timestamp.place(x=690 + ox, y=1, width=150, height=24)
+        self.icon_led.place(x=246, y=3, width=20, height=20)
+        self.lbl_led_plc.place(x=270, y=3, width=50, height=18)
+        self.icon_version.place(x=5, y=3, height=20, width=20)
+        self.lbl_version.place(x=25, y=3, width=150, height=18)
         # scale GUI elements from screen data
         self.udt_infos.place(x=50, y=25, height=58, width=690 + ox)
         self.lbl_udt_name_info.place(x=0, y=0, width=50, height=25)
