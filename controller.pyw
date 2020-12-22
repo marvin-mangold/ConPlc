@@ -1,6 +1,6 @@
 """
-Wicke PLC - connect PLC and PC
-Copyright (C) 2020  Marvin Mangold
+ConPlc - connect PLC and PC
+Copyright (C) 2020  Marvin Mangold (mangold.mangold00@googlemail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,22 +23,26 @@ import model
 
 class Controller(object):
     def __init__(self):
+
         # get configdata from configfile
         # Read JSON file
-        with open("wplc.conf") as configfile:
+        with open("cplc.conf") as configfile:
             self.configfile = json.load(configfile)
-        # get default project from projectfile
+
+        # get projectdata from projectfile
         # Read JSON file
-        with open("default.wplc") as projectfile:
+        with open("default.cplc") as projectfile:
             self.projectfile = json.load(projectfile)
+
         # call view (handles the graphics of GUI)
-        self.view = view.View(self, self.configfile, self.projectfile)
+        self.view = view.View(self)
+
         # call model (handles the functions of GUI)
         self.model = model.Model()
 
     def run(self):
         # refresh data
-        self.view.datatree_update(self.projectfile)
+        self.view.datatree_update()
         # initial trigger for 500ms loop
         self.view.window.after(0, self.trigger_500ms)
         # start window
@@ -50,30 +54,32 @@ class Controller(object):
 
     def file_new(self):
         # read JSON file
-        with open("empty.wplc") as file:
+        with open("empty.cplc") as file:
             self.projectfile = json.load(file)
-        self.view.datatree_update(self.projectfile)
-        self.view.window_title("empty.wplc")
+        self.view.datatree_update()
+        self.view.setup_update()
+        self.view.window_update()
 
-    def file_open(self):
-        path = self.view.filepath_open(filetypes=(("wplc Files", "*.wplc"),))
+    def file_open(self, path=None):
+        if path is None:
+            path = self.view.filepath_open(filetypes=(("wplc Files", "*.wplc"),))
         # read JSON file
         with open(path) as file:
             self.projectfile = json.load(file)
-        self.view.datatree_update(self.projectfile)
-        self.view.window_title(path.split("/")[-1])
+        self.view.datatree_update()
+        self.view.setup_update()
+        self.view.window_update()
 
     def file_save(self):
         # write JSON file
-        with open('default.wplc', 'w', encoding='utf-8') as f:
+        with open('default.cplc', 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
 
-    def file_saveas(self):
+    def file_backup(self):
         path = self.view.filepath_saveas(filetypes=(("wplc Files", "*.wplc"),))
         # write JSON file
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
-        self.view.window_title(path.split("/")[-1])
 
     def trigger_500ms(self):
         # trigger every 500ms
@@ -107,7 +113,14 @@ class Controller(object):
                 self.projectfile["udt_version"] = version
                 self.projectfile["udt_info"] = info
                 self.projectfile["udt_data"] = data
-                self.view.datatree_update(self.projectfile)
+                self.view.datatree_update()
+        if error:
+            self.projectfile["udt_name"] = ""
+            self.projectfile["udt_description"] = ""
+            self.projectfile["udt_version"] = ""
+            self.projectfile["udt_info"] = ""
+            self.projectfile["udt_data"] = []
+            self.view.datatree_update()
 
 
 if __name__ == '__main__':

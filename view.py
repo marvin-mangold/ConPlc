@@ -1,6 +1,6 @@
 """
-Wicke PLC - connect PLC and PC
-Copyright (C) 2020  Marvin Mangold
+ConPlc - connect PLC and PC
+Copyright (C) 2020  Marvin Mangold (mangold.mangold00@googlemail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,11 +25,8 @@ from pathlib import Path
 
 
 class View(object):
-    def __init__(self, controller, configfile, projectfile):
+    def __init__(self, controller):
         self.controller = controller
-        self.configfile = configfile
-        self.projectfile = projectfile
-
         # other variables------------------------------------------------------
         self.desktoppath = os.path.expanduser(r"~\Desktop")
 
@@ -38,41 +35,44 @@ class View(object):
         self.window = tk.Tk()
 
         # load icons
-        self.img_icon = tk.PhotoImage(file=Path(self.configfile["media_icon"]))
-        self.img_home = tk.PhotoImage(file=Path(self.configfile["media_home"]))
-        self.img_plc = tk.PhotoImage(file=Path(self.configfile["media_plc"]))
-        self.img_data = tk.PhotoImage(file=Path(self.configfile["media_data"]))
-        self.img_setup = tk.PhotoImage(file=Path(self.configfile["media_setup"]))
-        self.img_logo = tk.PhotoImage(file=Path(self.configfile["media_logo"]))
-        self.icon_exit = tk.PhotoImage(file=Path(self.configfile["media_exit"]))
-        self.img_clock = tk.PhotoImage(file=Path(self.configfile["media_clock"]))
-        self.img_version = tk.PhotoImage(file=Path(self.configfile["media_version"]))
-        self.img_led_gn = tk.PhotoImage(file=Path(self.configfile["media_led_gn"]))
-        self.img_led_ye = tk.PhotoImage(file=Path(self.configfile["media_led_ye"]))
-        self.img_led_rd = tk.PhotoImage(file=Path(self.configfile["media_led_rd"]))
+        self.img_icon = tk.PhotoImage(file=Path(self.controller.configfile["media_icon"]))
+        self.img_home = tk.PhotoImage(file=Path(self.controller.configfile["media_home"]))
+        self.img_plc = tk.PhotoImage(file=Path(self.controller.configfile["media_plc"]))
+        self.img_data = tk.PhotoImage(file=Path(self.controller.configfile["media_data"]))
+        self.img_setup = tk.PhotoImage(file=Path(self.controller.configfile["media_setup"]))
+        self.img_logo = tk.PhotoImage(file=Path(self.controller.configfile["media_logo"]))
+        self.icon_exit = tk.PhotoImage(file=Path(self.controller.configfile["media_exit"]))
+        self.img_clock = tk.PhotoImage(file=Path(self.controller.configfile["media_clock"]))
+        self.img_version = tk.PhotoImage(file=Path(self.controller.configfile["media_version"]))
+        self.img_led_gn = tk.PhotoImage(file=Path(self.controller.configfile["media_led_gn"]))
+        self.img_led_ye = tk.PhotoImage(file=Path(self.controller.configfile["media_led_ye"]))
+        self.img_led_rd = tk.PhotoImage(file=Path(self.controller.configfile["media_led_rd"]))
 
         # set title
-        self.window_title("default.wplc")
+        self.window.title(self.controller.configfile["title"])
 
         # set icon
         self.window.iconphoto(True, self.img_icon)
 
         # set min/max windowsize
-        self.window.wm_minsize(self.configfile["min_width"], self.configfile["min_height"])
-        self.window.wm_maxsize(self.configfile["max_width"], self.configfile["max_height"])
+        self.window.wm_minsize(self.controller.configfile["min_width"], self.controller.configfile["min_height"])
+        self.window.wm_maxsize(self.controller.configfile["max_width"], self.controller.configfile["max_height"])
 
         # style settings-general-----------------------------------------------
         # load tkinter ttk style theme
-        self.window.tk.call("lappend", "auto_path", Path(self.configfile["style_themepath"]))
-        self.window.tk.call("package", "require", Path(self.configfile["style_themename"]))
+        self.window.tk.call("lappend", "auto_path", Path(self.controller.configfile["style_themepath"]))
+        self.window.tk.call("package", "require", Path(self.controller.configfile["style_themename"]))
         self.style_main = ttk.Style()
-        self.style_main.theme_use(Path(self.configfile["style_themename"]))
+        self.style_main.theme_use(Path(self.controller.configfile["style_themename"]))
 
         # mainframe------------------------------------------------------------
         # set mainframe for window
         self.mainframe = ttk.Frame(master=self.window, style="TFrame")
         # set mainframe to max size
-        self.mainframe.place(x=0, y=0, height=self.configfile["max_height"], width=self.configfile["max_width"])
+        self.mainframe.place(x=0,
+                             y=0,
+                             height=self.controller.configfile["max_height"],
+                             width=self.controller.configfile["max_width"])
 
         # style customisation--------------------------------------------------
         # define main colors
@@ -140,7 +140,7 @@ class View(object):
         self.filemenu.add_command(label="New", command=self.controller.file_new)
         self.filemenu.add_command(label="Open", command=self.controller.file_open)
         self.filemenu.add_command(label="Save", command=self.controller.file_save)
-        self.filemenu.add_command(label="Save As", command=self.controller.file_saveas)
+        self.filemenu.add_command(label="Backup", command=self.controller.file_backup)
         self.filemenu.add_separator()
         self.filemenu.add_command(label="Exit", command=self.controller.stop)
         # help menu
@@ -202,7 +202,7 @@ class View(object):
         self.icon_version.create_image(0, 0, image=self.img_version, anchor="nw")
 
         self.version = tk.StringVar()
-        self.version.set(self.configfile["version"])
+        self.version.set(self.controller.configfile["version"])
         self.lbl_version = ttk.Label(master=self.infobar,
                                      style="style_infobar.TLabel",
                                      textvariable=self.version,
@@ -288,11 +288,11 @@ class View(object):
         # screen setup---------------------------------------------------------
         # create checkbox for option fullscreen
         self.opt_fullscreen = tk.BooleanVar()
-        self.opt_fullscreen.set(self.projectfile["opt_fullscreen"])
+        self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
         self.cbx_fullscreen = ttk.Checkbutton(master=self.screen_setup,
                                               text="Fullscreen",
                                               variable=self.opt_fullscreen,
-                                              command=self.window_size,
+                                              command=self.window_update,
                                               style="style_screen.TCheckbutton")
 
         # screensize-----------------------------------------------------------
@@ -300,14 +300,14 @@ class View(object):
         self.window.bind("<Configure>", lambda x: self.window_scale())
         # set window startposisiton and startsize
         # window zoomed without titlebar optional
-        self.window_size()
+        self.window_update()
 
     def window_scale(self):
         # calculate difference between minimal size and actual size
         # so the right scale can be calculated with individual size on startup
         # ox, oy: offset width (ox) and offset height (oy)
-        ox = int(self.window.winfo_width()) - self.configfile["min_width"]
-        oy = int(self.window.winfo_height()) - self.configfile["min_height"]
+        ox = int(self.window.winfo_width()) - self.controller.configfile["min_width"]
+        oy = int(self.window.winfo_height()) - self.controller.configfile["min_height"]
         # scale GUI elements from Mainframe
         self.screens.place(x=0, y=0, width=802 + ox, height=578 + oy)
         self.btn_exit.place(x=623 + ox, y=0, width=58, height=58)
@@ -336,13 +336,13 @@ class View(object):
         self.btn_import_datasructure.place(x=50, y=437 + oy, height=30, width=150)
         # scale Gui elements from screen setup
         self.cbx_fullscreen.place(x=50, y=25)
-        if not self.projectfile["opt_fullscreen"]:
-            self.projectfile["opt_windowwidth"] = self.window.winfo_width()
-            self.projectfile["opt_windowheight"] = self.window.winfo_height()
+        if not self.controller.projectfile["opt_fullscreen"]:
+            self.controller.projectfile["opt_windowwidth"] = self.window.winfo_width()
+            self.controller.projectfile["opt_windowheight"] = self.window.winfo_height()
 
-    def window_size(self):
+    def window_update(self):
         fullscreen = self.opt_fullscreen.get()
-        self.projectfile["opt_fullscreen"] = fullscreen
+        self.controller.projectfile["opt_fullscreen"] = fullscreen
         if fullscreen:
             self.window.overrideredirect(True)
             self.window.state("zoomed")
@@ -352,15 +352,11 @@ class View(object):
             # set window startposisiton and startsize
             screenwidth = self.window.winfo_screenwidth()
             screenheight = self.window.winfo_screenheight()
-            windowwidth = self.projectfile["opt_windowwidth"]
-            windowheight = self.projectfile["opt_windowheight"]
+            windowwidth = self.controller.projectfile["opt_windowwidth"]
+            windowheight = self.controller.projectfile["opt_windowheight"]
             windowstartposx = (screenwidth / 2) - (windowwidth / 2)
             windowstartposy = (screenheight / 2) - (windowheight / 2)
             self.window.geometry("%dx%d+%d+%d" % (windowwidth, windowheight, windowstartposx, windowstartposy))
-
-    def window_title(self, text):
-        title = "{title} - {project}".format(title=self.configfile["title"], project=text)
-        self.window.title(title)
 
     def filepath_open(self, message=None, filetypes=((), ("all files", "*.*"))):
         if message is not None:
@@ -376,10 +372,20 @@ class View(object):
         return path
 
     def about_show(self):
-        version = self.configfile["version"]
-        name = self.configfile["customer_name"]
-        mail = self.configfile["customer_mail"]
-        message = "{version}\n{name}\n{mail}".format(version=version, name=name, mail=mail)
+        txt_version = self.controller.configfile["version"]
+        txt_copyright = self.controller.configfile["about_copyright"]
+        txt_name = self.controller.configfile["about_name"]
+        txt_mail = self.controller.configfile["about_mail"]
+        txt_license = self.controller.configfile["about_license"]
+        message = "{version}\n" \
+                  "{copyright}\n" \
+                  "{name}\n" \
+                  "{mail}\n" \
+                  "{license}".format(version=txt_version,
+                                     name=txt_name,
+                                     mail=txt_mail,
+                                     license=txt_license,
+                                     copyright=txt_copyright)
         tk.messagebox.showinfo(title="About", message=message)
 
     def datatree_clear(self):
@@ -419,17 +425,19 @@ class View(object):
             else:
                 pass
 
-    def datatree_update(self, projectfile):
-        self.projectfile = projectfile
-        name = self.projectfile["udt_name"]
-        description = self.projectfile["udt_description"]
-        version = self.projectfile["udt_version"]
-        info = self.projectfile["udt_info"]
-        data = self.projectfile["udt_data"]
+    def datatree_update(self):
+        name = self.controller.projectfile["udt_name"]
+        description = self.controller.projectfile["udt_description"]
+        version = self.controller.projectfile["udt_version"]
+        info = self.controller.projectfile["udt_info"]
+        data = self.controller.projectfile["udt_data"]
         # clear data in datatree
         self.datatree_clear()
         # fill data in datatree
         self.datatree_fill(name, description, version, info, data)
+
+    def setup_update(self):
+        self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
 
     def led_state(self, state="error"):
         if state == "error":

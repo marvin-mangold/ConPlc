@@ -1,6 +1,6 @@
 """
-Wicke PLC - connect PLC and PC
-Copyright (C) 2020  Marvin Mangold
+ConPlc - connect PLC and PC
+Copyright (C) 2020  Marvin Mangold (mangold.mangold00@googlemail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

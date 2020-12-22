@@ -2,10 +2,10 @@
 #                       tkinter style theme: awthemes-9.5.0 | zlib-license
 #                       3rd party : PyInstaller |
 #                       special exception allows to use PyInstaller to build and distribute non-free programs (including commercial ones)
-#os                      #standard library module: os | no license restriction
-#tkinter                 #standard library module: tkinter | no license restriction
-#tkinter.ttk             #standard library module: tkinter.ttk | no license restriction
-#pathlib                 #standard library module: pathlib | no license restriction
-#time                    #standard library module: time | no license restriction
-#re                      #standard library module: re | no license restriction
-#json                    #standard library module: json | no license restriction
+#os                     standard library module: os | no license restriction
+#tkinter                standard library module: tkinter | no license restriction
+#tkinter.ttk            standard library module: tkinter.ttk | no license restriction
+#pathlib                standard library module: pathlib | no license restriction
+#time                   standard library module: time | no license restriction
+#re                     standard library module: re | no license restriction
+#json                   standard library module: json | no license restriction
