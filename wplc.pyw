@@ -1,38 +1,44 @@
+"""
+Wicke PLC - connect PLC and PC
+Copyright (C) 2020  Marvin Mangold
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
 import json
 import view
 import model
-import random
 
 
-class Controller:
+class Controller(object):
     def __init__(self):
         # get configdata from configfile
         # Read JSON file
-        with open("wplc.conf") as file:
-            self.config = json.load(file)
-        # get default parameters from file
+        with open("wplc.conf") as configfile:
+            self.configfile = json.load(configfile)
+        # get default project from projectfile
         # Read JSON file
-        with open("default.wplc") as file:
-            self.parameter = json.load(file)
+        with open("default.wplc") as projectfile:
+            self.projectfile = json.load(projectfile)
         # call view (handles the graphics of GUI)
-        self.view = view.View(self, self.config, self.parameter)
+        self.view = view.View(self, self.configfile, self.projectfile)
         # call model (handles the functions of GUI)
         self.model = model.Model()
-        # ---------------------------------------------------------------------
-        # connect view and controller (Buttons, Events, Functions)
-        # call scale function when windowsize gets changed
-        self.view.window.bind(
-            "<Configure>", lambda x: self.window_scale())
-        # call stop when exit button is pressed
-        self.view.btn_exit.bind(
-            "<ButtonRelease>", lambda x: self.stop())
-        # call import datastructure when button is pressed
-        self.view.btn_import_datasructure.bind(
-            "<ButtonRelease>", lambda x: self.datastructure_get())
 
     def run(self):
         # refresh data
-        self.data_refresh()
+        self.view.datatree_update(self.projectfile)
         # initial trigger for 500ms loop
         self.view.window.after(0, self.trigger_500ms)
         # start window
@@ -45,50 +51,38 @@ class Controller:
     def file_new(self):
         # read JSON file
         with open("empty.wplc") as file:
-            self.parameter = json.load(file)
-        self.data_refresh()
+            self.projectfile = json.load(file)
+        self.view.datatree_update(self.projectfile)
+        self.view.window_title("empty.wplc")
 
     def file_open(self):
         path = self.view.filepath_open(filetypes=(("wplc Files", "*.wplc"),))
         # read JSON file
         with open(path) as file:
-            self.parameter = json.load(file)
-        self.data_refresh()
+            self.projectfile = json.load(file)
+        self.view.datatree_update(self.projectfile)
+        self.view.window_title(path.split("/")[-1])
 
     def file_save(self):
         # write JSON file
         with open('default.wplc', 'w', encoding='utf-8') as f:
-            json.dump(self.parameter, f, ensure_ascii=False, indent=4)
+            json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
 
     def file_saveas(self):
         path = self.view.filepath_saveas(filetypes=(("wplc Files", "*.wplc"),))
         # write JSON file
         with open(path, 'w', encoding='utf-8') as f:
-            json.dump(self.parameter, f, ensure_ascii=False, indent=4)
-
-    def data_refresh(self):
-        self.view.parameter = self.parameter
-        self.datastructure_refresh()
+            json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
+        self.view.window_title(path.split("/")[-1])
 
     def trigger_500ms(self):
         # trigger every 500ms
         self.view.window.after(500, self.trigger_500ms)
         # get actual time and save it to variable
-        self.view.timestamp.set(model.time_get())
-        self.view.led_state(random.choice(["error","warn","ok"]))
+        self.view.timestamp.set(model.timestamp_get())
+        self.view.led_state("error")
 
-    def window_scale(self):
-        width, height = self.view.window_scale()
-        if not self.parameter["opt_fullscreen"]:
-            self.parameter["opt_windowwidth"] = width
-            self.parameter["opt_windowheight"] = height
-
-    def window_fullscreen(self):
-        self.parameter["opt_fullscreen"] = self.view.opt_fullscreen.get()
-        self.view.window_size()
-
-    def datastructure_get(self):
-        dependencies = {}
+    def data_get(self):
         error = False
         # clear data in datatree
         self.view.datatree_clear()
@@ -106,25 +100,14 @@ class Controller:
                 if dependencies[dep] == "":
                     error = True
             if not error:
-                # get datastructure of main UDT and sub-UDTs
+                # get data of main UDT and sub-UDTs
                 name, description, version, info, data = model.udt_data_get(filepath, dependencies)
-                self.parameter["udt_name"] = name
-                self.parameter["udt_description"] = description
-                self.parameter["udt_version"] = version
-                self.parameter["udt_info"] = info
-                self.parameter["udt_data"] = data
-                self.datastructure_refresh()
-
-    def datastructure_refresh(self):
-        name = self.parameter["udt_name"]
-        description = self.parameter["udt_description"]
-        version = self.parameter["udt_version"]
-        info = self.parameter["udt_info"]
-        data = self.parameter["udt_data"]
-        # clear data in datatree
-        self.view.datatree_clear()
-        # fill data in datatree
-        self.view.datatree_fill(name, description, version, info, data)
+                self.projectfile["udt_name"] = name
+                self.projectfile["udt_description"] = description
+                self.projectfile["udt_version"] = version
+                self.projectfile["udt_info"] = info
+                self.projectfile["udt_data"] = data
+                self.view.datatree_update(self.projectfile)
 
 
 if __name__ == '__main__':
