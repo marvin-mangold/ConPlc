@@ -1,2 +1,2 @@
-# Wicke PLC
+# ConPLC
 Datenaustausch zwischen SPS und PC
