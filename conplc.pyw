@@ -26,7 +26,7 @@ class Controller(object):
 
         # get configdata from configfile
         # Read JSON file
-        with open("cplc.conf") as configfile:
+        with open("conplc.conf") as configfile:
             self.configfile = json.load(configfile)
 
         # get projectdata from projectfile
