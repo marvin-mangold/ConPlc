@@ -146,7 +146,7 @@ class View(object):
         # help menu
         self.helpmenu = tk.Menu(self.menu)
         self.menu.add_cascade(label="Help", menu=self.helpmenu)
-        self.helpmenu.add_command(label="About", command=self.about_show)
+        self.helpmenu.add_command(label="About ConPlc", command=self.about_show)
 
         # actionbar------------------------------------------------------------
         # create and place exit button on actionbar
@@ -378,8 +378,7 @@ class View(object):
         txt_mail = self.controller.configfile["about_mail"]
         txt_license = self.controller.configfile["about_license"]
         message = "{version}\n" \
-                  "{copyright}\n" \
-                  "{name}\n" \
+                  "{copyright} {name}\n" \
                   "{mail}\n" \
                   "{license}".format(version=txt_version,
                                      name=txt_name,
