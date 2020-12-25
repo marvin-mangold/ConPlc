@@ -42,7 +42,9 @@ class Controller(object):
 
     def run(self):
         # refresh data
+        self.view.plc_update()
         self.view.datatree_update()
+        self.view.setup_update()
         # initial trigger for 500ms loop
         self.view.window.after(0, self.trigger_500ms)
         # start window
@@ -56,16 +58,18 @@ class Controller(object):
         # read JSON file
         with open("empty.cplc") as file:
             self.projectfile = json.load(file)
+        self.view.plc_update()
         self.view.datatree_update()
         self.view.setup_update()
         self.view.window_update()
 
     def file_open(self, path=None):
         if path is None:
-            path = self.view.filepath_open(filetypes=(("wplc Files", "*.wplc"),))
+            path = self.view.filepath_open(filetypes=(("cplc Files", "*.cplc"),))
         # read JSON file
         with open(path) as file:
             self.projectfile = json.load(file)
+        self.view.plc_update()
         self.view.datatree_update()
         self.view.setup_update()
         self.view.window_update()
@@ -76,7 +80,7 @@ class Controller(object):
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
 
     def file_backup(self):
-        path = self.view.filepath_saveas(filetypes=(("wplc Files", "*.wplc"),))
+        path = self.view.filepath_saveas(filetypes=(("cplc Files", "*.cplc"),))
         # write JSON file
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)

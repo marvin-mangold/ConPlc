@@ -6,5 +6,7 @@
     "udt_data": [],
     "opt_windowwidth": 1015,
     "opt_windowheight": 710,
-    "opt_fullscreen": false
+    "opt_fullscreen": false,
+    "con_ip": "",
+    "con_port: ""
 }

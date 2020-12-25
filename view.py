@@ -98,10 +98,13 @@ class View(object):
             "style_screen.TButton", background=[('selected', self.midcolor), ('active', "#000000")])
         self.style_lbl_screen = ttk.Style()
         self.style_lbl_screen.configure(
-            "style_screen.TLabel", font=("arial", 10), relief="flat", background=self.backcolor)
-        self.style_text_screen = ttk.Style()
-        self.style_text_screen.configure(
-            "style_text_screen.TLabel", font=("arial", 10), relief="flat", background=self.midcolor)
+            "style_screen.TLabel", font=("arial", 10), relief="flat", background=self.midcolor)
+        self.style_lbl_var_screen = ttk.Style()
+        self.style_lbl_var_screen.configure(
+            "style_screen_var.TLabel", font=("arial", 10), relief="flat", background=self.backcolor)
+        self.style_entry_screen = ttk.Style()
+        self.style_entry_screen.configure(
+            "style_screen.TEntry", font=("arial", 10), relief="flat", fieldbackground=self.backcolor)
         self.style_cbx_screen = ttk.Style()
         self.style_cbx_screen.configure(
             "style_screen.TCheckbutton", font=("arial", 10), relief="flat", background=self.midcolor)
@@ -208,60 +211,89 @@ class View(object):
                                      textvariable=self.version,
                                      anchor="w")
 
+        # screen plc---------------------------------------------------------
+        # create and place label for connection ip-address
+        self.lbl_con_ip = ttk.Label(master=self.screen_plc,
+                                    style="style_screen.TLabel",
+                                    text="IP-Adresse:",
+                                    anchor="w")
+
+        # create and place entry for connection ip-address
+        self.con_ip = tk.StringVar()
+        self.entry_con_ip = ttk.Entry(master=self.screen_plc,
+                                      style="style_screen.TEntry",
+                                      textvariable=self.con_ip)
+
+        # create and place label for connection port number
+        self.lbl_con_port = ttk.Label(master=self.screen_plc,
+                                      style="style_screen.TLabel",
+                                      text="Portnummer:",
+                                      anchor="w")
+
+        # create and place entry for connection port number
+        self.con_port = tk.StringVar()
+        self.entry_con_port = ttk.Entry(master=self.screen_plc,
+                                        style="style_screen.TEntry",
+                                        textvariable=self.con_port)
+
         # screen data----------------------------------------------------------
         # create frame on screen data for UDT name + description + version + info
-        # create and place label for UDT name
         self.udt_infos = tk.Canvas(master=self.screen_data,
                                    relief="flat",
                                    highlightthickness=0,
                                    bg=self.midcolor)
 
-        self.udt_name = tk.StringVar()
-        self.lbl_udt_name_info = ttk.Label(master=self.udt_infos,
-                                           style="style_screen.TLabel",
-                                           text="Name:",
-                                           anchor="w")
-
+        # create and place label for UDT name
         self.lbl_udt_name = ttk.Label(master=self.udt_infos,
                                       style="style_screen.TLabel",
-                                      textvariable=self.udt_name,
+                                      text="Name:",
                                       anchor="w")
+
+        # create and place variable label for UDT name
+        self.udt_name = tk.StringVar()
+        self.lbl_udt_name_var = ttk.Label(master=self.udt_infos,
+                                          style="style_screen_var.TLabel",
+                                          textvariable=self.udt_name,
+                                          anchor="w")
 
         # create and place label for UDT description
-        self.udt_description = tk.StringVar()
-        self.lbl_udt_description_info = ttk.Label(master=self.udt_infos,
-                                                  style="style_screen.TLabel",
-                                                  text="Beschreibung:",
-                                                  anchor="w")
-
         self.lbl_udt_description = ttk.Label(master=self.udt_infos,
                                              style="style_screen.TLabel",
-                                             textvariable=self.udt_description,
+                                             text="Beschreibung:",
                                              anchor="w")
 
-        # create and place label for UDT version
-        self.udt_version = tk.StringVar()
-        self.lbl_udt_version_info = ttk.Label(master=self.udt_infos,
-                                              style="style_screen.TLabel",
-                                              text="Version:",
-                                              anchor="w")
+        # create and place variable label for UDT description
+        self.udt_description = tk.StringVar()
+        self.lbl_udt_description_var = ttk.Label(master=self.udt_infos,
+                                                 style="style_screen_var.TLabel",
+                                                 textvariable=self.udt_description,
+                                                 anchor="w")
 
+        # create and place label for UDT version
         self.lbl_udt_version = ttk.Label(master=self.udt_infos,
                                          style="style_screen.TLabel",
-                                         textvariable=self.udt_version,
+                                         text="Version:",
                                          anchor="w")
 
-        # create and place label for UDT info
-        self.udt_info = tk.StringVar()
-        self.lbl_udt_info_info = ttk.Label(master=self.udt_infos,
-                                           style="style_screen.TLabel",
-                                           text="Info:",
-                                           anchor="w")
+        # create and place variable label for UDT version
+        self.udt_version = tk.StringVar()
+        self.lbl_udt_version_var = ttk.Label(master=self.udt_infos,
+                                             style="style_screen_var.TLabel",
+                                             textvariable=self.udt_version,
+                                             anchor="w")
 
+        # create and place label for UDT info
         self.lbl_udt_info = ttk.Label(master=self.udt_infos,
                                       style="style_screen.TLabel",
-                                      textvariable=self.udt_info,
+                                      text="Info:",
                                       anchor="w")
+
+        # create and place variable label for UDT info
+        self.udt_info = tk.StringVar()
+        self.lbl_udt_info_var = ttk.Label(master=self.udt_infos,
+                                          style="style_screen_var.TLabel",
+                                          textvariable=self.udt_info,
+                                          anchor="w")
 
         # create and place treeview for data structure
         self.datatree = ttk.Treeview(self.screen_data)
@@ -323,16 +355,21 @@ class View(object):
         self.lbl_led_plc.place(x=270, y=3, width=50, height=18)
         self.icon_version.place(x=5, y=3, height=20, width=20)
         self.lbl_version.place(x=25, y=3, width=150, height=18)
+        # scale GUI elements from screen plc
+        self.lbl_con_ip.place(x=50, y=25, width=80, height=25)
+        self.entry_con_ip.place(x=135, y=25, width=80, height=25)
+        self.lbl_con_port.place(x=50, y=58, width=80, height=25)
+        self.entry_con_port.place(x=135, y=58, width=80, height=25)
         # scale GUI elements from screen data
         self.udt_infos.place(x=50, y=25, height=58, width=690 + ox)
-        self.lbl_udt_name_info.place(x=0, y=0, width=50, height=25)
-        self.lbl_udt_name.place(x=50, y=0, width=250, height=25)
-        self.lbl_udt_description_info.place(x=330, y=0, width=85, height=25)
-        self.lbl_udt_description.place(x=415, y=0, width=500 + ox, height=25)
-        self.lbl_udt_version_info.place(x=0, y=33, width=50, height=25)
-        self.lbl_udt_version.place(x=50, y=33, width=250, height=25)
-        self.lbl_udt_info_info.place(x=330, y=33, width=85, height=25)
-        self.lbl_udt_info.place(x=415, y=33, width=500 + ox, height=25)
+        self.lbl_udt_name.place(x=0, y=0, width=50, height=25)
+        self.lbl_udt_name_var.place(x=55, y=0, width=250, height=25)
+        self.lbl_udt_description.place(x=330, y=0, width=85, height=25)
+        self.lbl_udt_description_var.place(x=420, y=0, width=500 + ox, height=25)
+        self.lbl_udt_version.place(x=0, y=33, width=50, height=25)
+        self.lbl_udt_version_var.place(x=55, y=33, width=250, height=25)
+        self.lbl_udt_info.place(x=330, y=33, width=85, height=25)
+        self.lbl_udt_info_var.place(x=420, y=33, width=500 + ox, height=25)
         # scale Gui elements from treeview
         self.datatree.place(x=50, y=90, height=325 + oy, width=691 + ox)
         self.datatree_scrollx.place(x=50, y=415 + oy, width=691 + ox)
@@ -364,21 +401,12 @@ class View(object):
 
     def keyup(self, event):
         # print(event)
-        if event.keysym == "Tab":
-            self.screen_change()
+        # if event.keysym == "Tab": self.method()
+        pass
 
     def keydown(self, event):
         # print(event)
         pass
-
-    def screen_change(self):
-        # look for actual tab and max tabs --> set next tab
-        current = self.screens.index("current")
-        end = self.screens.index("end") - 1
-        if current >= end:
-            self.screens.select(0)
-        else:
-            self.screens.select(current + 1)
 
     def filepath_open(self, message=None, filetypes=((), ("all files", "*.*"))):
         if message is not None:
@@ -456,6 +484,10 @@ class View(object):
         self.datatree_clear()
         # fill data in datatree
         self.datatree_fill(name, description, version, info, data)
+
+    def plc_update(self):
+        self.con_ip.set(self.controller.projectfile["con_ip"])
+        self.con_port.set(self.controller.projectfile["con_port"])
 
     def setup_update(self):
         self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
