@@ -295,6 +295,10 @@ class View(object):
                                               command=self.window_update,
                                               style="style_screen.TCheckbutton")
 
+        # Key events-----------------------------------------------------------
+        self.window.bind("<KeyPress>", self.keydown)
+        self.window.bind("<KeyRelease>", self.keyup)
+
         # screensize-----------------------------------------------------------
         # call scale function when windowsize gets changed
         self.window.bind("<Configure>", lambda x: self.window_scale())
@@ -357,6 +361,24 @@ class View(object):
             windowstartposx = (screenwidth / 2) - (windowwidth / 2)
             windowstartposy = (screenheight / 2) - (windowheight / 2)
             self.window.geometry("%dx%d+%d+%d" % (windowwidth, windowheight, windowstartposx, windowstartposy))
+
+    def keyup(self, event):
+        # print(event)
+        if event.keysym == "Tab":
+            self.screen_change()
+
+    def keydown(self, event):
+        # print(event)
+        pass
+
+    def screen_change(self):
+        # look for actual tab and max tabs --> set next tab
+        current = self.screens.index("current")
+        end = self.screens.index("end") - 1
+        if current >= end:
+            self.screens.select(0)
+        else:
+            self.screens.select(current + 1)
 
     def filepath_open(self, message=None, filetypes=((), ("all files", "*.*"))):
         if message is not None:
