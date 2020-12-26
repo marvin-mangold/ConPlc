@@ -4,9 +4,12 @@
     "udt_version": "",
     "udt_info": "",
     "udt_data": [],
-    "opt_windowwidth": 1335,
-    "opt_windowheight": 663,
+    "opt_windowwidth": 1015,
+    "opt_windowheight": 710,
     "opt_fullscreen": false,
-    "con_ip": "192,134",
-    "con_port": "234"
+    "con_ip_byte1": "000",
+    "con_ip_byte2": "000",
+    "con_ip_byte3": "000",
+    "con_ip_byte4": "000",
+    "con_port": "0"
 }

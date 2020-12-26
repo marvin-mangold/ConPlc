@@ -219,10 +219,41 @@ class View(object):
                                     anchor="w")
 
         # create and place entry for connection ip-address
-        self.con_ip = tk.StringVar()
-        self.entry_con_ip = ttk.Entry(master=self.screen_plc,
-                                      style="style_screen.TEntry",
-                                      textvariable=self.con_ip)
+        # byte 1
+        self.con_ip_byte1 = tk.StringVar()
+        self.con_ip_byte1.set(self.controller.projectfile["con_ip_byte1"])
+        self.con_ip_byte1.trace("w", lambda *args: self.validation(var=self.con_ip_byte1, mode="ip", length=3))
+        self.entry_con_ip_byte1 = ttk.Entry(master=self.screen_plc,
+                                            style="style_screen.TEntry",
+                                            textvariable=self.con_ip_byte1)
+        self.entry_con_ip_byte1.bind("<KeyRelease>", lambda x: self.entry_after())
+
+        # byte 2
+        self.con_ip_byte2 = tk.StringVar()
+        self.con_ip_byte2.set(self.controller.projectfile["con_ip_byte2"])
+        self.con_ip_byte2.trace("w", lambda *args: self.validation(var=self.con_ip_byte2, mode="ip", length=3))
+        self.entry_con_ip_byte2 = ttk.Entry(master=self.screen_plc,
+                                            style="style_screen.TEntry",
+                                            textvariable=self.con_ip_byte2)
+        self.entry_con_ip_byte2.bind("<KeyRelease>", lambda x: self.entry_after())
+
+        # byte 3
+        self.con_ip_byte3 = tk.StringVar()
+        self.con_ip_byte3.set(self.controller.projectfile["con_ip_byte3"])
+        self.con_ip_byte3.trace("w", lambda *args: self.validation(var=self.con_ip_byte3, mode="ip", length=3))
+        self.entry_con_ip_byte3 = ttk.Entry(master=self.screen_plc,
+                                            style="style_screen.TEntry",
+                                            textvariable=self.con_ip_byte3)
+        self.entry_con_ip_byte3.bind("<KeyRelease>", lambda x: self.entry_after())
+
+        # byte 4
+        self.con_ip_byte4 = tk.StringVar()
+        self.con_ip_byte4.set(self.controller.projectfile["con_ip_byte4"])
+        self.con_ip_byte4.trace("w", lambda *args: self.validation(var=self.con_ip_byte4, mode="ip", length=3))
+        self.entry_con_ip_byte4 = ttk.Entry(master=self.screen_plc,
+                                            style="style_screen.TEntry",
+                                            textvariable=self.con_ip_byte4)
+        self.entry_con_ip_byte4.bind("<KeyRelease>", lambda x: self.entry_after())
 
         # create and place label for connection port number
         self.lbl_con_port = ttk.Label(master=self.screen_plc,
@@ -232,9 +263,12 @@ class View(object):
 
         # create and place entry for connection port number
         self.con_port = tk.StringVar()
+        self.con_port.set(self.controller.projectfile["con_port"])
+        self.con_port.trace("w", lambda *args: self.validation(var=self.con_port, mode="port", length=5))
         self.entry_con_port = ttk.Entry(master=self.screen_plc,
                                         style="style_screen.TEntry",
                                         textvariable=self.con_port)
+        self.entry_con_port.bind("<KeyRelease>", lambda x: self.entry_after())
 
         # screen data----------------------------------------------------------
         # create frame on screen data for UDT name + description + version + info
@@ -344,7 +378,7 @@ class View(object):
         # ox, oy: offset width (ox) and offset height (oy)
         ox = int(self.window.winfo_width()) - self.controller.configfile["min_width"]
         oy = int(self.window.winfo_height()) - self.controller.configfile["min_height"]
-        # scale GUI elements from Mainframe
+        # scale gui elements from Mainframe------------------------------------
         self.screens.place(x=0, y=0, width=802 + ox, height=578 + oy)
         self.btn_exit.place(x=623 + ox, y=0, width=58, height=58)
         self.icon_logo.place(x=687 + ox, y=0, width=114, height=58)
@@ -355,12 +389,15 @@ class View(object):
         self.lbl_led_plc.place(x=270, y=3, width=50, height=18)
         self.icon_version.place(x=5, y=3, height=20, width=20)
         self.lbl_version.place(x=25, y=3, width=150, height=18)
-        # scale GUI elements from screen plc
+        # scale gui elements from screen plc-----------------------------------
         self.lbl_con_ip.place(x=50, y=25, width=80, height=25)
-        self.entry_con_ip.place(x=135, y=25, width=80, height=25)
+        self.entry_con_ip_byte1.place(x=135, y=25, width=35, height=25)
+        self.entry_con_ip_byte2.place(x=175, y=25, width=35, height=25)
+        self.entry_con_ip_byte3.place(x=215, y=25, width=35, height=25)
+        self.entry_con_ip_byte4.place(x=255, y=25, width=35, height=25)
         self.lbl_con_port.place(x=50, y=58, width=80, height=25)
-        self.entry_con_port.place(x=135, y=58, width=80, height=25)
-        # scale GUI elements from screen data
+        self.entry_con_port.place(x=135, y=58, width=45, height=25)
+        # scale gui elements from screen data----------------------------------
         self.udt_infos.place(x=50, y=25, height=58, width=690 + ox)
         self.lbl_udt_name.place(x=0, y=0, width=50, height=25)
         self.lbl_udt_name_var.place(x=55, y=0, width=250, height=25)
@@ -370,12 +407,12 @@ class View(object):
         self.lbl_udt_version_var.place(x=55, y=33, width=250, height=25)
         self.lbl_udt_info.place(x=330, y=33, width=85, height=25)
         self.lbl_udt_info_var.place(x=420, y=33, width=500 + ox, height=25)
-        # scale Gui elements from treeview
+        # scale gui elements from treeview-------------------------------------
         self.datatree.place(x=50, y=90, height=325 + oy, width=691 + ox)
         self.datatree_scrollx.place(x=50, y=415 + oy, width=691 + ox)
         self.datatree_scrolly.place(x=740 + ox, y=92, height=337 + oy)
         self.btn_import_datasructure.place(x=50, y=437 + oy, height=30, width=150)
-        # scale Gui elements from screen setup
+        # scale gui elements from screen setup---------------------------------
         self.cbx_fullscreen.place(x=50, y=25)
         if not self.controller.projectfile["opt_fullscreen"]:
             self.controller.projectfile["opt_windowwidth"] = self.window.winfo_width()
@@ -407,6 +444,52 @@ class View(object):
     def keydown(self, event):
         # print(event)
         pass
+
+    @staticmethod
+    def validation(var, mode, length):
+        text = var.get()
+        # check if text is a number between 0 and 65535
+        if mode == "port":
+            # set text to maximum length
+            if len(text) > length:
+                text = text[:length]
+            # delete all non digits
+            newtext = ""
+            for char in text:
+                if str.isdigit(char):
+                    newtext += char
+            text = newtext
+            # set min max values
+            if str.isdigit(text):
+                if int(text) < 0:
+                    text = "0"
+                elif int(text) > 65535:
+                    text = "65535"
+        # check if text is a number between 0 and 255
+        if mode == "ip":
+            # set text to maximum length
+            if len(text) > length:
+                text = text[:length]
+            # delete all non digits
+            newtext = ""
+            for char in text:
+                if str.isdigit(char):
+                    newtext += char
+            text = newtext
+            # set min max values
+            if str.isdigit(text):
+                if int(text) < 0:
+                    text = "0"
+                elif int(text) > 255:
+                    text = "255"
+        var.set(text)
+
+    def entry_after(self):
+        self.controller.projectfile["con_ip_byte1"] = self.con_ip_byte1.get()
+        self.controller.projectfile["con_ip_byte2"] = self.con_ip_byte2.get()
+        self.controller.projectfile["con_ip_byte3"] = self.con_ip_byte3.get()
+        self.controller.projectfile["con_ip_byte4"] = self.con_ip_byte4.get()
+        self.controller.projectfile["con_port"] = self.con_port.get()
 
     def filepath_open(self, message=None, filetypes=((), ("all files", "*.*"))):
         if message is not None:
@@ -486,7 +569,10 @@ class View(object):
         self.datatree_fill(name, description, version, info, data)
 
     def plc_update(self):
-        self.con_ip.set(self.controller.projectfile["con_ip"])
+        self.con_ip_byte1.set(self.controller.projectfile["con_ip_byte1"])
+        self.con_ip_byte2.set(self.controller.projectfile["con_ip_byte2"])
+        self.con_ip_byte3.set(self.controller.projectfile["con_ip_byte3"])
+        self.con_ip_byte4.set(self.controller.projectfile["con_ip_byte4"])
         self.con_port.set(self.controller.projectfile["con_port"])
 
     def setup_update(self):

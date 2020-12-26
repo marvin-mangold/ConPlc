@@ -41,10 +41,10 @@ class Controller(object):
         self.model = model.Model()
 
     def run(self):
-        # refresh data
         self.view.plc_update()
         self.view.datatree_update()
         self.view.setup_update()
+        self.view.window_update()
         # initial trigger for 500ms loop
         self.view.window.after(0, self.trigger_500ms)
         # start window
