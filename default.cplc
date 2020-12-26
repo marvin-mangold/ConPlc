@@ -11,5 +11,6 @@
     "con_ip_byte2": "000",
     "con_ip_byte3": "000",
     "con_ip_byte4": "000",
-    "con_port": "0"
+    "con_port": "0",
+    "con_autorun": false
 }

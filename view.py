@@ -29,7 +29,7 @@ class View(object):
         self.controller = controller
         # other variables------------------------------------------------------
         self.desktoppath = os.path.expanduser(r"~\Desktop")
-
+        self.connectionstate = False
         # general window settings----------------------------------------------
         # create window
         self.window = tk.Tk()
@@ -41,9 +41,11 @@ class View(object):
         self.img_data = tk.PhotoImage(file=Path(self.controller.configfile["media_data"]))
         self.img_setup = tk.PhotoImage(file=Path(self.controller.configfile["media_setup"]))
         self.img_logo = tk.PhotoImage(file=Path(self.controller.configfile["media_logo"]))
-        self.icon_exit = tk.PhotoImage(file=Path(self.controller.configfile["media_exit"]))
+        self.img_exit = tk.PhotoImage(file=Path(self.controller.configfile["media_exit"]))
         self.img_clock = tk.PhotoImage(file=Path(self.controller.configfile["media_clock"]))
         self.img_version = tk.PhotoImage(file=Path(self.controller.configfile["media_version"]))
+        self.img_play = tk.PhotoImage(file=Path(self.controller.configfile["media_play"]))
+        self.img_pause = tk.PhotoImage(file=Path(self.controller.configfile["media_pause"]))
         self.img_led_gn = tk.PhotoImage(file=Path(self.controller.configfile["media_led_gn"]))
         self.img_led_ye = tk.PhotoImage(file=Path(self.controller.configfile["media_led_ye"]))
         self.img_led_rd = tk.PhotoImage(file=Path(self.controller.configfile["media_led_rd"]))
@@ -157,7 +159,7 @@ class View(object):
                                    takefocus=0,
                                    text="Exit",
                                    compound=tk.TOP,
-                                   image=self.icon_exit,
+                                   image=self.img_exit,
                                    style="style_actionbar.TButton",
                                    command=self.controller.stop)
 
@@ -222,7 +224,7 @@ class View(object):
         # byte 1
         self.con_ip_byte1 = tk.StringVar()
         self.con_ip_byte1.set(self.controller.projectfile["con_ip_byte1"])
-        self.con_ip_byte1.trace("w", lambda *args: self.validation(var=self.con_ip_byte1, mode="ip", length=3))
+        self.con_ip_byte1.trace("w", lambda *args: self.entry_validate(var=self.con_ip_byte1, mode="ip", length=3))
         self.entry_con_ip_byte1 = ttk.Entry(master=self.screen_plc,
                                             style="style_screen.TEntry",
                                             textvariable=self.con_ip_byte1)
@@ -231,7 +233,7 @@ class View(object):
         # byte 2
         self.con_ip_byte2 = tk.StringVar()
         self.con_ip_byte2.set(self.controller.projectfile["con_ip_byte2"])
-        self.con_ip_byte2.trace("w", lambda *args: self.validation(var=self.con_ip_byte2, mode="ip", length=3))
+        self.con_ip_byte2.trace("w", lambda *args: self.entry_validate(var=self.con_ip_byte2, mode="ip", length=3))
         self.entry_con_ip_byte2 = ttk.Entry(master=self.screen_plc,
                                             style="style_screen.TEntry",
                                             textvariable=self.con_ip_byte2)
@@ -240,7 +242,7 @@ class View(object):
         # byte 3
         self.con_ip_byte3 = tk.StringVar()
         self.con_ip_byte3.set(self.controller.projectfile["con_ip_byte3"])
-        self.con_ip_byte3.trace("w", lambda *args: self.validation(var=self.con_ip_byte3, mode="ip", length=3))
+        self.con_ip_byte3.trace("w", lambda *args: self.entry_validate(var=self.con_ip_byte3, mode="ip", length=3))
         self.entry_con_ip_byte3 = ttk.Entry(master=self.screen_plc,
                                             style="style_screen.TEntry",
                                             textvariable=self.con_ip_byte3)
@@ -249,7 +251,7 @@ class View(object):
         # byte 4
         self.con_ip_byte4 = tk.StringVar()
         self.con_ip_byte4.set(self.controller.projectfile["con_ip_byte4"])
-        self.con_ip_byte4.trace("w", lambda *args: self.validation(var=self.con_ip_byte4, mode="ip", length=3))
+        self.con_ip_byte4.trace("w", lambda *args: self.entry_validate(var=self.con_ip_byte4, mode="ip", length=3))
         self.entry_con_ip_byte4 = ttk.Entry(master=self.screen_plc,
                                             style="style_screen.TEntry",
                                             textvariable=self.con_ip_byte4)
@@ -264,11 +266,33 @@ class View(object):
         # create and place entry for connection port number
         self.con_port = tk.StringVar()
         self.con_port.set(self.controller.projectfile["con_port"])
-        self.con_port.trace("w", lambda *args: self.validation(var=self.con_port, mode="port", length=5))
+        self.con_port.trace("w", lambda *args: self.entry_validate(var=self.con_port, mode="port", length=5))
         self.entry_con_port = ttk.Entry(master=self.screen_plc,
                                         style="style_screen.TEntry",
                                         textvariable=self.con_port)
         self.entry_con_port.bind("<KeyRelease>", lambda x: self.entry_after())
+
+        # create and place label for play pause connection
+        self.lbl_playpause = ttk.Label(master=self.screen_plc,
+                                       style="style_screen.TLabel",
+                                       text="Run/Stop:",
+                                       anchor="w")
+
+        # create button for play pause connection
+        self.btn_playpause = ttk.Button(master=self.screen_plc,
+                                        takefocus=0,
+                                        image=self.img_play,
+                                        style="style_screen.TButton",
+                                        command=self.connect_state)
+
+        # create checkbox autoplay connection
+        self.con_autorun = tk.BooleanVar()
+        self.con_autorun.set(self.controller.projectfile["con_autorun"])
+        self.cbx_autoplay = ttk.Checkbutton(master=self.screen_plc,
+                                            text="Autorun",
+                                            variable=self.con_autorun,
+                                            command=self.connect_autorun,
+                                            style="style_screen.TCheckbutton")
 
         # screen data----------------------------------------------------------
         # create frame on screen data for UDT name + description + version + info
@@ -397,6 +421,9 @@ class View(object):
         self.entry_con_ip_byte4.place(x=255, y=25, width=35, height=25)
         self.lbl_con_port.place(x=50, y=58, width=80, height=25)
         self.entry_con_port.place(x=135, y=58, width=45, height=25)
+        self.lbl_playpause.place(x=50, y=97, width=80, height=25)
+        self.btn_playpause.place(x=135, y=91, width=40, height=40)
+        self.cbx_autoplay.place(x=180, y=91, width=80, height=40)
         # scale gui elements from screen data----------------------------------
         self.udt_infos.place(x=50, y=25, height=58, width=690 + ox)
         self.lbl_udt_name.place(x=0, y=0, width=50, height=25)
@@ -413,7 +440,7 @@ class View(object):
         self.datatree_scrolly.place(x=740 + ox, y=92, height=337 + oy)
         self.btn_import_datasructure.place(x=50, y=437 + oy, height=30, width=150)
         # scale gui elements from screen setup---------------------------------
-        self.cbx_fullscreen.place(x=50, y=25)
+        self.cbx_fullscreen.place(x=50, y=25, width=80, height=40)
         if not self.controller.projectfile["opt_fullscreen"]:
             self.controller.projectfile["opt_windowwidth"] = self.window.winfo_width()
             self.controller.projectfile["opt_windowheight"] = self.window.winfo_height()
@@ -446,7 +473,7 @@ class View(object):
         pass
 
     @staticmethod
-    def validation(var, mode, length):
+    def entry_validate(var, mode, length):
         text = var.get()
         # check if text is a number between 0 and 65535
         if mode == "port":
@@ -574,6 +601,7 @@ class View(object):
         self.con_ip_byte3.set(self.controller.projectfile["con_ip_byte3"])
         self.con_ip_byte4.set(self.controller.projectfile["con_ip_byte4"])
         self.con_port.set(self.controller.projectfile["con_port"])
+        self.con_autorun.set(self.controller.projectfile["con_autorun"])
 
     def setup_update(self):
         self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
@@ -587,3 +615,14 @@ class View(object):
             self.icon_led.create_image(0, 0, image=self.img_led_gn, anchor="nw")
         else:
             self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
+
+    def connect_autorun(self):
+        self.controller.projectfile["con_autorun"] = self.con_autorun.get()
+
+    def connect_state(self):
+        if self.connectionstate:
+            self.connectionstate = False
+            self.btn_playpause.config(image=self.img_play)
+        elif not self.connectionstate:
+            self.connectionstate = True
+            self.btn_playpause.config(image=self.img_pause)
