@@ -93,7 +93,7 @@ class View(object):
         # screen
         self.style_btn_screen = ttk.Style()
         self.style_btn_screen.configure(
-            "style_screen.TButton", font=("arial", 10), relief="flat")
+            "style_screen.TButton", font=("arial", 10), relief="solid")
         self.style_btn_screen.map(
             "style_screen.TButton", background=[('selected', self.midcolor), ('active', "#000000")])
         self.style_lbl_screen = ttk.Style()
@@ -101,13 +101,13 @@ class View(object):
             "style_screen.TLabel", font=("arial", 10), relief="flat", background=self.midcolor)
         self.style_lbl_var_screen = ttk.Style()
         self.style_lbl_var_screen.configure(
-            "style_screen_var.TLabel", font=("arial", 10), relief="flat", background=self.backcolor)
+            "style_screen_var.TLabel", font=("arial", 10), relief="solid", background=self.backcolor)
         self.style_entry_screen = ttk.Style()
         self.style_entry_screen.configure(
             "style_screen.TEntry", font=("arial", 10), relief="flat", fieldbackground=self.backcolor)
         self.style_cbx_screen = ttk.Style()
         self.style_cbx_screen.configure(
-            "style_screen.TCheckbutton", font=("arial", 10), relief="flat", background=self.midcolor)
+            "style_screen.TCheckbutton", font=("arial", 10), relief="solid", background=self.midcolor)
         self.style_screen = ttk.Style()
         self.style_screen.configure(
             "style_screen.TFrame", background=self.midcolor)
@@ -356,7 +356,7 @@ class View(object):
         self.opt_fullscreen = tk.BooleanVar()
         self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
         self.cbx_fullscreen = ttk.Checkbutton(master=self.screen_setup,
-                                              text="Fullscreen",
+                                              text="Vollbild",
                                               variable=self.opt_fullscreen,
                                               command=self.window_update,
                                               style="style_screen.TCheckbutton")
@@ -402,11 +402,11 @@ class View(object):
         self.lbl_udt_name.place(x=0, y=0, width=50, height=25)
         self.lbl_udt_name_var.place(x=55, y=0, width=250, height=25)
         self.lbl_udt_description.place(x=330, y=0, width=85, height=25)
-        self.lbl_udt_description_var.place(x=420, y=0, width=500 + ox, height=25)
+        self.lbl_udt_description_var.place(x=420, y=0, width=270 + ox, height=25)
         self.lbl_udt_version.place(x=0, y=33, width=50, height=25)
         self.lbl_udt_version_var.place(x=55, y=33, width=250, height=25)
         self.lbl_udt_info.place(x=330, y=33, width=85, height=25)
-        self.lbl_udt_info_var.place(x=420, y=33, width=500 + ox, height=25)
+        self.lbl_udt_info_var.place(x=420, y=33, width=270 + ox, height=25)
         # scale gui elements from treeview-------------------------------------
         self.datatree.place(x=50, y=90, height=325 + oy, width=691 + ox)
         self.datatree_scrollx.place(x=50, y=415 + oy, width=691 + ox)
