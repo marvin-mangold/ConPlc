@@ -29,7 +29,6 @@ class View(object):
         self.controller = controller
         # other variables------------------------------------------------------
         self.desktoppath = os.path.expanduser(r"~\Desktop")
-        self.connectionstate = False
         # general window settings----------------------------------------------
         # create window
         self.window = tk.Tk()
@@ -316,13 +315,6 @@ class View(object):
                                        text="Run/Stop:",
                                        anchor="w")
 
-        # create button for play pause connection
-        self.btn_playpause = ttk.Button(master=self.screen_plc,
-                                        takefocus=0,
-                                        image=self.img_play,
-                                        style="style_screen.TButton",
-                                        command=self.connect_state)
-
         # create checkbox autoplay connection
         self.con_autorun = tk.BooleanVar()
         self.con_autorun.set(self.controller.projectfile["con_autorun"])
@@ -331,6 +323,13 @@ class View(object):
                                             variable=self.con_autorun,
                                             command=self.connect_autorun,
                                             style="style_screen.TCheckbutton")
+
+        # create button for play pause connection
+        self.btn_playpause = ttk.Button(master=self.screen_plc,
+                                        takefocus=0,
+                                        image=self.img_play,
+                                        style="style_screen.TButton",
+                                        command=self.connect_state)
 
         # screen data----------------------------------------------------------
         # create frame on screen data for UDT name + description + version + info
@@ -433,6 +432,16 @@ class View(object):
         # set window startposisiton and startsize
         # window zoomed without titlebar optional
         self.window_update()
+        # initial trigger for 250ms loop
+        self.window.after(0, self.trigger_250ms)
+
+    def trigger_250ms(self):
+        # trigger every 250ms
+        self.window.after(250, self.trigger_250ms)
+        # get actual time and save it to variable
+        self.timestamp.set(self.controller.read_time())
+        # set led state
+        self.led_state("error")
 
     def window_scale(self):
         # calculate difference between minimal size and actual size
@@ -682,9 +691,10 @@ class View(object):
         self.controller.projectfile["con_autorun"] = self.con_autorun.get()
 
     def connect_state(self):
-        if self.connectionstate:
-            self.connectionstate = False
-            self.btn_playpause.config(image=self.img_play)
-        elif not self.connectionstate:
-            self.connectionstate = True
+        image = str(self.btn_playpause.cget("image")[0])
+        if image == str(self.img_play):
             self.btn_playpause.config(image=self.img_pause)
+            self.controller.connection_run()
+        elif image == str(self.img_pause):
+            self.btn_playpause.config(image=self.img_play)
+            self.controller.connection_stop()

@@ -41,29 +41,41 @@ class Controller(object):
         self.model = model.Model()
 
     def run(self):
+        # refresh variables on screen plc
         self.view.plc_update()
+        # refresh variables on screen data
         self.view.datatree_update()
+        # refresh variables on screen setup
         self.view.setup_update()
+        # refresh windowsize and scaling
         self.view.window_update()
-        # initial trigger for 500ms loop
-        self.view.window.after(0, self.trigger_500ms)
-        # start window
+        # write eventmessage
         self.view.eventframe_post("Programm gestartet")
+        # check if autorun is activated
+        if self.projectfile["con_autorun"]:
+            self.view.connect_state()
+        # start mainloop
         self.view.window.mainloop()
 
     def stop(self):
-        # stop window
+        # write eventmessage
         self.view.eventframe_post("Programm gestoppt")
+        # stop mainloop
         self.view.window.destroy()
 
     def file_new(self):
         # read JSON file
         with open("empty.cplc") as file:
             self.projectfile = json.load(file)
+        # refresh variables on screen plc
         self.view.plc_update()
+        # refresh variables on screen data
         self.view.datatree_update()
+        # refresh variables on screen setup
         self.view.setup_update()
+        # refresh windowsize and scaling
         self.view.window_update()
+        # write eventmessage
         self.view.eventframe_post("Projekt geöffnet (neu)")
 
     def file_open(self, path=None):
@@ -72,16 +84,22 @@ class Controller(object):
         # read JSON file
         with open(path) as file:
             self.projectfile = json.load(file)
+        # refresh variables on screen plc
         self.view.plc_update()
+        # refresh variables on screen data
         self.view.datatree_update()
+        # refresh variables on screen setup
         self.view.setup_update()
+        # refresh windowsize and scaling
         self.view.window_update()
+        # write eventmessage
         self.view.eventframe_post("Projekt geöffnet ({path})".format(path=path))
 
     def file_save(self):
         # write JSON file
         with open('default.cplc', 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
+        # write eventmessage
         self.view.eventframe_post("Projekt gespeichert")
 
     def file_backup(self):
@@ -89,17 +107,8 @@ class Controller(object):
         # write JSON file
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
+        # write eventmessage
         self.view.eventframe_post("Projekt gespeichert ({path})".format(path=path))
-
-    def trigger_500ms(self):
-        # trigger every 500ms
-        # get live position while coding
-        # print(self.view.window.winfo_pointerx() - self.view.window.winfo_rootx())
-        # print(self.view.window.winfo_pointery() - self.view.window.winfo_rooty())
-        self.view.window.after(500, self.trigger_500ms)
-        # get actual time and save it to variable
-        self.view.timestamp.set(self.read_time())
-        self.view.led_state("error")
 
     @staticmethod
     def read_time():
@@ -130,7 +139,9 @@ class Controller(object):
                 self.projectfile["udt_version"] = version
                 self.projectfile["udt_info"] = info
                 self.projectfile["udt_data"] = data
+                # refresh variables on screen data
                 self.view.datatree_update()
+                # write eventmessage
                 self.view.eventframe_post("Datenstruktur eingelesen")
         if error:
             self.projectfile["udt_name"] = ""
@@ -138,7 +149,16 @@ class Controller(object):
             self.projectfile["udt_version"] = ""
             self.projectfile["udt_info"] = ""
             self.projectfile["udt_data"] = []
+            # refresh variables on screen data
             self.view.datatree_update()
+
+    def connection_run(self):
+        # write eventmessage
+        self.view.eventframe_post("Verbindung geöffnet")
+
+    def connection_stop(self):
+        # write eventmessage
+        self.view.eventframe_post("Verbindung geschlossen")
 
 
 if __name__ == '__main__':
