@@ -518,7 +518,7 @@ class View(object):
                 self.eventframeoffs = 300
             self.window_scale()
 
-    def eventframe_post(self, text) -> object:
+    def eventframe_post(self, text):
         self.txt_eventframe.configure(state="normal")
         timestamp = self.controller.read_time()
         self.txt_eventframe.insert(tk.END, "{timestamp}: {text}\n".format(timestamp=timestamp, text=text))
