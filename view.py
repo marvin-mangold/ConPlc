@@ -213,11 +213,47 @@ class View(object):
                                      textvariable=self.version,
                                      anchor="w")
 
+        # screen home--------------------------------------------------------
+        # create and place eventframe on screen home
+        self.eventframe = tk.Canvas(master=self.screen_home,
+                                    relief="flat",
+                                    bg=self.frontcolor,
+                                    highlightthickness=1,
+                                    highlightbackground="black")
+
+        # create and place label for eventframe
+        self.lbl_eventframe = ttk.Label(master=self.eventframe,
+                                        style="style_infobar.TLabel",
+                                        text="Eventlog",
+                                        anchor="w")
+
+        # change mouse cursor when mouse over label
+        self.lbl_eventframe.configure(cursor="sb_v_double_arrow")
+        self.eventframediff = 0
+        self.eventframeoffs = 100
+        self.lbl_eventframe.bind("<Button-1>", lambda x: self.eventframe_drag(mode="start"))
+        self.lbl_eventframe.bind("<B1-Motion>", lambda x: self.eventframe_drag(mode="move"))
+        self.lbl_eventframe.bind("<ButtonRelease-1>", lambda x: self.eventframe_drag(mode="stop"))
+
+        # create an place textfield on eventframe
+        self.txt_eventframe = tk.Text(self.eventframe,
+                                      width=10,
+                                      bg=self.frontcolor,
+                                      fg=self.textcolor,
+                                      state="disabled",
+                                      relief="flat")
+
+        # add scrollbar to eventframe
+        self.eventframe_scrollx = ttk.Scrollbar(self.eventframe, orient="horizontal", command=self.txt_eventframe.xview)
+        self.eventframe_scrolly = ttk.Scrollbar(self.eventframe, orient="vertical", command=self.txt_eventframe.yview)
+        self.txt_eventframe.configure(xscrollcommand=self.eventframe_scrollx.set)
+        self.txt_eventframe.configure(yscrollcommand=self.eventframe_scrolly.set)
+
         # screen plc---------------------------------------------------------
         # create and place label for connection ip-address
         self.lbl_con_ip = ttk.Label(master=self.screen_plc,
                                     style="style_screen.TLabel",
-                                    text="IP-Adresse:",
+                                    text="IP-Address:",
                                     anchor="w")
 
         # create and place entry for connection ip-address
@@ -260,7 +296,7 @@ class View(object):
         # create and place label for connection port number
         self.lbl_con_port = ttk.Label(master=self.screen_plc,
                                       style="style_screen.TLabel",
-                                      text="Portnummer:",
+                                      text="Portnumber:",
                                       anchor="w")
 
         # create and place entry for connection port number
@@ -317,7 +353,7 @@ class View(object):
         # create and place label for UDT description
         self.lbl_udt_description = ttk.Label(master=self.udt_infos,
                                              style="style_screen.TLabel",
-                                             text="Beschreibung:",
+                                             text="Description:",
                                              anchor="w")
 
         # create and place variable label for UDT description
@@ -343,7 +379,7 @@ class View(object):
         # create and place label for UDT info
         self.lbl_udt_info = ttk.Label(master=self.udt_infos,
                                       style="style_screen.TLabel",
-                                      text="Info:",
+                                      text="Information:",
                                       anchor="w")
 
         # create and place variable label for UDT info
@@ -355,13 +391,13 @@ class View(object):
 
         # create and place treeview for data structure
         self.datatree = ttk.Treeview(self.screen_data)
-        self.datatree["columns"] = ("Datentyp", "Kommentar")
+        self.datatree["columns"] = ("Datatype", "Comment")
         self.datatree.column("#0", width=200, minwidth=100, stretch=tk.NO)
-        self.datatree.column("Datentyp", width=200, minwidth=100, stretch=tk.NO)
-        self.datatree.column("Kommentar", width=200, minwidth=100, stretch=tk.YES)
+        self.datatree.column("Datatype", width=200, minwidth=100, stretch=tk.NO)
+        self.datatree.column("Comment", width=200, minwidth=100, stretch=tk.YES)
         self.datatree.heading("#0", text="Name", anchor=tk.W)
-        self.datatree.heading("Datentyp", text="Datentyp", anchor=tk.W)
-        self.datatree.heading("Kommentar", text="Kommentar", anchor=tk.W)
+        self.datatree.heading("Datatype", text="Datatype", anchor=tk.W)
+        self.datatree.heading("Comment", text="Comment", anchor=tk.W)
         # add scrollbar to treeview
         self.datatree_scrollx = ttk.Scrollbar(self.screen_data, orient="horizontal", command=self.datatree.xview)
         self.datatree_scrolly = ttk.Scrollbar(self.screen_data, orient="vertical", command=self.datatree.yview)
@@ -371,7 +407,7 @@ class View(object):
         # create button for datasructure import
         self.btn_import_datasructure = ttk.Button(master=self.screen_data,
                                                   takefocus=0,
-                                                  text='Datenstruktur einlesen',
+                                                  text='load Datastructure',
                                                   style="style_screen.TButton",
                                                   command=self.controller.data_get)
 
@@ -380,7 +416,7 @@ class View(object):
         self.opt_fullscreen = tk.BooleanVar()
         self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
         self.cbx_fullscreen = ttk.Checkbutton(master=self.screen_setup,
-                                              text="Vollbild",
+                                              text="Fullscreen",
                                               variable=self.opt_fullscreen,
                                               command=self.window_update,
                                               style="style_screen.TCheckbutton")
@@ -406,13 +442,19 @@ class View(object):
         self.screens.place(x=0, y=0, width=802 + ox, height=578 + oy)
         self.btn_exit.place(x=623 + ox, y=0, width=58, height=58)
         self.icon_logo.place(x=687 + ox, y=0, width=114, height=58)
-        self.infobar.place(x=0, y=576 + oy, height=24, width=800 + ox)
-        self.icon_clock.place(x=670 + ox, y=3, height=20, width=20)
+        self.infobar.place(x=0, y=576 + oy, width=800 + ox, height=24)
+        self.icon_clock.place(x=670 + ox, y=3, width=20, height=20)
         self.lbl_timestamp.place(x=690 + ox, y=1, width=150, height=24)
         self.icon_led.place(x=246, y=3, width=20, height=20)
         self.lbl_led_plc.place(x=270, y=3, width=50, height=18)
-        self.icon_version.place(x=5, y=3, height=20, width=20)
+        self.icon_version.place(x=5, y=3, width=20, height=20)
         self.lbl_version.place(x=25, y=3, width=150, height=18)
+        # scale gui elements from screen home----------------------------------
+        self.eventframe.place(x=0, y=478 + oy - self.eventframeoffs, height=35 + self.eventframeoffs, width=797 + ox)
+        self.lbl_eventframe.place(x=1, y=1, width=795 + ox, height=20)
+        self.txt_eventframe.place(x=1, y=20, width=782 + ox, height=78 + self.eventframeoffs)
+        self.eventframe_scrollx.place(x=1, y=20 + self.eventframeoffs, width=782 + ox)
+        self.eventframe_scrolly.place(x=782 + ox, y=20, height=15 + self.eventframeoffs)
         # scale gui elements from screen plc-----------------------------------
         self.lbl_con_ip.place(x=50, y=25, width=80, height=25)
         self.entry_con_ip_byte1.place(x=135, y=25, width=35, height=25)
@@ -425,22 +467,22 @@ class View(object):
         self.btn_playpause.place(x=135, y=91, width=40, height=40)
         self.cbx_autoplay.place(x=180, y=91, width=80, height=40)
         # scale gui elements from screen data----------------------------------
-        self.udt_infos.place(x=50, y=25, height=58, width=690 + ox)
+        self.udt_infos.place(x=50, y=25, width=750 + ox, height=58)
         self.lbl_udt_name.place(x=0, y=0, width=50, height=25)
         self.lbl_udt_name_var.place(x=55, y=0, width=250, height=25)
         self.lbl_udt_description.place(x=330, y=0, width=85, height=25)
-        self.lbl_udt_description_var.place(x=420, y=0, width=270 + ox, height=25)
+        self.lbl_udt_description_var.place(x=420, y=0, width=283 + ox, height=25)
         self.lbl_udt_version.place(x=0, y=33, width=50, height=25)
         self.lbl_udt_version_var.place(x=55, y=33, width=250, height=25)
         self.lbl_udt_info.place(x=330, y=33, width=85, height=25)
-        self.lbl_udt_info_var.place(x=420, y=33, width=270 + ox, height=25)
+        self.lbl_udt_info_var.place(x=420, y=33, width=283 + ox, height=25)
         # scale gui elements from treeview-------------------------------------
-        self.datatree.place(x=50, y=90, height=325 + oy, width=691 + ox)
+        self.datatree.place(x=50, y=90, width=691 + ox, height=325 + oy)
         self.datatree_scrollx.place(x=50, y=415 + oy, width=691 + ox)
         self.datatree_scrolly.place(x=740 + ox, y=92, height=337 + oy)
-        self.btn_import_datasructure.place(x=50, y=437 + oy, height=30, width=150)
+        self.btn_import_datasructure.place(x=50, y=437 + oy, width=150, height=30)
         # scale gui elements from screen setup---------------------------------
-        self.cbx_fullscreen.place(x=50, y=25, width=80, height=40)
+        self.cbx_fullscreen.place(x=50, y=25, width=90, height=40)
         if not self.controller.projectfile["opt_fullscreen"]:
             self.controller.projectfile["opt_windowwidth"] = self.window.winfo_width()
             self.controller.projectfile["opt_windowheight"] = self.window.winfo_height()
@@ -462,6 +504,17 @@ class View(object):
             windowstartposx = (screenwidth / 2) - (windowwidth / 2)
             windowstartposy = (screenheight / 2) - (windowheight / 2)
             self.window.geometry("%dx%d+%d+%d" % (windowwidth, windowheight, windowstartposx, windowstartposy))
+
+    def eventframe_drag(self, mode):
+        if mode == "start":
+            self.eventframediff = self.eventframe.winfo_rooty() + self.eventframe.winfo_height() - 35
+        elif mode == "move":
+            self.eventframeoffs = self.eventframediff - self.window.winfo_pointery()
+            if self.eventframeoffs < 0:
+                self.eventframeoffs = 0
+            if self.eventframeoffs > 300:
+                self.eventframeoffs = 300
+            self.window_scale()
 
     def keyup(self, event):
         # print(event)

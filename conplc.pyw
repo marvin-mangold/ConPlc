@@ -87,6 +87,9 @@ class Controller(object):
 
     def trigger_500ms(self):
         # trigger every 500ms
+        # get live position while coding
+        # print(self.view.window.winfo_pointerx() - self.view.window.winfo_rootx())
+        # print(self.view.window.winfo_pointery() - self.view.window.winfo_rooty())
         self.view.window.after(500, self.trigger_500ms)
         # get actual time and save it to variable
         self.view.timestamp.set(model.timestamp_get())
