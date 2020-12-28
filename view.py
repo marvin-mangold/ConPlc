@@ -240,6 +240,8 @@ class View(object):
                                       width=10,
                                       bg=self.frontcolor,
                                       fg=self.textcolor,
+                                      wrap="none",
+                                      font=("arial", 10),
                                       state="disabled",
                                       relief="flat")
 
@@ -450,9 +452,9 @@ class View(object):
         self.icon_version.place(x=5, y=3, width=20, height=20)
         self.lbl_version.place(x=25, y=3, width=150, height=18)
         # scale gui elements from screen home----------------------------------
-        self.eventframe.place(x=0, y=478 + oy - self.eventframeoffs, height=35 + self.eventframeoffs, width=797 + ox)
+        self.eventframe.place(x=0, y=482 + oy - self.eventframeoffs, height=35 + self.eventframeoffs, width=797 + ox)
         self.lbl_eventframe.place(x=1, y=1, width=795 + ox, height=20)
-        self.txt_eventframe.place(x=1, y=20, width=782 + ox, height=78 + self.eventframeoffs)
+        self.txt_eventframe.place(x=1, y=20, width=782 + ox, height=10 + self.eventframeoffs)
         self.eventframe_scrollx.place(x=1, y=20 + self.eventframeoffs, width=782 + ox)
         self.eventframe_scrolly.place(x=782 + ox, y=20, height=15 + self.eventframeoffs)
         # scale gui elements from screen plc-----------------------------------
@@ -515,6 +517,13 @@ class View(object):
             if self.eventframeoffs > 300:
                 self.eventframeoffs = 300
             self.window_scale()
+
+    def eventframe_post(self, text) -> object:
+        self.txt_eventframe.configure(state="normal")
+        timestamp = self.controller.read_time()
+        self.txt_eventframe.insert(tk.END, "{timestamp}: {text}\n".format(timestamp=timestamp, text=text))
+        self.txt_eventframe.configure(state="disabled")
+        self.txt_eventframe.yview_moveto('1.0')
 
     def keyup(self, event):
         # print(event)

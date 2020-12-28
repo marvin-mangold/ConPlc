@@ -48,10 +48,12 @@ class Controller(object):
         # initial trigger for 500ms loop
         self.view.window.after(0, self.trigger_500ms)
         # start window
+        self.view.eventframe_post("Programm gestartet")
         self.view.window.mainloop()
 
     def stop(self):
         # stop window
+        self.view.eventframe_post("Programm gestoppt")
         self.view.window.destroy()
 
     def file_new(self):
@@ -62,6 +64,7 @@ class Controller(object):
         self.view.datatree_update()
         self.view.setup_update()
         self.view.window_update()
+        self.view.eventframe_post("Projekt geöffnet (neu)")
 
     def file_open(self, path=None):
         if path is None:
@@ -73,17 +76,20 @@ class Controller(object):
         self.view.datatree_update()
         self.view.setup_update()
         self.view.window_update()
+        self.view.eventframe_post("Projekt geöffnet ({path})".format(path=path))
 
     def file_save(self):
         # write JSON file
         with open('default.cplc', 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
+        self.view.eventframe_post("Projekt gespeichert")
 
     def file_backup(self):
         path = self.view.filepath_saveas(filetypes=(("cplc Files", "*.cplc"),))
         # write JSON file
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
+        self.view.eventframe_post("Projekt gespeichert ({path})".format(path=path))
 
     def trigger_500ms(self):
         # trigger every 500ms
@@ -92,8 +98,12 @@ class Controller(object):
         # print(self.view.window.winfo_pointery() - self.view.window.winfo_rooty())
         self.view.window.after(500, self.trigger_500ms)
         # get actual time and save it to variable
-        self.view.timestamp.set(model.timestamp_get())
+        self.view.timestamp.set(self.read_time())
         self.view.led_state("error")
+
+    @staticmethod
+    def read_time():
+        return model.timestamp_get()
 
     def data_get(self):
         error = False
@@ -121,6 +131,7 @@ class Controller(object):
                 self.projectfile["udt_info"] = info
                 self.projectfile["udt_data"] = data
                 self.view.datatree_update()
+                self.view.eventframe_post("Datenstruktur eingelesen")
         if error:
             self.projectfile["udt_name"] = ""
             self.projectfile["udt_description"] = ""
