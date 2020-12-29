@@ -324,12 +324,20 @@ class View(object):
                                             command=self.connect_autorun,
                                             style="style_screen.TCheckbutton")
 
-        # create button for play pause connection
-        self.btn_playpause = ttk.Button(master=self.screen_plc,
-                                        takefocus=0,
-                                        image=self.img_play,
-                                        style="style_screen.TButton",
-                                        command=self.connect_state)
+        # create checkboxbutton for play pause connection
+        self.playpause = tk.BooleanVar()
+        self.cbx_playpause = tk.Checkbutton(master=self.screen_plc,
+                                            bd=0,
+                                            bg=self.backcolor,
+                                            selectcolor=self.backcolor,
+                                            highlightcolor=self.backcolor,
+                                            activebackground=self.backcolor,
+                                            relief="flat",
+                                            variable=self.playpause,
+                                            command=self.connect_state,
+                                            image=self.img_play,
+                                            selectimage=self.img_pause,
+                                            indicatoron=False)
 
         # screen data----------------------------------------------------------
         # create frame on screen data for UDT name + description + version + info
@@ -433,15 +441,6 @@ class View(object):
         # window zoomed without titlebar optional
         self.window_update()
         # initial trigger for 250ms loop
-        self.window.after(0, self.trigger_250ms)
-
-    def trigger_250ms(self):
-        # trigger every 250ms
-        self.window.after(250, self.trigger_250ms)
-        # get actual time and save it to variable
-        self.timestamp.set(self.controller.read_time())
-        # set led state
-        self.led_state("error")
 
     def window_scale(self):
         # calculate difference between minimal size and actual size
@@ -475,7 +474,7 @@ class View(object):
         self.lbl_con_port.place(x=50, y=58, width=80, height=25)
         self.entry_con_port.place(x=135, y=58, width=45, height=25)
         self.lbl_playpause.place(x=50, y=97, width=80, height=25)
-        self.btn_playpause.place(x=135, y=91, width=40, height=40)
+        self.cbx_playpause.place(x=135, y=91, width=40, height=40)
         self.cbx_autoplay.place(x=180, y=91, width=80, height=40)
         # scale gui elements from screen data----------------------------------
         self.udt_infos.place(x=50, y=25, width=750 + ox, height=58)
@@ -529,7 +528,7 @@ class View(object):
 
     def eventframe_post(self, text):
         self.txt_eventframe.configure(state="normal")
-        timestamp = self.controller.read_time()
+        timestamp = self.controller.timestamp
         self.txt_eventframe.insert(tk.END, "{timestamp}: {text}\n".format(timestamp=timestamp, text=text))
         self.txt_eventframe.configure(state="disabled")
         self.txt_eventframe.yview_moveto('1.0')
@@ -691,10 +690,8 @@ class View(object):
         self.controller.projectfile["con_autorun"] = self.con_autorun.get()
 
     def connect_state(self):
-        image = str(self.btn_playpause.cget("image")[0])
-        if image == str(self.img_play):
-            self.btn_playpause.config(image=self.img_pause)
-            self.controller.connection_run()
-        elif image == str(self.img_pause):
-            self.btn_playpause.config(image=self.img_play)
-            self.controller.connection_stop()
+        state = self.playpause.get()
+        if state:
+            self.controller.server_start()
+        elif not state:
+            self.controller.server_stop()

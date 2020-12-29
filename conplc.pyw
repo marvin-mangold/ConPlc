@@ -16,14 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import json
 import view
-import model
+import readudt
+import tcpserver
+import json
+import time
+import queue
 
 
 class Controller(object):
     def __init__(self):
-
+        self.timestamp = time.strftime("%d.%m.%Y %H:%M:%S")
         # get configdata from configfile
         # Read JSON file
         with open("conplc.conf") as configfile:
@@ -37,8 +40,8 @@ class Controller(object):
         # call view (handles the graphics of GUI)
         self.view = view.View(self)
 
-        # call model (handles the functions of GUI)
-        self.model = model.Model()
+        # call server (handles the tcp connection)
+        self.server = tcpserver.Server()
 
     def run(self):
         # refresh variables on screen plc
@@ -50,18 +53,30 @@ class Controller(object):
         # refresh windowsize and scaling
         self.view.window_update()
         # write eventmessage
-        self.view.eventframe_post("Programm gestartet")
+        self.view.eventframe_post("Programm started")
         # check if autorun is activated
         if self.projectfile["con_autorun"]:
-            self.view.connect_state()
+            self.view.cbx_playpause.invoke()
+        # start parallel trigger
+        self.view.window.after(0, self.trigger_250ms)
         # start mainloop
         self.view.window.mainloop()
 
     def stop(self):
         # write eventmessage
-        self.view.eventframe_post("Programm gestoppt")
+        self.view.eventframe_post("Programm stopped")
         # stop mainloop
         self.view.window.destroy()
+
+    def trigger_250ms(self):
+        # trigger every 250ms
+        self.view.window.after(250, self.trigger_250ms)
+        # get actual time and save it to variable
+        self.timestamp = time.strftime("%d.%m.%Y %H:%M:%S")
+        # set led state
+        self.led_state()
+        # check for servermessage
+        self.server_message()
 
     def file_new(self):
         # read JSON file
@@ -76,7 +91,7 @@ class Controller(object):
         # refresh windowsize and scaling
         self.view.window_update()
         # write eventmessage
-        self.view.eventframe_post("Projekt geöffnet (neu)")
+        self.view.eventframe_post("Project opened (new)")
 
     def file_open(self, path=None):
         if path is None:
@@ -93,14 +108,14 @@ class Controller(object):
         # refresh windowsize and scaling
         self.view.window_update()
         # write eventmessage
-        self.view.eventframe_post("Projekt geöffnet ({path})".format(path=path))
+        self.view.eventframe_post("Projekt opened ({path})".format(path=path))
 
     def file_save(self):
         # write JSON file
         with open('default.cplc', 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
         # write eventmessage
-        self.view.eventframe_post("Projekt gespeichert")
+        self.view.eventframe_post("Projekt saved")
 
     def file_backup(self):
         path = self.view.filepath_saveas(filetypes=(("cplc Files", "*.cplc"),))
@@ -108,11 +123,7 @@ class Controller(object):
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
         # write eventmessage
-        self.view.eventframe_post("Projekt gespeichert ({path})".format(path=path))
-
-    @staticmethod
-    def read_time():
-        return model.timestamp_get()
+        self.view.eventframe_post("Projekt saved ({path})".format(path=path))
 
     def data_get(self):
         error = False
@@ -124,7 +135,7 @@ class Controller(object):
             error = True
         if not error:
             # check if UDT consists of sub-UDTs
-            dependencies = model.udt_dependencies_get(filepath)
+            dependencies = readudt.get_udt_dependencies(filepath)
             # get filepath of sub-UDTs
             for dep in dependencies:
                 dependencies[dep] = self.view.filepath_open(message="select UDT: {dep}".format(dep=dep),
@@ -133,7 +144,8 @@ class Controller(object):
                     error = True
             if not error:
                 # get data of main UDT and sub-UDTs
-                name, description, version, info, data = model.udt_data_get(filepath, dependencies)
+                name, description, version, info, data = readudt.get_udt_data(filepath=filepath,
+                                                                              dependencies=dependencies)
                 self.projectfile["udt_name"] = name
                 self.projectfile["udt_description"] = description
                 self.projectfile["udt_version"] = version
@@ -142,7 +154,7 @@ class Controller(object):
                 # refresh variables on screen data
                 self.view.datatree_update()
                 # write eventmessage
-                self.view.eventframe_post("Datenstruktur eingelesen")
+                self.view.eventframe_post("Datastructure loaded")
         if error:
             self.projectfile["udt_name"] = ""
             self.projectfile["udt_description"] = ""
@@ -152,13 +164,34 @@ class Controller(object):
             # refresh variables on screen data
             self.view.datatree_update()
 
-    def connection_run(self):
-        # write eventmessage
-        self.view.eventframe_post("Verbindung geöffnet")
+    def server_start(self):
+        ip = "{byte1}.{byte2}.{byte3}.{byte4}".format(byte1=str(int(self.projectfile["con_ip_byte1"])),
+                                                      byte2=str(int(self.projectfile["con_ip_byte2"])),
+                                                      byte3=str(int(self.projectfile["con_ip_byte3"])),
+                                                      byte4=str(int(self.projectfile["con_ip_byte4"])))
+        port = int(self.projectfile["con_port"])
+        self.server.start(ip=ip, port=port)
 
-    def connection_stop(self):
-        # write eventmessage
-        self.view.eventframe_post("Verbindung geschlossen")
+    def server_stop(self):
+        self.server.stop()
+
+    def server_message(self):
+        try:
+            event, message = self.server.buffer_message.get(block=False)
+            # write eventmessage
+            self.view.eventframe_post(message)
+            if event == "stop":
+                self.view.cbx_playpause.invoke()
+        except queue.Empty:  # error if queue is empty
+            pass
+
+    def led_state(self):
+        if not self.server.active:
+            self.view.led_state("error")
+        elif self.server.active and not self.server.connected:
+            self.view.led_state("warn")
+        elif self.server.active and self.server.connected:
+            self.view.led_state("ok")
 
 
 if __name__ == '__main__':
