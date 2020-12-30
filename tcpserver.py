@@ -53,7 +53,10 @@ class Server(object):
                 try:
                     if not self.timeout:
                         self.message("", "Server starting".format(ip=self.ip, port=self.port))
+                    self.message("", "1111")
+                    self.message("", "2222")
                     self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                     self.connection.bind((self.ip, self.port))  # create connection channel
                     if not self.timeout:
                         self.message("", "Server active @ IP ({ip}) Port ({port})".format(ip=self.ip, port=self.port))
@@ -87,9 +90,9 @@ class Server(object):
                             self.buffer_recv.put(recv)
                             self.message("", "Server received data: {data}".format(data=recv))#########################################################################
                             # Send Data
-                            send = self.buffer_send.get(block=True)  # waiting for data
-                            send = send.encode(self.format)  # format send data
-                            self.partner_id.send(send)
+                            #send = self.buffer_send.get(block=True)  # waiting for data
+                            #send = send.encode(self.format)  # format send data
+                            #self.partner_id.send(send)
                         except Exception as errormessage:
                             self.message("", str(errormessage))
                             break  # break datatransfer, close connection and restart
