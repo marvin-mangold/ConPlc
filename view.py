@@ -32,11 +32,10 @@ class View(object):
         # general window settings----------------------------------------------
         # create window
         self.window = tk.Tk()
-
         # load icons
         self.img_icon = tk.PhotoImage(file=Path(self.controller.configfile["media_icon"]))
         self.img_home = tk.PhotoImage(file=Path(self.controller.configfile["media_home"]))
-        self.img_plc = tk.PhotoImage(file=Path(self.controller.configfile["media_plc"]))
+        self.img_server = tk.PhotoImage(file=Path(self.controller.configfile["media_server"]))
         self.img_data = tk.PhotoImage(file=Path(self.controller.configfile["media_data"]))
         self.img_setup = tk.PhotoImage(file=Path(self.controller.configfile["media_setup"]))
         self.img_logo = tk.PhotoImage(file=Path(self.controller.configfile["media_logo"]))
@@ -126,11 +125,11 @@ class View(object):
         # create Tabs----------------------------------------------------------
         self.screens = ttk.Notebook(self.mainframe, style="style_screen.TNotebook")
         self.screen_home = ttk.Frame(self.screens, style="style_screen.TFrame")
-        self.screen_plc = ttk.Frame(self.screens, style="style_screen.TFrame")
+        self.screen_server = ttk.Frame(self.screens, style="style_screen.TFrame")
         self.screen_data = ttk.Frame(self.screens, style="style_screen.TFrame")
         self.screen_setup = ttk.Frame(self.screens, style="style_screen.TFrame")
         self.screens.add(self.screen_home, text="Home", image=self.img_home, compound=tk.TOP)
-        self.screens.add(self.screen_plc, text="PLC", image=self.img_plc, compound=tk.TOP)
+        self.screens.add(self.screen_server, text="Server", image=self.img_server, compound=tk.TOP)
         self.screens.add(self.screen_data, text="Data", image=self.img_data, compound=tk.TOP)
         self.screens.add(self.screen_setup, text="Setup", image=self.img_setup, compound=tk.TOP)
 
@@ -187,10 +186,10 @@ class View(object):
                                        textvariable=self.timestamp,
                                        anchor="w")
 
-        # create and place LED and label for PLC state on infobar
-        self.lbl_led_plc = ttk.Label(master=self.infobar,
+        # create and place LED and label for connectionstate on infobar
+        self.lbl_led_connection = ttk.Label(master=self.infobar,
                                      style="style_infobar.TLabel",
-                                     text="PLC",
+                                     text="Connection",
                                      anchor="w")
 
         self.icon_led = tk.Canvas(master=self.infobar, relief="flat", highlightthickness=0, bg=self.backcolor)
@@ -250,9 +249,9 @@ class View(object):
         self.txt_eventframe.configure(xscrollcommand=self.eventframe_scrollx.set)
         self.txt_eventframe.configure(yscrollcommand=self.eventframe_scrolly.set)
 
-        # screen plc---------------------------------------------------------
+        # screen server------------------------------------------------------
         # create and place label for connection ip-address
-        self.lbl_con_ip = ttk.Label(master=self.screen_plc,
+        self.lbl_con_ip = ttk.Label(master=self.screen_server,
                                     style="style_screen.TLabel",
                                     text="IP-Address:",
                                     anchor="w")
@@ -262,7 +261,7 @@ class View(object):
         self.con_ip_byte1 = tk.StringVar()
         self.con_ip_byte1.set(self.controller.projectfile["con_ip_byte1"])
         self.con_ip_byte1.trace("w", lambda *args: self.entry_validate(var=self.con_ip_byte1, mode="ip", length=3))
-        self.entry_con_ip_byte1 = ttk.Entry(master=self.screen_plc,
+        self.entry_con_ip_byte1 = ttk.Entry(master=self.screen_server,
                                             style="style_screen.TEntry",
                                             textvariable=self.con_ip_byte1)
         self.entry_con_ip_byte1.bind("<KeyRelease>", lambda x: self.entry_after())
@@ -271,7 +270,7 @@ class View(object):
         self.con_ip_byte2 = tk.StringVar()
         self.con_ip_byte2.set(self.controller.projectfile["con_ip_byte2"])
         self.con_ip_byte2.trace("w", lambda *args: self.entry_validate(var=self.con_ip_byte2, mode="ip", length=3))
-        self.entry_con_ip_byte2 = ttk.Entry(master=self.screen_plc,
+        self.entry_con_ip_byte2 = ttk.Entry(master=self.screen_server,
                                             style="style_screen.TEntry",
                                             textvariable=self.con_ip_byte2)
         self.entry_con_ip_byte2.bind("<KeyRelease>", lambda x: self.entry_after())
@@ -280,7 +279,7 @@ class View(object):
         self.con_ip_byte3 = tk.StringVar()
         self.con_ip_byte3.set(self.controller.projectfile["con_ip_byte3"])
         self.con_ip_byte3.trace("w", lambda *args: self.entry_validate(var=self.con_ip_byte3, mode="ip", length=3))
-        self.entry_con_ip_byte3 = ttk.Entry(master=self.screen_plc,
+        self.entry_con_ip_byte3 = ttk.Entry(master=self.screen_server,
                                             style="style_screen.TEntry",
                                             textvariable=self.con_ip_byte3)
         self.entry_con_ip_byte3.bind("<KeyRelease>", lambda x: self.entry_after())
@@ -289,13 +288,13 @@ class View(object):
         self.con_ip_byte4 = tk.StringVar()
         self.con_ip_byte4.set(self.controller.projectfile["con_ip_byte4"])
         self.con_ip_byte4.trace("w", lambda *args: self.entry_validate(var=self.con_ip_byte4, mode="ip", length=3))
-        self.entry_con_ip_byte4 = ttk.Entry(master=self.screen_plc,
+        self.entry_con_ip_byte4 = ttk.Entry(master=self.screen_server,
                                             style="style_screen.TEntry",
                                             textvariable=self.con_ip_byte4)
         self.entry_con_ip_byte4.bind("<KeyRelease>", lambda x: self.entry_after())
 
         # create and place label for connection port number
-        self.lbl_con_port = ttk.Label(master=self.screen_plc,
+        self.lbl_con_port = ttk.Label(master=self.screen_server,
                                       style="style_screen.TLabel",
                                       text="Portnumber:",
                                       anchor="w")
@@ -304,13 +303,13 @@ class View(object):
         self.con_port = tk.StringVar()
         self.con_port.set(self.controller.projectfile["con_port"])
         self.con_port.trace("w", lambda *args: self.entry_validate(var=self.con_port, mode="port", length=5))
-        self.entry_con_port = ttk.Entry(master=self.screen_plc,
+        self.entry_con_port = ttk.Entry(master=self.screen_server,
                                         style="style_screen.TEntry",
                                         textvariable=self.con_port)
         self.entry_con_port.bind("<KeyRelease>", lambda x: self.entry_after())
 
         # create and place label for play pause connection
-        self.lbl_playpause = ttk.Label(master=self.screen_plc,
+        self.lbl_playpause = ttk.Label(master=self.screen_server,
                                        style="style_screen.TLabel",
                                        text="Run/Stop:",
                                        anchor="w")
@@ -318,7 +317,7 @@ class View(object):
         # create checkbox autoplay connection
         self.con_autorun = tk.BooleanVar()
         self.con_autorun.set(self.controller.projectfile["con_autorun"])
-        self.cbx_autoplay = ttk.Checkbutton(master=self.screen_plc,
+        self.cbx_autoplay = ttk.Checkbutton(master=self.screen_server,
                                             text="Autorun",
                                             variable=self.con_autorun,
                                             command=self.connect_autorun,
@@ -326,7 +325,7 @@ class View(object):
 
         # create checkboxbutton for play pause connection
         self.playpause = tk.BooleanVar()
-        self.cbx_playpause = tk.Checkbutton(master=self.screen_plc,
+        self.cbx_playpause = tk.Checkbutton(master=self.screen_server,
                                             bd=0,
                                             bg=self.backcolor,
                                             selectcolor=self.backcolor,
@@ -456,7 +455,7 @@ class View(object):
         self.icon_clock.place(x=670 + ox, y=3, width=20, height=20)
         self.lbl_timestamp.place(x=690 + ox, y=1, width=150, height=24)
         self.icon_led.place(x=246, y=3, width=20, height=20)
-        self.lbl_led_plc.place(x=270, y=3, width=50, height=18)
+        self.lbl_led_connection.place(x=270, y=3, width=80, height=18)
         self.icon_version.place(x=5, y=3, width=20, height=20)
         self.lbl_version.place(x=25, y=3, width=150, height=18)
         # scale gui elements from screen home----------------------------------
@@ -465,7 +464,7 @@ class View(object):
         self.txt_eventframe.place(x=1, y=20, width=782 + ox, height=10 + self.eventframeoffs)
         self.eventframe_scrollx.place(x=1, y=20 + self.eventframeoffs, width=782 + ox)
         self.eventframe_scrolly.place(x=782 + ox, y=20, height=15 + self.eventframeoffs)
-        # scale gui elements from screen plc-----------------------------------
+        # scale gui elements from screen server--------------------------------
         self.lbl_con_ip.place(x=50, y=25, width=80, height=25)
         self.entry_con_ip_byte1.place(x=135, y=25, width=35, height=25)
         self.entry_con_ip_byte2.place(x=175, y=25, width=35, height=25)
@@ -528,7 +527,7 @@ class View(object):
 
     def eventframe_post(self, text):
         self.txt_eventframe.configure(state="normal")
-        timestamp = self.controller.timestamp
+        timestamp = self.controller.timestamp_get()
         self.txt_eventframe.insert(tk.END, "{timestamp}: {text}\n".format(timestamp=timestamp, text=text))
         self.txt_eventframe.configure(state="disabled")
         self.txt_eventframe.yview_moveto('1.0')
@@ -665,7 +664,7 @@ class View(object):
         # fill data in datatree
         self.datatree_fill(name, description, version, info, data)
 
-    def plc_update(self):
+    def server_update(self):
         self.con_ip_byte1.set(self.controller.projectfile["con_ip_byte1"])
         self.con_ip_byte2.set(self.controller.projectfile["con_ip_byte2"])
         self.con_ip_byte3.set(self.controller.projectfile["con_ip_byte3"])

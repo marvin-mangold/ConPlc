@@ -7,10 +7,10 @@
     "opt_windowwidth": 1015,
     "opt_windowheight": 710,
     "opt_fullscreen": false,
-    "con_ip_byte1": "192",
-    "con_ip_byte2": "168",
+    "con_ip_byte1": "000",
+    "con_ip_byte2": "000",
     "con_ip_byte3": "000",
-    "con_ip_byte4": "096",
-    "con_port": "1025",
+    "con_ip_byte4": "000",
+    "con_port": "0",
     "con_autorun": false
 }

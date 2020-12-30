@@ -26,7 +26,6 @@ import queue
 
 class Controller(object):
     def __init__(self):
-        self.timestamp = time.strftime("%d.%m.%Y %H:%M:%S")
         # get configdata from configfile
         # Read JSON file
         with open("conplc.conf") as configfile:
@@ -44,8 +43,8 @@ class Controller(object):
         self.server = tcpserver.Server()
 
     def run(self):
-        # refresh variables on screen plc
-        self.view.plc_update()
+        # refresh variables on screen server
+        self.view.server_update()
         # refresh variables on screen data
         self.view.datatree_update()
         # refresh variables on screen setup
@@ -58,7 +57,7 @@ class Controller(object):
         if self.projectfile["con_autorun"]:
             self.view.cbx_playpause.invoke()
         # start parallel trigger
-        self.view.window.after(0, self.trigger_250ms)
+        self.view.window.after(0, self.trigger_100ms)
         # start mainloop
         self.view.window.mainloop()
 
@@ -68,22 +67,24 @@ class Controller(object):
         # stop mainloop
         self.view.window.destroy()
 
-    def trigger_250ms(self):
+    def trigger_100ms(self):
         # trigger every 250ms
-        self.view.window.after(250, self.trigger_250ms)
+        self.view.window.after(100, self.trigger_100ms)
         # get actual time and save it to variable
-        self.timestamp = time.strftime("%d.%m.%Y %H:%M:%S")
+        self.view.timestamp.set(self.timestamp_get())
         # set led state
         self.led_state()
         # check for servermessage
         self.server_message()
+        # check new serverdata
+        self.server_data()
 
     def file_new(self):
         # read JSON file
         with open("empty.cplc") as file:
             self.projectfile = json.load(file)
-        # refresh variables on screen plc
-        self.view.plc_update()
+        # refresh variables on screen server
+        self.view.server_update()
         # refresh variables on screen data
         self.view.datatree_update()
         # refresh variables on screen setup
@@ -99,8 +100,8 @@ class Controller(object):
         # read JSON file
         with open(path) as file:
             self.projectfile = json.load(file)
-        # refresh variables on screen plc
-        self.view.plc_update()
+        # refresh variables on screen server
+        self.view.server_update()
         # refresh variables on screen data
         self.view.datatree_update()
         # refresh variables on screen setup
@@ -184,6 +185,21 @@ class Controller(object):
                 self.view.cbx_playpause.invoke()
         except queue.Empty:  # error if queue is empty
             pass
+
+    def server_data(self):
+        try:
+            recv = self.server.buffer_recv.get(block=False)
+            # write eventmessage
+            message = "Server received data: {data}".format(data=recv)
+            self.view.eventframe_post(message)
+        except queue.Empty:  # error if queue is empty
+            pass
+        else:
+            print("---")
+
+    @staticmethod
+    def timestamp_get():
+        return time.strftime("%d.%m.%Y %H:%M:%S")
 
     def led_state(self):
         if not self.server.active:
