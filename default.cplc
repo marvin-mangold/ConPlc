@@ -11,6 +11,6 @@
     "con_ip_byte2": "168",
     "con_ip_byte3": "000",
     "con_ip_byte4": "096",
-    "con_port": "1024",
-    "con_autorun": true
+    "con_port": "1025",
+    "con_autorun": false
 }

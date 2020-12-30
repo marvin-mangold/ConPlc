@@ -29,11 +29,11 @@ class Server(object):
         self.port = 0  # local port
         self.format = "utf-8"  # format to encode or decode byte data
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.partner = {"id": "", "addr": ""}  # [connection_id, ip-address] of partner
         self.active = False  # server start and stop flag
-        self.timeout = False
-        self.standby = True
-        self.connected = False
+        self.timeout = False  # flag to restart waiting for connections
+        self.connected = False  # flat to indicate if connection is established
+        self.partner_ip = ""  # ip-address of connected partner
+        self.partner_id = None  # connection id to receive and end data
         # buffers
         self.buffer_recv = queue.Queue()  # buffer for received data
         self.buffer_send = queue.Queue()  # buffer for data to send
@@ -49,75 +49,67 @@ class Server(object):
             time.sleep(0.001)
             if self.active:
                 self.connected = False
+                # try to open socket and connect to requesting partner-----------------
                 try:
                     if not self.timeout:
-                        address = (self.ip, self.port)
-                        message = "Server starting".format(ip=self.ip, port=self.port)
-                        self.buffer_message.put(["", message])
-                        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                        self.connection.bind(address)  # create connection channel
-                        message = "Server active: IP ({ip}) Port ({port})".format(ip=self.ip, port=self.port)
-                        self.buffer_message.put(["", message])
-                        message = "Server listening for connection".format(ip=self.ip, port=self.port)
-                        self.buffer_message.put(["", message])
+                        self.message("", "Server starting".format(ip=self.ip, port=self.port))
+                    self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.connection.bind((self.ip, self.port))  # create connection channel
+                    if not self.timeout:
+                        self.message("", "Server active @ IP ({ip}) Port ({port})".format(ip=self.ip, port=self.port))
+                        self.message("", "Server listening for connection".format(ip=self.ip, port=self.port))
                     self.timeout = False
-                    self.connection.settimeout(5)  # turn on listeningtime to check if server is turned off manually----------------------------------
                     self.connection.listen(0)  # wait for partner to connect
-                    self.connection.settimeout(None)  # turn off listeningtime-----------------------------------------------------------------------
-                    self.partner["id"], self.partner["addr"] = self.connection.accept()  # save partner id and address
-                    message = "Server connected to {partner}".format(partner=self.partner["addr"])
-                    self.buffer_message.put(["", message])
-                    self.connected = True
-                    while self.active:  # start datatransfer
-                        message = "Server waiting for data"
-                        self.buffer_message.put(["", message])
-                        try:
-                            # Receive Data
-                            recv = self.connection.recv(1024)  # waiting for data
-                            recv = recv.decode(self.format)  # format recieved data
-                            self.buffer_recv.put(recv)
-                            # Send Data
-                            send = self.buffer_send.get(block=True)  # waiting for data
-                            send = send.encode(self.format)  # format send data
-                            self.connection.send(send)
-                        except WindowsError as errormessage:
-                            if "10057" in str(errormessage):
-                                message = "Server lost connection to {partner}".format(partner=self.partner["addr"])
-                            else:
-                                message = errormessage
-                            self.buffer_message.put(["", message])
-                            break  # break datatransfer, close connection and restart
-                        except Exception as errormessage:
-                            message = "Servererror {errormessage}".format(errormessage=errormessage)
-                            self.buffer_message.put(["", message])
-                        break  # break datatransfer, close connection and restart
-                    self.connection.close()
-                    message = "Server stopped"
-                    self.buffer_message.put(["", message])
+                    self.connection.settimeout(1)  # turn on listeningtime to check if server is turned off manually
+                    self.partner_id, self.partner_ip = self.connection.accept()  # save partner id and address
+                    self.message("", "Server connected to {partner}".format(partner=self.partner_ip))
+                # an error occurred----------------------------------------------------
                 except Exception as errormessage:
                     if "timed out" in str(errormessage):
                         self.timeout = True
-                        print("timeout")
                     else:
-                        message = "Servererror {errormessage}".format(errormessage=errormessage)
-                        self.buffer_message.put(["stop", message])
-                        self.stop()
-            else:
-                if not self.standby:
-                    message = "Server stopped"
-                    self.buffer_message.put(["", message])
-                    self.standby = True
+                        self.message("stop", "Servererror {errormessage}".format(errormessage=errormessage))
+                        self.active = False
+                # connection established start datatransfer----------------------------
+                else:
+                    self.connected = True
+                    # start datatransfer-----------------------------------------------
+                    self.message("", "Server waiting for data")
+                    while self.active:
+                        try:
+                            # Receive Data
+                            recv = self.partner_id.recv(1024)  # waiting for data
+                            recv = recv.decode(self.format)  # format recieved data
+                            if recv == "":
+                                self.connected = False
+                                self.message("", "Server lost connection to {partner}".format(partner=self.partner_ip))
+                                break
+                            self.buffer_recv.put(recv)
+                            self.message("", "Server received data: {data}".format(data=recv))#########################################################################
+                            # Send Data
+                            send = self.buffer_send.get(block=True)  # waiting for data
+                            send = send.encode(self.format)  # format send data
+                            self.partner_id.send(send)
+                        except Exception as errormessage:
+                            self.message("", str(errormessage))
+                            break  # break datatransfer, close connection and restart
+                    self.connection.close()
+                    self.message("", "Server stopped")
 
     def start(self, ip, port):
         self.ip = ip
         self.port = port
         # set server to active
         self.active = True
-        self.standby = False
         self.timeout = False
+        self.connected = False
 
     def stop(self):
         # set server to inactive
         self.active = False
-        self.standby = False
         self.timeout = False
+        self.connected = False
+        self.message("", "Server stopped")
+
+    def message(self, cmd, message):
+        self.buffer_message.put([cmd, message])
