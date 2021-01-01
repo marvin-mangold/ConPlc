@@ -193,6 +193,7 @@ class View(object):
                                      anchor="w")
 
         self.icon_led = tk.Canvas(master=self.infobar, relief="flat", highlightthickness=0, bg=self.backcolor)
+        self.icon_led_last_state = ""
         self.icon_led.create_image(0, 0, image=self.img_led_gn, anchor="nw")
         self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
         self.icon_led.create_image(0, 0, image=self.img_led_ye, anchor="nw")
@@ -676,14 +677,16 @@ class View(object):
         self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
 
     def led_state(self, state="error"):
-        if state == "error":
-            self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
-        elif state == "warn":
-            self.icon_led.create_image(0, 0, image=self.img_led_ye, anchor="nw")
-        elif state == "ok":
-            self.icon_led.create_image(0, 0, image=self.img_led_gn, anchor="nw")
-        else:
-            self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
+        if state != self.icon_led_last_state:
+            if state == "error":
+                self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
+            elif state == "warn":
+                self.icon_led.create_image(0, 0, image=self.img_led_ye, anchor="nw")
+            elif state == "ok":
+                self.icon_led.create_image(0, 0, image=self.img_led_gn, anchor="nw")
+            else:
+                self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
+        self.icon_led_last_state = state
 
     def connect_autorun(self):
         self.controller.projectfile["con_autorun"] = self.con_autorun.get()

@@ -68,7 +68,7 @@ class Controller(object):
         self.view.window.destroy()
 
     def trigger_100ms(self):
-        # trigger every 250ms
+        # trigger every 500ms
         self.view.window.after(100, self.trigger_100ms)
         # get actual time and save it to variable
         self.view.timestamp.set(self.timestamp_get())
@@ -187,15 +187,21 @@ class Controller(object):
             pass
 
     def server_data(self):
-        try:
+        try:  # try to get data from queue
             recv = self.server.buffer_recv.get(block=False)
-            # write eventmessage
-            message = "Server received data: {data}".format(data=recv)
-            self.view.eventframe_post(message)
         except queue.Empty:  # error if queue is empty
             pass
-        else:
-            print("---")
+        else:  # data from queue taken
+            data = list(recv)  # convert recieved bytestring to list of integer
+            # write eventmessage
+            self.view.eventframe_post("Server received data")
+            # work with received data
+            # -----------------------
+            print(data)
+            data[5] = 94
+            # -----------------------
+            data = bytes(data)  # convert list of integer to bytestring
+            self.server.buffer_send.put(data)
 
     @staticmethod
     def timestamp_get():
