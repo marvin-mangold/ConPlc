@@ -53,9 +53,9 @@ class Controller(object):
         self.view.window_update()
         # write eventmessage
         self.view.eventframe_post("Programm started")
-        # check if autorun is activated
-        if self.projectfile["con_autorun"]:
-            self.view.cbx_playpause.invoke()
+        # check if autostart is activated
+        if self.projectfile["con_autostart"]:
+            self.view.cbx_runstop.invoke()
         # start parallel trigger
         self.view.window.after(0, self.trigger_100ms)
         # start mainloop
@@ -182,7 +182,7 @@ class Controller(object):
             # write eventmessage
             self.view.eventframe_post(message)
             if event == "stop":
-                self.view.cbx_playpause.invoke()
+                self.view.cbx_runstop.invoke()
         except queue.Empty:  # error if queue is empty
             pass
 
@@ -194,10 +194,14 @@ class Controller(object):
         else:  # data from queue taken
             data = list(recv)  # convert recieved bytestring to list of integer
             # write eventmessage
-            self.view.eventframe_post("Server received data")
+            message = "Server received data"
+            if self.projectfile["con_show_recvdata"]:
+                message = "{msg}: {data}".format(msg=message, data=data)
+            self.view.eventframe_post(message)
             # work with received data
             # -----------------------
             print(data)
+            print(len(data))
             data[5] = 94
             # -----------------------
             data = bytes(data)  # convert list of integer to bytestring

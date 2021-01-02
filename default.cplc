@@ -12,5 +12,6 @@
     "con_ip_byte3": "000",
     "con_ip_byte4": "96",
     "con_port": "1024",
-    "con_autorun": true
+    "con_autostart": true,
+    "con_show_recvdata": false
 }

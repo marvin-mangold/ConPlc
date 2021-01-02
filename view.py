@@ -188,9 +188,9 @@ class View(object):
 
         # create and place LED and label for connectionstate on infobar
         self.lbl_led_connection = ttk.Label(master=self.infobar,
-                                     style="style_infobar.TLabel",
-                                     text="Connection",
-                                     anchor="w")
+                                            style="style_infobar.TLabel",
+                                            text="Connection",
+                                            anchor="w")
 
         self.icon_led = tk.Canvas(master=self.infobar, relief="flat", highlightthickness=0, bg=self.backcolor)
         self.icon_led_last_state = ""
@@ -309,35 +309,49 @@ class View(object):
                                         textvariable=self.con_port)
         self.entry_con_port.bind("<KeyRelease>", lambda x: self.entry_after())
 
-        # create and place label for play pause connection
-        self.lbl_playpause = ttk.Label(master=self.screen_server,
-                                       style="style_screen.TLabel",
-                                       text="Run/Stop:",
-                                       anchor="w")
+        # create and place label for run stop connection
+        self.lbl_runstop = ttk.Label(master=self.screen_server,
+                                     style="style_screen.TLabel",
+                                     text="Run/Stop:",
+                                     anchor="w")
 
-        # create checkbox autoplay connection
-        self.con_autorun = tk.BooleanVar()
-        self.con_autorun.set(self.controller.projectfile["con_autorun"])
-        self.cbx_autoplay = ttk.Checkbutton(master=self.screen_server,
-                                            text="Autorun",
-                                            variable=self.con_autorun,
-                                            command=self.connect_autorun,
-                                            style="style_screen.TCheckbutton")
+        # create checkbox autostart connection
+        self.con_autostart = tk.BooleanVar()
+        self.con_autostart.set(self.controller.projectfile["con_autostart"])
+        self.cbx_autostart = ttk.Checkbutton(master=self.screen_server,
+                                             text="Autostart",
+                                             variable=self.con_autostart,
+                                             command=self.connect_autostart,
+                                             style="style_screen.TCheckbutton")
 
-        # create checkboxbutton for play pause connection
-        self.playpause = tk.BooleanVar()
-        self.cbx_playpause = tk.Checkbutton(master=self.screen_server,
-                                            bd=0,
-                                            bg=self.backcolor,
-                                            selectcolor=self.backcolor,
-                                            highlightcolor=self.backcolor,
-                                            activebackground=self.backcolor,
-                                            relief="flat",
-                                            variable=self.playpause,
-                                            command=self.connect_state,
-                                            image=self.img_play,
-                                            selectimage=self.img_pause,
-                                            indicatoron=False)
+        # create checkboxbutton for run stop connection
+        self.runstop = tk.BooleanVar()
+        self.cbx_runstop = tk.Checkbutton(master=self.screen_server,
+                                          bd=0,
+                                          bg=self.backcolor,
+                                          selectcolor=self.backcolor,
+                                          highlightcolor=self.backcolor,
+                                          activebackground=self.backcolor,
+                                          relief="flat",
+                                          variable=self.runstop,
+                                          command=self.connect_state,
+                                          image=self.img_play,
+                                          selectimage=self.img_pause,
+                                          indicatoron=False)
+
+        # create and place label for show received data in Eventlog
+        self.lbl_show_recvdata = ttk.Label(master=self.screen_server,
+                                           style="style_screen.TLabel",
+                                           text="Show received Data in Eventlog:",
+                                           anchor="w")
+
+        # create checkbox for show received data in Eventlog
+        self.con_show_recvdata = tk.BooleanVar()
+        self.con_show_recvdata.set(self.controller.projectfile["con_show_recvdata"])
+        self.cbx_show_recvdata = ttk.Checkbutton(master=self.screen_server,
+                                                 variable=self.con_show_recvdata,
+                                                 command=self.connect_show_recvdata,
+                                                 style="style_screen.TCheckbutton")
 
         # screen data----------------------------------------------------------
         # create frame on screen data for UDT name + description + version + info
@@ -473,9 +487,11 @@ class View(object):
         self.entry_con_ip_byte4.place(x=255, y=25, width=35, height=25)
         self.lbl_con_port.place(x=50, y=58, width=80, height=25)
         self.entry_con_port.place(x=135, y=58, width=45, height=25)
-        self.lbl_playpause.place(x=50, y=97, width=80, height=25)
-        self.cbx_playpause.place(x=135, y=91, width=40, height=40)
-        self.cbx_autoplay.place(x=180, y=91, width=80, height=40)
+        self.lbl_runstop.place(x=50, y=97, width=80, height=25)
+        self.cbx_runstop.place(x=135, y=91, width=40, height=40)
+        self.cbx_autostart.place(x=180, y=91, width=80, height=40)
+        self.lbl_show_recvdata.place(x=50, y=136, width=190, height=25)
+        self.cbx_show_recvdata.place(x=245, y=129, width=21, height=40)
         # scale gui elements from screen data----------------------------------
         self.udt_infos.place(x=50, y=25, width=750 + ox, height=58)
         self.lbl_udt_name.place(x=0, y=0, width=50, height=25)
@@ -671,7 +687,8 @@ class View(object):
         self.con_ip_byte3.set(self.controller.projectfile["con_ip_byte3"])
         self.con_ip_byte4.set(self.controller.projectfile["con_ip_byte4"])
         self.con_port.set(self.controller.projectfile["con_port"])
-        self.con_autorun.set(self.controller.projectfile["con_autorun"])
+        self.con_autostart.set(self.controller.projectfile["con_autostart"])
+        self.con_show_recvdata.set(self.controller.projectfile["con_show_recvdata"])
 
     def setup_update(self):
         self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
@@ -688,11 +705,14 @@ class View(object):
                 self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
         self.icon_led_last_state = state
 
-    def connect_autorun(self):
-        self.controller.projectfile["con_autorun"] = self.con_autorun.get()
+    def connect_autostart(self):
+        self.controller.projectfile["con_autostart"] = self.con_autostart.get()
+
+    def connect_show_recvdata(self):
+        self.controller.projectfile["con_show_recvdata"] = self.con_show_recvdata.get()
 
     def connect_state(self):
-        state = self.playpause.get()
+        state = self.runstop.get()
         if state:
             self.controller.server_start()
         elif not state:
