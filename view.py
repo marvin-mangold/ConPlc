@@ -223,7 +223,7 @@ class View(object):
         # create and place label for eventframe
         self.lbl_eventframe = ttk.Label(master=self.eventframe,
                                         style="style_infobar.TLabel",
-                                        text="Eventlog",
+                                        text="Event Log",
                                         anchor="w")
 
         # change mouse cursor when mouse over label
@@ -414,12 +414,14 @@ class View(object):
 
         # create and place treeview for data structure
         self.datatree = ttk.Treeview(self.screen_data)
-        self.datatree["columns"] = ("Datatype", "Comment")
+        self.datatree["columns"] = ("Datatype", "Value", "Comment")
         self.datatree.column("#0", width=200, minwidth=100, stretch=tk.NO)
-        self.datatree.column("Datatype", width=200, minwidth=100, stretch=tk.NO)
+        self.datatree.column("Datatype", width=150, minwidth=100, stretch=tk.NO)
+        self.datatree.column("Value", width=150, minwidth=100, stretch=tk.NO)
         self.datatree.column("Comment", width=200, minwidth=100, stretch=tk.YES)
         self.datatree.heading("#0", text="Name", anchor=tk.W)
         self.datatree.heading("Datatype", text="Datatype", anchor=tk.W)
+        self.datatree.heading("Value", text="Value", anchor=tk.W)
         self.datatree.heading("Comment", text="Comment", anchor=tk.W)
         # add scrollbar to treeview
         self.datatree_scrollx = ttk.Scrollbar(self.screen_data, orient="horizontal", command=self.datatree.xview)
@@ -433,6 +435,19 @@ class View(object):
                                                   text='load Datastructure',
                                                   style="style_screen.TButton",
                                                   command=self.controller.data_get)
+
+        # create and place label for UDT info
+        self.lbl_udt_size = ttk.Label(master=self.screen_data,
+                                      style="style_screen.TLabel",
+                                      text="Size [Bytes]:",
+                                      anchor="w")
+
+        # create and place variable label for UDT info
+        self.udt_size = tk.StringVar()
+        self.lbl_udt_size_var = ttk.Label(master=self.screen_data,
+                                          style="style_screen_var.TLabel",
+                                          textvariable=self.udt_size,
+                                          anchor="center")
 
         # screen setup---------------------------------------------------------
         # create checkbox for option fullscreen
@@ -507,6 +522,8 @@ class View(object):
         self.datatree_scrollx.place(x=50, y=415 + oy, width=691 + ox)
         self.datatree_scrolly.place(x=740 + ox, y=92, height=337 + oy)
         self.btn_import_datasructure.place(x=50, y=437 + oy, width=150, height=30)
+        self.lbl_udt_size.place(x=580 + ox, y=437 + oy, width=85, height=25)
+        self.lbl_udt_size_var.place(x=670 + ox, y=437 + oy, width=83, height=25)
         # scale gui elements from screen setup---------------------------------
         self.cbx_fullscreen.place(x=50, y=25, width=90, height=40)
         if not self.controller.projectfile["opt_fullscreen"]:
@@ -655,9 +672,10 @@ class View(object):
             comment = element["comment"]
             visible = element["visible"]
             action = element["action"]
+            value = element["value"]
             # insert element if element has "visible" flag
             if visible:
-                data = self.datatree.insert(folderpath[-1], "end", text=name, values=(datatype, comment))
+                data = self.datatree.insert(folderpath[-1], "end", text=name, values=(datatype, value, comment))
             # open new folder if element has "open" flag
             if action == "open":
                 # save name to folderpath
@@ -675,11 +693,13 @@ class View(object):
         description = self.controller.projectfile["udt_description"]
         version = self.controller.projectfile["udt_version"]
         info = self.controller.projectfile["udt_info"]
+        size = self.controller.projectfile["udt_size"]
         data = self.controller.projectfile["udt_data"]
         # clear data in datatree
         self.datatree_clear()
         # fill data in datatree
         self.datatree_fill(name, description, version, info, data)
+        self.udt_size.set(size)
 
     def server_update(self):
         self.con_ip_byte1.set(self.controller.projectfile["con_ip_byte1"])

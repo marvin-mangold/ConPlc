@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import view
 import readudt
+import readplc
 import tcpserver
 import json
 import time
@@ -145,12 +146,13 @@ class Controller(object):
                     error = True
             if not error:
                 # get data of main UDT and sub-UDTs
-                name, description, version, info, data = readudt.get_udt_data(filepath=filepath,
-                                                                              dependencies=dependencies)
+                name, description, version, info, size, data = readudt.get_udt_data(filepath=filepath,
+                                                                                    dependencies=dependencies)
                 self.projectfile["udt_name"] = name
                 self.projectfile["udt_description"] = description
                 self.projectfile["udt_version"] = version
                 self.projectfile["udt_info"] = info
+                self.projectfile["udt_size"] = size
                 self.projectfile["udt_data"] = data
                 # refresh variables on screen data
                 self.view.datatree_update()
@@ -161,6 +163,7 @@ class Controller(object):
             self.projectfile["udt_description"] = ""
             self.projectfile["udt_version"] = ""
             self.projectfile["udt_info"] = ""
+            self.projectfile["udt_size"] = "0"
             self.projectfile["udt_data"] = []
             # refresh variables on screen data
             self.view.datatree_update()
@@ -171,7 +174,9 @@ class Controller(object):
                                                       byte3=str(int(self.projectfile["con_ip_byte3"])),
                                                       byte4=str(int(self.projectfile["con_ip_byte4"])))
         port = int(self.projectfile["con_port"])
-        self.server.start(ip=ip, port=port)
+        datasize = int(self.projectfile["udt_size"])
+        datasize = 258
+        self.server.start(ip=ip, port=port, datasize=datasize)
 
     def server_stop(self):
         self.server.stop()
@@ -187,24 +192,23 @@ class Controller(object):
             pass
 
     def server_data(self):
-        try:  # try to get data from queue
+        try:  # try to get data from recvbuffer
             recv = self.server.buffer_recv.get(block=False)
-        except queue.Empty:  # error if queue is empty
+        except queue.Empty:  # error if recvbuffer is empty
             pass
-        else:  # data from queue taken
-            data = list(recv)  # convert recieved bytestring to list of integer
+        else:  # data from recvbuffer taken
+            # convert recieved bytestring to list of integer
+            data = list(recv)
             # write eventmessage
             message = "Server received data"
             if self.projectfile["con_show_recvdata"]:
                 message = "{msg}: {data}".format(msg=message, data=data)
             self.view.eventframe_post(message)
             # work with received data
-            # -----------------------
-            print(data)
-            print(len(data))
-            data[5] = 94
-            # -----------------------
-            data = bytes(data)  # convert list of integer to bytestring
+            readplc.get_plc_data(plcdata=data, udtdata=self.projectfile["udt_data"])
+            # convert list of integer to bytestring
+            data = bytes(data)
+            # put data back in sendbuffer
             self.server.buffer_send.put(data)
 
     @staticmethod

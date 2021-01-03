@@ -19,6 +19,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import re
 
 
+# define possible Datatypes and its bits-size
+standard_types = {"Bool": 1,
+                  "Byte": 8,
+                  "Word": 16,
+                  "DWord": 32,
+                  "LWord": 64,
+                  "SInt": 8,
+                  "USInt": 8,
+                  "Int": 16,
+                  "UInt": 16,
+                  "DInt": 32,
+                  "UDInt": 32,
+                  "LInt": 64,
+                  "ULInt": 64,
+                  "Real": 32,
+                  "LReal": 64,
+                  "Char": 8,
+                  "WChar": 16,
+                  "String": 16,
+                  "WString": 16}
+special_types = {"DTL": 0,
+                 "Array": 0,
+                 "Struct": 0}
+
+
 def read_udt_file(path):
     udt = []
     with open(path, "r", encoding="utf-8") as udt_file:
@@ -265,11 +290,6 @@ def get_udt_data(data=None, foldernames=None, filepath="", dependencies=None):
     version = ""
     info = ""
     readheader = True
-    # define possible Datatypes
-    standard_types = ["Bool", "Byte", "Word", "DWord", "LWord", "SInt", "USInt",
-                      "Int", "UInt", "DInt", "UDInt", "LInt", "ULInt", "Real",
-                      "LReal", "Char", "WChar", "String", "WString"]
-    special_types = ["DTL", "Array", "Struct"]
     # read Data from udt-File
     udt = read_udt_file(filepath)
     # analyse Data from udt-File
@@ -351,10 +371,10 @@ def get_udt_data(data=None, foldernames=None, filepath="", dependencies=None):
                         foldernames.append(element["name"] + ".")
                         # middle part of udt (data)
                         _path = dependencies[datatype]
-                        _name, _description, _version, _info, data = get_udt_data(data=data,
-                                                                                  foldernames=foldernames,
-                                                                                  filepath=_path,
-                                                                                  dependencies=dependencies)
+                        _name, _description, _version, _info, _size, data = get_udt_data(data=data,
+                                                                                         foldernames=foldernames,
+                                                                                         filepath=_path,
+                                                                                         dependencies=dependencies)
                         # last part of udt (end indicator)
                         element = {"name": "", "datatype": "", "comment": "",
                                    "visible": False, "access": False, "action": "close"}
@@ -362,7 +382,8 @@ def get_udt_data(data=None, foldernames=None, filepath="", dependencies=None):
                         foldernames.pop()
                 else:
                     print("Datentyp {datatype} nicht implementiert!".format(datatype=datatype))
-    return name, description, version, info, data
+    size = 0
+    return name, description, version, info, size, data
 
 
 def get_udt_dependencies(path):
