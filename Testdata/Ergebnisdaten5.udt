@@ -1,0 +1,8 @@
+﻿TYPE "test"
+VERSION : 0.1
+   STRUCT
+      test : "Teststatus";   // beschreibung test
+   END_STRUCT;
+
+END_TYPE
+
