@@ -342,7 +342,7 @@ class View(object):
         # create and place label for show received data in Eventlog
         self.lbl_show_recvdata = ttk.Label(master=self.screen_server,
                                            style="style_screen.TLabel",
-                                           text="Show received Data in Eventlog:",
+                                           text="Show received Data in Event log:",
                                            anchor="w")
 
         # create checkbox for show received data in Eventlog
@@ -505,7 +505,7 @@ class View(object):
         self.lbl_runstop.place(x=50, y=97, width=80, height=25)
         self.cbx_runstop.place(x=135, y=91, width=40, height=40)
         self.cbx_autostart.place(x=180, y=91, width=80, height=40)
-        self.lbl_show_recvdata.place(x=50, y=136, width=190, height=25)
+        self.lbl_show_recvdata.place(x=50, y=136, width=192, height=25)
         self.cbx_show_recvdata.place(x=245, y=129, width=21, height=40)
         # scale gui elements from screen data----------------------------------
         self.udt_infos.place(x=50, y=25, width=750 + ox, height=58)

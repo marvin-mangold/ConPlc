@@ -1,8 +1,14 @@
 ﻿TYPE "Anwenderdatentyp_1"
 VERSION : 0.1
    STRUCT
-      test : Array[0..10] of String;
-      testt2 {InstructionName := 'DTL'; LibVersion := '1.0'} : Array[0..10] of DTL;
+      test : Array[0..10] of "Testudt";
+      twentythree : "Teststatus";   // beschreibung twentythree
+      twentytwo : Struct   // beschreibung twentytwo
+         one : "Teststruct";   // twentytwo one
+         two : Int;   // twentytwo two
+         three : DInt;   // twentytwo three
+         onetest : Array[0..10] of "Testarrayinstruct";
+      END_STRUCT;
    END_STRUCT;
 
 END_TYPE

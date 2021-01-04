@@ -261,10 +261,12 @@ def element_is_udt(datatype):
     # check if element datatype is special udt type
     # -->"someName"
     result = False
+    element = ""
     regex = re.search(r'"(.*)"', datatype)
     if regex is not None:
         result = True
-    return result
+        element = regex[0]
+    return result, element
     
 
 def save_udt_element(data, foldernames, element):
@@ -361,7 +363,7 @@ def get_udt_data(data=None, foldernames=None, filepath="", dependencies=None):
                                     firstrun = False
                             foldernames.pop()
                 # special datatype udt type
-                elif element_is_udt(datatype):
+                elif element_is_udt(datatype)[0]:
                     result, element = get_udt_var(line)
                     if result:
                         # first part of udt (declaration line)
@@ -392,6 +394,11 @@ def get_udt_dependencies(path):
     for line in udt:
         result, datatype = get_udt_datatype(line)
         if result:
-            if element_is_udt(datatype):
+            if datatype == "Array":
+                result, elements = get_udt_array(line)
+                if result:
+                    dependencies[elements[1]["datatype"]] = ""
+            # special datatype udt
+            elif element_is_udt(datatype)[0]:
                 dependencies[datatype] = ""
     return dependencies
