@@ -90,17 +90,17 @@ class Server(object):
                         self.connection.close()
                         self.connected = False
                         break
-                else:  # data recieved
+                else:  # data received
                     self.timeout = False
                     if self.encode_decode:  # if activated the data will be  decoded
-                        recv = recv.decode(self.format, 'ignore')  # format recieved data
+                        recv = recv.decode(self.format, 'ignore')  # format received data
                     if not recv:  # if no data in received data, partner closed connection
                         self.message("", "Server lost connection to {partner}".format(partner=self.partner_ip))
                         self.connection.close()
                         self.connected = False
                         break
                     else:
-                        # check if length of recieved data matches expected length of data
+                        # check if length of received data matches expected length of data
                         if len(recv) == self.datasize:
                             self.buffer_recv.put(recv)  # put received data in buffer
                             # send answer to partner
@@ -115,10 +115,10 @@ class Server(object):
                                 self.connection.close()
                                 self.connected = False
                                 break
-                        # length of recieved data does not matches expected length of data
+                        # length of received data does not matches expected length of data
                         else:
                             self.timeout = False
-                            message = "Servererror length of recieved data " \
+                            message = "Servererror length of received data " \
                                       "({recvsize} Bytes) does not matches length expected data " \
                                       "({expectedsize} Bytes)".format(recvsize=len(recv), expectedsize=self.datasize)
                             self.message("stop", message=message)

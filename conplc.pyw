@@ -110,14 +110,14 @@ class Controller(object):
         # refresh windowsize and scaling
         self.view.window_update()
         # write eventmessage
-        self.view.eventframe_post("Projekt opened ({path})".format(path=path))
+        self.view.eventframe_post("Project opened ({path})".format(path=path))
 
     def file_save(self):
         # write JSON file
         with open('default.cplc', 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
         # write eventmessage
-        self.view.eventframe_post("Projekt saved")
+        self.view.eventframe_post("Project saved")
 
     def file_backup(self):
         path = self.view.filepath_saveas(filetypes=(("cplc Files", "*.cplc"),))
@@ -125,7 +125,7 @@ class Controller(object):
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
         # write eventmessage
-        self.view.eventframe_post("Projekt saved ({path})".format(path=path))
+        self.view.eventframe_post("Project saved ({path})".format(path=path))
 
     def data_get(self):
         error = False
@@ -197,7 +197,7 @@ class Controller(object):
         except queue.Empty:  # error if recvbuffer is empty
             pass
         else:  # data from recvbuffer taken
-            # convert recieved bytestring to list of integer
+            # convert received bytestring to list of integer
             data = list(recv)
             # write eventmessage
             message = "Server received data"
