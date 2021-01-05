@@ -1,0 +1,19 @@
+﻿TYPE "UDT sub udt"
+TITLE = has no title
+VERSION : 0.1
+//some comment
+   STRUCT
+      one : Bool;   // beschreibung one
+      two : Byte;   // beschreibung two
+      three : Word;   // beschreibung three
+      four : DWord;   // beschreibung four
+      five : LWord;   // beschreibung five
+      six : SInt;   // beschreibung six
+      seven : USInt;   // beschreibung seven
+      eight : Int;   // beschreibung eight
+      nine : UInt;   // beschreibung nine
+      ten : DInt;   // beschreibung ten
+   END_STRUCT;
+
+END_TYPE
+

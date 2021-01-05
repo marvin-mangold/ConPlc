@@ -26,6 +26,12 @@ from pathlib import Path
 
 class View(object):
     def __init__(self, controller):
+        """
+        -setup window
+        -load images
+        -configure style
+        -create gui elements
+        """
         self.controller = controller
         # other variables------------------------------------------------------
         self.desktoppath = os.path.expanduser(r"~\Desktop")
@@ -472,6 +478,10 @@ class View(object):
         # initial trigger for 250ms loop
 
     def window_scale(self):
+        """
+        -scale window
+        -place gui elements
+        """
         # calculate difference between minimal size and actual size
         # so the right scale can be calculated with individual size on startup
         # ox, oy: offset width (ox) and offset height (oy)
@@ -531,6 +541,9 @@ class View(object):
             self.controller.projectfile["opt_windowheight"] = self.window.winfo_height()
 
     def window_update(self):
+        """
+        -update windowsize and position
+        """
         fullscreen = self.opt_fullscreen.get()
         self.controller.projectfile["opt_fullscreen"] = fullscreen
         if fullscreen:
@@ -549,6 +562,9 @@ class View(object):
             self.window.geometry("%dx%d+%d+%d" % (windowwidth, windowheight, windowstartposx, windowstartposy))
 
     def eventframe_drag(self, mode):
+        """
+        -change height of event log while dragging it with the mouse
+        """
         if mode == "start":
             self.eventframediff = self.eventframe.winfo_rooty() + self.eventframe.winfo_height() - 35
         elif mode == "move":
@@ -560,6 +576,9 @@ class View(object):
             self.window_scale()
 
     def eventframe_post(self, text):
+        """
+        -write text into event log with timestamp
+        """
         self.txt_eventframe.configure(state="normal")
         timestamp = self.controller.timestamp_get()
         self.txt_eventframe.insert(tk.END, "{timestamp}: {text}\n".format(timestamp=timestamp, text=text))
@@ -567,16 +586,25 @@ class View(object):
         self.txt_eventframe.yview_moveto('1.0')
 
     def keyup(self, event):
+        """
+        -special actions when a key gets released
+        """
         # print(event)
         # if event.keysym == "Tab": self.method()
         pass
 
     def keydown(self, event):
+        """
+        -special actions when a key gets pressed
+        """
         # print(event)
         pass
 
     @staticmethod
     def entry_validate(var, mode, length):
+        """
+        check keyboard input on gui element depending on the selected mode
+        """
         text = var.get()
         # check if text is a number between 0 and 65535
         if mode == "port":
@@ -615,6 +643,9 @@ class View(object):
         var.set(text)
 
     def entry_after(self):
+        """
+        -save content of gui element after the input is done
+        """
         self.controller.projectfile["con_ip_byte1"] = self.con_ip_byte1.get()
         self.controller.projectfile["con_ip_byte2"] = self.con_ip_byte2.get()
         self.controller.projectfile["con_ip_byte3"] = self.con_ip_byte3.get()
@@ -622,6 +653,10 @@ class View(object):
         self.controller.projectfile["con_port"] = self.con_port.get()
 
     def filepath_open(self, message=None, filetypes=((), ("all files", "*.*"))):
+        """
+        -show message if message is not None
+        -open file dialog and return the filepath
+        """
         if message is not None:
             tk.messagebox.showinfo(title=None, message=message)
         path = tk.filedialog.askopenfilename(initialdir=self.desktoppath, title="select File",
@@ -629,12 +664,18 @@ class View(object):
         return path
 
     def filepath_saveas(self, filetypes=((), ("all files", "*.*"))):
+        """
+        -open file dialog and return the filepath
+        """
         path = tk.filedialog.asksaveasfilename(initialdir=self.desktoppath, title="Save as...",
                                                filetypes=filetypes,
                                                defaultextension=filetypes[0][1])
         return path
 
     def about_show(self):
+        """
+        -show software infos
+        """
         txt_version = self.controller.configfile["version"]
         txt_copyright = self.controller.configfile["about_copyright"]
         txt_name = self.controller.configfile["about_name"]
@@ -651,6 +692,10 @@ class View(object):
         tk.messagebox.showinfo(title="About", message=message)
 
     def datatree_clear(self):
+        """
+        -clear data on screen data
+        -delete all entries in datatree
+        """
         for element in self.datatree.get_children():
             self.datatree.delete(element)
         self.udt_name.set("")
@@ -659,6 +704,9 @@ class View(object):
         self.udt_info.set("")
 
     def datatree_fill(self, name, description, version, info, data):
+        """
+        -insert entries in datatree
+        """
         self.udt_name.set(name)
         self.udt_description.set(description)
         self.udt_version.set(version)
@@ -689,6 +737,10 @@ class View(object):
                 pass
 
     def datatree_update(self):
+        """
+        -update data on screen data
+        -update all entries in datatree
+        """
         name = self.controller.projectfile["udt_name"]
         description = self.controller.projectfile["udt_description"]
         version = self.controller.projectfile["udt_version"]
@@ -702,6 +754,9 @@ class View(object):
         self.udt_size.set(size)
 
     def server_update(self):
+        """
+        -update data on screen server
+        """
         self.con_ip_byte1.set(self.controller.projectfile["con_ip_byte1"])
         self.con_ip_byte2.set(self.controller.projectfile["con_ip_byte2"])
         self.con_ip_byte3.set(self.controller.projectfile["con_ip_byte3"])
@@ -711,9 +766,15 @@ class View(object):
         self.con_show_recvdata.set(self.controller.projectfile["con_show_recvdata"])
 
     def setup_update(self):
+        """
+        -update data on screen setup
+        """
         self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
 
     def led_state(self, state="error"):
+        """
+        -change image of led element depending on its state
+        """
         if state != self.icon_led_last_state:
             if state == "error":
                 self.icon_led.create_image(0, 0, image=self.img_led_rd, anchor="nw")
@@ -726,12 +787,21 @@ class View(object):
         self.icon_led_last_state = state
 
     def connect_autostart(self):
+        """
+        -save content of checkbox after the state has changed
+        """
         self.controller.projectfile["con_autostart"] = self.con_autostart.get()
 
     def connect_show_recvdata(self):
+        """
+        -save content of checkbox after the state has changed
+        """
         self.controller.projectfile["con_show_recvdata"] = self.con_show_recvdata.get()
 
     def connect_state(self):
+        """
+        -toggle checkbutton
+        """
         state = self.runstop.get()
         if state:
             self.controller.server_start()

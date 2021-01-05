@@ -1,0 +1,38 @@
+﻿TYPE "UDT with sub udt"
+TITLE = has no title
+VERSION : 0.1
+//some comment
+   STRUCT
+      one : Bool;   // comment one
+      two : Byte;   // comment two
+      three : Word;   // comment three
+      four : DWord;   // comment four
+      five : LWord;   // comment five
+      six : SInt;   // comment six
+      seven : USInt;   // comment seven
+      eight : Int;   // comment eight
+      nine : UInt;   // comment nine
+      ten : DInt;   // comment ten
+      eleven : UDInt;   // comment eleven
+      twelve : LInt;   // comment twelve
+      thirteen : ULInt;   // comment thirteen
+      fourteen : Real;   // comment fourteen
+      fifteen_one : LReal;   // comment fifteen_one
+      fifteen_two : Array[0..10] of "UDT_sub_udt";   // comment fifteen_two
+      sixteen : Char;   // comment sixteen
+      seventeen : WChar;   // comment seventeen
+      eighteen : String;   // comment eighteen
+      nineteen : WString;   // comment nineteen
+      twenty {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment twenty
+      twentyone : Array[0..10] of Byte;   // comment twentyone
+      twentytwo : Struct   // comment twentytwo
+         one : Bool;   // twentytwo one
+         two : Int;   // twentytwo two
+         three : DInt;   // twentytwo three
+         four : Array[0..2] of "UDT_sub_udt";   // comment four
+      END_STRUCT;
+      twentythree : "UDT_sub_udt";   // comment twentythree
+   END_STRUCT;
+
+END_TYPE
+

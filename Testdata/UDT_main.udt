@@ -1,0 +1,37 @@
+﻿TYPE "UDT_main"
+TITLE = Datatype Main
+VERSION : 0.1
+//here is the comment
+   STRUCT
+      one : Bool;   // comment one
+      two : Byte;   // comment two
+      three : Word;   // comment three
+      four : DWord;   // comment four
+      five : LWord;   // comment five
+      six : SInt;   // comment six
+      seven : USInt;   // comment seven
+      eight : Int;   // comment eight
+      nine : UInt;   // comment nine
+      ten : DInt;   // comment ten
+      eleven : UDInt;   // comment eleven
+      twelve : LInt;   // comment twelve
+      thirteen : ULInt;   // comment thirteen
+      fourteen : Real;   // comment fourteen
+      fifteen : LReal;   // comment fifteen
+      sixteen : Char;   // comment sixteen
+      seventeen : WChar;   // comment seventeen
+      eighteen : String;   // comment eighteen
+      nineteen : WString;   // comment nineteen
+      twenty {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment twenty
+      twentyone : Array[0..10] of Byte;   // comment twentyone
+      twentytwo : Struct   // comment twentytwo
+         one : Bool;   // twentytwo one
+         two : Int;   // twentytwo two
+         three : DInt;   // twentytwo three
+      END_STRUCT;
+      twentythree : "UDT_with_sub_udt";   // comment twentythree
+      twentytfour : "UDT_without_sub_udt";   // comment twentyfour
+   END_STRUCT;
+
+END_TYPE
+

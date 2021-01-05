@@ -395,6 +395,9 @@ def get_udt_data(data=None, foldernames=None, filepath="", dependencies=None):
 
 
 def get_udt_dependencies(path):
+    """
+    -iterate trough udt file and find underlying udts
+    """
     dependencies = {}
     udt = read_udt_file(path)
     # check every line in udt file for udt declaration
@@ -408,8 +411,8 @@ def get_udt_dependencies(path):
                 if result:
                     # check in (array[x..x] of datatype) if datatype is udt type
                     if element_is_udt(elements[1]["datatype"])[0]:
-                        dependencies[elements[1]["datatype"]] = ""
+                        dependencies[elements[1]["datatype"]] = None
             # declaration type udt direct or in struct
             elif element_is_udt(datatype)[0]:
-                dependencies[datatype] = ""
+                dependencies[datatype] = None
     return dependencies

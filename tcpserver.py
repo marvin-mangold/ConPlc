@@ -24,6 +24,11 @@ import time
 
 class Server(object):
     def __init__(self):
+        """
+        -setup connection parameters
+        -setup buffers
+        -setup thread
+        """
         # connection parameters
         self.ip = "127.0.0.1"  # local ip-address
         self.port = 0  # local port
@@ -46,6 +51,11 @@ class Server(object):
         self.thread.start()  # start thread
 
     def run(self):
+        """
+        -connect to partner
+        -receive data
+        -send data
+        """
         while True:  # infinite loop
             time.sleep(0.001)
             while self.active and not self.connected:  # start connecting
@@ -121,13 +131,16 @@ class Server(object):
                             message = "Servererror length of received data " \
                                       "({recvsize} Bytes) does not matches length expected data " \
                                       "({expectedsize} Bytes)".format(recvsize=len(recv), expectedsize=self.datasize)
-                            self.message("stop", message=message)
+                            self.message("stop", message)
                             self.connection.close()
                             self.connected = False
                             self.active = False
                             break
 
     def start(self, ip, port, datasize):
+        """
+        -start communication
+        """
         self.ip = ip
         self.port = port
         self.datasize = datasize
@@ -136,10 +149,16 @@ class Server(object):
         self.timeout = False
 
     def stop(self):
+        """
+        -stop communication
+        """
         # set server to inactive
         self.active = False
         self.timeout = False
         self.message("", "Server stopped")
 
     def message(self, cmd, message):
+        """
+        -put message to buffer
+        """
         self.buffer_message.put([cmd, message])

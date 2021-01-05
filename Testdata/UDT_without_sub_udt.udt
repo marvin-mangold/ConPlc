@@ -1,7 +1,7 @@
-﻿TYPE "Ergebnisdaten"
-TITLE = Datentyp mit den Ergebnisdaten
+﻿TYPE "UDT without sub udt"
+TITLE = has no title
 VERSION : 0.1
-//HIer werden die zu sendenen Ergebnisdaten definiert
+//some comment
    STRUCT
       one : Bool;   // beschreibung one
       two : Byte;   // beschreibung two
@@ -29,7 +29,6 @@ VERSION : 0.1
          two : Int;   // twentytwo two
          three : DInt;   // twentytwo three
       END_STRUCT;
-      twentythree : "Ergebnisdaten3";   // beschreibung twentythree
    END_STRUCT;
 
 END_TYPE

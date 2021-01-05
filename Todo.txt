@@ -1,2 +1,3 @@
--Depedencies while reading UDT
+-read udt new with underlying udt in arrays or structs
+-how to handle strings?
 -Size of Elements
