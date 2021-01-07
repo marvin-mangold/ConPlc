@@ -4,6 +4,7 @@ VERSION : 0.1
 //here is the comment
    STRUCT
       one : Bool;   // comment one
+      testt2 {InstructionName := 'DTL'; LibVersion := '1.0'} : Array[0..10] of DTL;
       two : Byte;   // comment two
       three : Word;   // comment three
       four : DWord;   // comment four
@@ -31,6 +32,7 @@ VERSION : 0.1
       END_STRUCT;
       twentythree : "UDT_with_sub_udt";   // comment twentythree
       twentytfour : "UDT_without_sub_udt";   // comment twentyfour
+      sone : Bool;   // comment sone
    END_STRUCT;
 
 END_TYPE

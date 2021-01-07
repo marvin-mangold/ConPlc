@@ -27,10 +27,10 @@ from pathlib import Path
 class View(object):
     def __init__(self, controller):
         """
-        -setup window
-        -load images
-        -configure style
-        -create gui elements
+        setup window
+        load images
+        configure style
+        create gui elements
         """
         self.controller = controller
         # other variables------------------------------------------------------
@@ -479,8 +479,8 @@ class View(object):
 
     def window_scale(self):
         """
-        -scale window
-        -place gui elements
+        scale window
+        place gui elements
         """
         # calculate difference between minimal size and actual size
         # so the right scale can be calculated with individual size on startup
@@ -542,7 +542,7 @@ class View(object):
 
     def window_update(self):
         """
-        -update windowsize and position
+        update windowsize and position
         """
         fullscreen = self.opt_fullscreen.get()
         self.controller.projectfile["opt_fullscreen"] = fullscreen
@@ -563,7 +563,7 @@ class View(object):
 
     def eventframe_drag(self, mode):
         """
-        -change height of event log while dragging it with the mouse
+        change height of event log while dragging it with the mouse
         """
         if mode == "start":
             self.eventframediff = self.eventframe.winfo_rooty() + self.eventframe.winfo_height() - 35
@@ -577,7 +577,7 @@ class View(object):
 
     def eventframe_post(self, text):
         """
-        -write text into event log with timestamp
+        write text into event log with timestamp
         """
         self.txt_eventframe.configure(state="normal")
         timestamp = self.controller.timestamp_get()
@@ -587,7 +587,7 @@ class View(object):
 
     def keyup(self, event):
         """
-        -special actions when a key gets released
+        special actions when a key gets released
         """
         # print(event)
         # if event.keysym == "Tab": self.method()
@@ -595,7 +595,7 @@ class View(object):
 
     def keydown(self, event):
         """
-        -special actions when a key gets pressed
+        special actions when a key gets pressed
         """
         # print(event)
         pass
@@ -644,7 +644,7 @@ class View(object):
 
     def entry_after(self):
         """
-        -save content of gui element after the input is done
+        save content of gui element after the input is done
         """
         self.controller.projectfile["con_ip_byte1"] = self.con_ip_byte1.get()
         self.controller.projectfile["con_ip_byte2"] = self.con_ip_byte2.get()
@@ -654,8 +654,8 @@ class View(object):
 
     def filepath_open(self, message=None, filetypes=((), ("all files", "*.*"))):
         """
-        -show message if message is not None
-        -open file dialog and return the filepath
+        show message if message is not None
+        open file dialog and return the filepath
         """
         if message is not None:
             tk.messagebox.showinfo(title=None, message=message)
@@ -665,7 +665,7 @@ class View(object):
 
     def filepath_saveas(self, filetypes=((), ("all files", "*.*"))):
         """
-        -open file dialog and return the filepath
+        open file dialog and return the filepath
         """
         path = tk.filedialog.asksaveasfilename(initialdir=self.desktoppath, title="Save as...",
                                                filetypes=filetypes,
@@ -674,7 +674,7 @@ class View(object):
 
     def about_show(self):
         """
-        -show software infos
+        show software infos
         """
         txt_version = self.controller.configfile["version"]
         txt_copyright = self.controller.configfile["about_copyright"]
@@ -693,8 +693,8 @@ class View(object):
 
     def datatree_clear(self):
         """
-        -clear data on screen data
-        -delete all entries in datatree
+        clear data on screen data
+        delete all entries in datatree
         """
         for element in self.datatree.get_children():
             self.datatree.delete(element)
@@ -705,7 +705,7 @@ class View(object):
 
     def datatree_fill(self, name, description, version, info, data):
         """
-        -insert entries in datatree
+        insert entries in datatree
         """
         self.udt_name.set(name)
         self.udt_description.set(description)
@@ -714,6 +714,7 @@ class View(object):
         # check every element,
         folderpath = ["", ""]
         for element in data:
+            print(element)
             # put actual data in datatree in the actual folder
             name = element["name"]
             datatype = element["datatype"]
@@ -738,8 +739,8 @@ class View(object):
 
     def datatree_update(self):
         """
-        -update data on screen data
-        -update all entries in datatree
+        update data on screen data
+        update all entries in datatree
         """
         name = self.controller.projectfile["udt_name"]
         description = self.controller.projectfile["udt_description"]
@@ -755,7 +756,7 @@ class View(object):
 
     def server_update(self):
         """
-        -update data on screen server
+        update data on screen server
         """
         self.con_ip_byte1.set(self.controller.projectfile["con_ip_byte1"])
         self.con_ip_byte2.set(self.controller.projectfile["con_ip_byte2"])
@@ -767,13 +768,13 @@ class View(object):
 
     def setup_update(self):
         """
-        -update data on screen setup
+        update data on screen setup
         """
         self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
 
     def led_state(self, state="error"):
         """
-        -change image of led element depending on its state
+        change image of led element depending on its state
         """
         if state != self.icon_led_last_state:
             if state == "error":
@@ -788,19 +789,19 @@ class View(object):
 
     def connect_autostart(self):
         """
-        -save content of checkbox after the state has changed
+        save content of checkbox after the state has changed
         """
         self.controller.projectfile["con_autostart"] = self.con_autostart.get()
 
     def connect_show_recvdata(self):
         """
-        -save content of checkbox after the state has changed
+        save content of checkbox after the state has changed
         """
         self.controller.projectfile["con_show_recvdata"] = self.con_show_recvdata.get()
 
     def connect_state(self):
         """
-        -toggle checkbutton
+        toggle checkbutton
         """
         state = self.runstop.get()
         if state:

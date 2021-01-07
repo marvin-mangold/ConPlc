@@ -16,10 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import re
+import re, time
 
 
-# define possible Datatypes and its bits-size
+# define possible Datatypes and its bit-size
 standard_types = {"Bool": 1,
                   "Byte": 8,
                   "Word": 16,
@@ -36,383 +36,660 @@ standard_types = {"Bool": 1,
                   "Real": 32,
                   "LReal": 64,
                   "Char": 8,
-                  "WChar": 16,
-                  "String": 16,
-                  "WString": 16}
-special_types = {"DTL": 0,
+                  "WChar": 16}
+
+special_types = {"String": 16,
+                 "WString": 32,
                  "Array": 0,
-                 "Struct": 0}
+                 "DTL": 0,
+                 "Struct": 0,
+                 "UDT": 0}
 
 
-def read_udt_file(path):
-    udt = []
-    with open(path, "r", encoding="utf-8") as udt_file:
-        for line in udt_file:
+def read_file(path):
+    """
+    open/read file
+    """
+    data = []
+    with open(path, "r", encoding="utf-8") as file:
+        for line in file:
             stripped = line.strip()
             if stripped != "":
-                udt.append(stripped)
-    return udt
+                data.append(stripped)
+    return data
 
 
-def get_udt_name(line):
-    # get Name of udt (must have string "TYPE ")
-    # -->TYPE "udt Name"
-    result = False
-    name = ""
-    regex = re.search(r'TYPE "(.*?)"', line)
+def save_entry(filedata, foldernames, entry):
+    """
+    concat prefix to name and save entry in data
+    """
+    # concat prefix to varname
+    varname = ""
+    newentry = entry.copy()
+    for prefix in foldernames:
+        varname += prefix
+    newentry["name"] = varname + newentry["name"]
+    # save element
+    filedata.append(newentry)
+
+
+def clean_name(name):
+    """
+    erase additional info in Varname (internal settings in {} brackets)
+    sample: [Test {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment Test] --> "Test"
+    """
+    newname = name
+    regex = re.search(r'(.*) {', name)
     if regex is not None:
-        result = True
-        name = regex.group(1)
-    return result, name
+        newname = regex.group(1)
+    return newname
 
 
-def get_udt_description(line):
-    # get Description of udt (must have string "TITLE = ")
-    # -->TITLE = udt with variables
+def is_udt(datatype=""):
+    """
+    check if datatype is special udt type
+    regex searching for text between quotation marks
+    sample: [Test : "some_UDT";   // comment Test] --> "some_UDT"
+    """
     result = False
-    description = ""
-    regex = re.search(r'TITLE = (.*)', line)
-    if regex is not None:
-        result = True
-        description = regex.group(1)
-    return result, description
-
-
-def get_udt_version(line):
-    # get Version of udt (must have string "VERSION : ")
-    # -->VERSION : 0.1
-    result = False
-    version = ""
-    regex = re.search(r'VERSION : (.*)', line)
-    if regex is not None:
-        result = True
-        version = regex.group(1)
-    return result, version
-
-
-def get_udt_info(line):
-    # get Info of udt (string has to start with "//")
-    # -->//Information about this udt
-    result = False
-    info = ""
-    regex = re.search(r'^/{2}(.*)', line)
-    if regex is not None:
-        result = True
-        info = regex.group(1)
-    return result, info
-
-
-def get_udt_headerend(line):
-    # get last part of the header
-    # -->STRUCT
-    result = False
-    regex = re.search(r'STRUCT', line)
+    regex = re.search(r'"(.*)"', datatype)
     if regex is not None:
         result = True
     return result
 
 
-def get_datatype(line):
-    # get VAR declaration datatype (must have ":")
-    # -->name : Bool;   // comment
+def is_endstruct(line=""):
+    """
+    get end of Struct declaration
+    regex searching for text "END_STRUCT;"
+    sample: [END_STRUCT;] --> "END_STRUCT;"
+    """
     result = False
-    datatype = ""
-    regex = re.search(r'(.*) : ([^;/\[ ]*)', line)
-    if regex is not None:
-        result = True
-        datatype = regex.group(2)
-    return result, datatype
-
-
-def clean_varname(varname):
-    # erase additional info in Varname (internal settings in {} brackets)
-    # -->name {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment
-    regex = re.search(r'(.*) {', varname)
-    if regex is not None:
-        varname = regex.group(1)
-    return varname
-
-
-def get_struct(line):
-    # get Struct declaration (must have ":" and "Struct" and can have "// comment")
-    # -->name : Struct   // comment
-    result = False
-    element = {}
-    regex = re.search(r'(.*) : (Struct)(?:\s{3}// )?(.*)?', line)
-    if regex is not None:
-        result = True
-        name, datatype, comment = clean_varname(regex.group(1)), regex.group(2), regex.group(3)
-        # first part of struct (declaration line)
-        element = {
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": False, "action": "open"}
-    return result, element
-
-
-def get_endstruct(line):
-    # get end of Struct declaration (must have string "END_STRUCT;")
-    # -->END_STRUCT;
-    result = False
-    element = {}
     regex = re.search(r'END_STRUCT;', line)
     if regex is not None:
         result = True
-        # last part of struct (end indicator)
-        element = {
-            "name": "", "datatype": "", "comment": "", "visible": False, "access": False, "action": "close"}
-    return result, element
+    return result
 
 
-def get_var(line):
-    # get VAR declaration (must have ":" and can have "// comment")
-    # -->name : Bool;   // comment
+def is_endtype(rawdata):
+    """
+    get udt-file end indicator
+    regex searching for text "END_TYPE"
+    sample: [END_TYPE] --> "END_TYPE"
+    """
     result = False
-    element = {}
-    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', line)
+    regex = re.search(r'END_TYPE', rawdata[0])
     if regex is not None:
         result = True
-        name, datatype, comment = clean_varname(regex.group(1)), regex.group(2), regex.group(3)
-        element = {
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"}
-    return result, element
+    return result
 
 
-def get_dtl(line):
-    # get VAR declaration (must have ":" and can have "// comment")
-    # -->name : Bool;   // comment
-    result = False
-    elements = []
-    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', line)
-    if regex is not None:
-        result = True
-        name, datatype, comment = clean_varname(regex.group(1)), regex.group(2), regex.group(3)
-        # first part of dtl (declaration line)
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": False, "action": "open"})
-        name, datatype, comment = "YEAR", "UInt", "Year"
-        # middle part of dtl (data)
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
-        name, datatype, comment = "MONTH", "USInt", "Month"
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
-        name, datatype, comment = "DAY", "USInt", "Day"
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
-        name, datatype, comment = "WEEKDAY", "USInt", "Weekday"
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
-        name, datatype, comment = "HOUR", "USInt", "Hour"
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
-        name, datatype, comment = "MINUTE", "USInt", "Minute"
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
-        name, datatype, comment = "SECOND", "USInt", "Second"
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
-        name, datatype, comment = "NANOSECOND", "UDint", "Nanosecond"
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True, "action": "none"})
-        # last part of dtl (end indicator)
-        elements.append({
-            "name": "", "datatype": "", "comment": "", "visible": False, "access": False, "action": "close"})
-    return result, elements
-
-
-def get_array_data(line):
-    # -->Array[X..Y] of Datatype
-    start = 0
-    end = 0
+def get_datatype(line=""):
+    """
+    get datatype from VAR declaration datatype
+    regex searching for text between ": " and "whitespace or any other symbol except letters"
+    sample:  [Test : Bool;   // comment Test] --> "Bool"
+    """
     datatype = ""
-    regex = re.search(r'(?:Array\[)(.*)(?:\.\.)(.*)(?:] of )(.*);', line)
+    regex = re.search(r'(.*) : ([^;/\[ ]*)', line)
     if regex is not None:
-        start = int(regex.group(1))
-        end = int(regex.group(2)) + 1
-        datatype = regex.group(3)
-    return start, end, datatype
+        datatype = regex.group(2)
+    return datatype
 
 
-def get_array(line):
-    # get VAR declaration (must have ":" and can have "// comment")
-    # -->name : Bool;   // comment
+def get_arraytype(line=""):
+    """
+    get datatype from array declaration
+    regex searching for text between "of " and ";"
+    sample: [Test : Array[0..10] of String;   // comment Test] --> "String"
+    """
+    datatype = ""
+    regex = re.search(r'of (.*);', line)
+    if regex is not None:
+        datatype = regex.group(1)
+    return datatype
+
+
+def get_header_name(rawdata, headerdata):
+    """
+    get name from header
+    regex searching for text after "TYPE" and between quotation marks
+    sample: [TYPE "Main"] --> "Main"
+    save data in headerdata
+    """
     result = False
-    elements = []
-    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', line)
+    regex = re.search(r'TYPE "(.*?)"', rawdata[0])
     if regex is not None:
         result = True
-        name, datatype, comment = clean_varname(regex.group(1)), regex.group(2), regex.group(3)
-        # first part of array (declaration line)
-        elements.append({
-            "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": False, "action": "open"})
-        start, end, datatype = get_array_data(line)
-        for entry in range(start, end):
-            name, datatype = "[" + str(entry) + "]", datatype
-            # middle part of array (data)
-            elements.append({
-                "name": name, "datatype": datatype, "comment": comment, "visible": True, "access": True,
-                "action": "none"})
-        # last part of array (end indicator)
-        elements.append({
-            "name": "", "datatype": "", "comment": "", "visible": False, "access": False, "action": "close"})
-    return result, elements
+        name = regex.group(1)
+        headerdata["name"] = name
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
 
 
-def get_udt(line, data, foldernames, dependencies, datatype):
-    result, element = get_var(line)
-    if result:
-        # first part of udt (declaration line)
-        element["access"] = False
-        element["action"] = "open"
-        save_element(data, foldernames, element)
-        foldernames.append(element["name"] + ".")
-        # middle part of udt (data)
-        _path = dependencies[datatype]
-        _name, _description, _version, _info, _size, data = get_udt_data(data=data,
-                                                                         foldernames=foldernames,
-                                                                         filepath=_path,
-                                                                         dependencies=dependencies)
-        # last part of udt (end indicator)
-        element = {"name": "", "datatype": "", "comment": "",
-                   "visible": False, "access": False, "action": "close"}
-        save_element(data, foldernames, element)
+def get_header_description(rawdata, headerdata):
+    """
+    get description from header
+    regex searching for text after "TITLE = "
+    sample: [TITLE = Main] --> "Main"
+    save data in headerdata
+    """
+    result = False
+    regex = re.search(r'TITLE = (.*)', rawdata[0])
+    if regex is not None:
+        result = True
+        description = regex.group(1)
+        headerdata["description"] = description
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
+
+
+def get_header_version(rawdata, headerdata):
+    """
+    get version from header
+    regex searching for text after "VERSION : "
+    sample: [VERSION : 0.1] --> "0.1"
+    save data in headerdata
+    """
+    result = False
+    regex = re.search(r'VERSION : (.*)', rawdata[0])
+    if regex is not None:
+        result = True
+        version = regex.group(1)
+        headerdata["version"] = version
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
+
+
+def get_header_info(rawdata, headerdata):
+    """
+    get info from header
+    regex searching for text after "//"
+    sample: [//some comment] --> "some comment"
+    save data in headerdata
+    """
+    result = False
+    regex = re.search(r'^/{2}(.*)', rawdata[0])
+    if regex is not None:
+        result = True
+        info = regex.group(1)
+        headerdata["info"] = info
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
+
+
+def get_header_end(rawdata):
+    """
+    get header end indicator from header
+    regex searching for text "STRUCT"
+    sample: [STRUCT] --> "STRUCT"
+    """
+    result = False
+    regex = re.search(r'STRUCT', rawdata[0])
+    if regex is not None:
+        result = True
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
+
+
+def get_data_endstruct(rawdata, filedata, foldernames):
+    """
+    get end of Struct declaration
+    regex searching for text "END_STRUCT;"
+    sample: [END_STRUCT;] --> "END_STRUCT;"
+    collect data and save it in filedata
+    """
+    result = False
+    regex = re.search(r'END_STRUCT;', rawdata[0])
+    if regex is not None:
+        result = True
+        # delete name prefix from list
         foldernames.pop()
+        # last part of struct (end indicator)
+        # collect data
+        entry = {
+            "name": "",
+            "datatype": "",
+            "comment": "",
+            "visible": False,
+            "access": False,
+            "action": "close",
+            "value": "",
+            "size": 0}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
 
 
-def element_is_udt(datatype):
-    # check if element datatype is special udt type
-    # -->"someName"
+def get_data_standard(rawdata, filedata, foldernames):
+    """
+    get data from VAR declaration of a standard datatype
+    regex searching for:
+        text between start and before " :"
+        text between ": " and ";"
+        text between "// " and end
+    sample:  [Test : Bool;   // comment Test] --> "Test", "Bool", "comment Test"
+    collect data and save it in filedata
+    """
     result = False
-    element = ""
-    regex = re.search(r'"(.*)"', datatype)
+    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
-        element = regex[0]
-    return result, element
-    
+        name, datatype, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3)
+        # get size of data
+        size = standard_types[datatype]
+        # collect data
+        entry = {
+            "name": name,
+            "datatype": datatype,
+            "comment": comment,
+            "visible": True,
+            "access": True,
+            "action": "none",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
 
-def save_element(data, foldernames, element):
-    # put prefix to varname
-    varname = ""
-    newelement = element.copy()
-    for prefix in foldernames:
-        varname += prefix
-    newelement["name"] = varname + newelement["name"]
-    # add value parameter to element
-    newelement["value"] = ""
-    # save element
-    data.append(newelement)
+
+def get_data_string(rawdata, filedata, foldernames):
+    """
+    get data from VAR declaration of a string datatype
+    regex searching for:
+        text between start and before " :"
+        text between ": " and "["
+        text between "[ " and "]"
+        text between "// " and end
+    sample:  [Test : String[10];   // comment Test] --> "Test", "String", "10", "comment Test"
+    sample:  [Test : String;   // comment Test] --> "Test", "String", None, "comment Test"
+    if datatype = String without [xxx] --> set it to String[254] after regex
+    collect data and save it in filedata
+    """
+    result = False
+    regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?;(?:\s{3}// )?(.*)?', rawdata[0])
+    if regex is not None:
+        result = True
+        name, datatype, length, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3), regex.group(4)
+        if length is not None:
+            length = int(length)
+        else:
+            length = 254
+        # get size of data
+        # first Byte of String = maximal length of String
+        # second Byte of String = actual length of String
+        size_decalration = special_types["String"]
+        size_data = standard_types["Char"] * length  # size of data = count of chars * bit-size of a char
+        size = size_decalration + size_data
+        # collect data
+        entry = {
+            "name": name,
+            "datatype": "{datatype}[{length}]".format(datatype=datatype, length=length),
+            "comment": comment,
+            "visible": True,
+            "access": True,
+            "action": "none",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
 
 
-def get_udt_data(data=None, foldernames=None, filepath="", dependencies=None):
-    if data is None:
-        data = []
+def get_data_wstring(rawdata, filedata, foldernames):
+    """
+    get data from VAR declaration of a wstring datatype
+    regex searching for:
+        text between start and before " :"
+        text between ": " and "["
+        text between "[ " and "]"
+        text between "// " and end
+    sample:  [Test : WString[10];   // comment Test] --> "Test", "WString", "10", "comment Test"
+    sample:  [Test : WString;   // comment Test] --> "Test", "WString", None, "comment Test"
+    if datatype = WString without [xxx] --> set it to WString[254] after regex
+    collect data and save it in filedata
+    """
+    result = False
+    regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?;(?:\s{3}// )?(.*)?', rawdata[0])
+    if regex is not None:
+        result = True
+        name, datatype, length, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3), regex.group(4)
+        if length is not None:
+            length = int(length)
+        else:
+            length = 254
+        # get size of data
+        # first Word of WString = maximal length of WString
+        # second Word of WString = actual length of WString
+        size_decalration = special_types["WString"]
+        size_data = standard_types["WChar"] * length  # size of data = count of wchars * bit-size of a wchar
+        size = size_decalration + size_data
+        # collect data
+        entry = {
+            "name": name,
+            "datatype": "{datatype}[{length}]".format(datatype=datatype, length=length),
+            "comment": comment,
+            "visible": True,
+            "access": True,
+            "action": "none",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
+
+
+def get_data_dtl(rawdata, filedata, foldernames):
+    """
+    get data from VAR declaration of a dtl datatype
+    regex searching for:
+        text between start and before " :"
+        text between ": " and ";"
+        text between "// " and end
+    sample:  [Test {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment Test]
+    --> "Test {InstructionName := 'DTL'; LibVersion := '1.0'}", "DTL", "comment Test"
+    --> name will be cleaned to "Test"
+    collect data and save it in filedata
+    data:   "YEAR", "UInt"
+            "MONTH", "USInt"
+            "DAY", "USInt"
+            "WEEKDAY", "USInt"
+            "HOUR", "USInt"
+            "MINUTE", "USInt"
+            "SECOND", "USInt"
+            "NANOSECOND", "UDint"
+    """
+    result = False
+    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
+    if regex is not None:
+        result = True
+        # ---------------------------------
+        # first part of dtl (declaration line)
+        name, datatype, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3)
+        # get size of data
+        size = special_types[datatype]
+        # collect data
+        entry = {
+            "name": name,
+            "datatype": datatype,
+            "comment": comment,
+            "visible": True,
+            "access": False,
+            "action": "open",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # append name prefix to list
+        foldernames.append(name + ".")
+        # ---------------------------------
+        # middle part of dtl (data)
+        data = [["YEAR", "UInt", "Year"],
+                ["MONTH", "USInt", "Month"],
+                ["DAY", "USInt", "Day"],
+                ["WEEKDAY", "USInt", "Weekday"],
+                ["HOUR", "USInt", "Hour"],
+                ["MINUTE", "USInt", "Minute"],
+                ["SECOND", "USInt", "Second"],
+                ["NANOSECOND", "UDInt", "Nanosecond"]]
+        for element in data:
+            name, datatype, comment = element
+            # get size of data
+            size = standard_types[datatype]
+            # collect data
+            entry = {
+                "name": name,
+                "datatype": datatype,
+                "comment": comment,
+                "visible": True,
+                "access": True,
+                "action": "none",
+                "value": "",
+                "size": size}
+            # save entry to list "data"
+            save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # ---------------------------------
+        # delete name prefix from list
+        foldernames.pop()
+        # last part of dtl (end indicator)
+        # get size of data
+        size = special_types["DTL"]
+        # collect data
+        entry = {
+            "name": "",
+            "datatype": "",
+            "comment": "",
+            "visible": False,
+            "access": False,
+            "action": "close",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # ---------------------------------
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
+
+
+def get_data_struct(rawdata, filedata, foldernames):
+    """
+    get data from VAR declaration of a struct datatype
+    regex searching for:
+        text between start and before " :"
+        text between ": " and ";"
+        text between "// " and end
+    sample:  [Test : Struct   // comment Test] --> "Test", "Struct", "comment Test"
+    collect data and save it in filedata
+    """
+    result = False
+    regex = re.search(r'(.*) : (Struct)(?:\s{3}// )?(.*)?', rawdata[0])
+    if regex is not None:
+        result = True
+        # first part of struct (declaration line)
+        name, datatype, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3)
+        # get size of data
+        size = special_types[datatype]
+        # collect data
+        entry = {
+            "name": name,
+            "datatype": datatype,
+            "comment": comment,
+            "visible": True,
+            "access": False,
+            "action": "open",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # append name prefix to list
+        foldernames.append(name + ".")
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
+
+
+def get_data_subudt(rawdata, filedata, foldernames, dependencies):
+    """
+    get data from VAR declaration of a sub-udt datatype (UDT in UDT)
+    regex searching for text between quotation marks
+    sample: [Test : "some_UDT";   // comment Test] --> "Test", "some_UDT", "comment Test"
+    collect data and save it in filedata
+    data: call the function where this function was called from --> get_structure()
+    """
+    result = False
+    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
+    if regex is not None:
+        result = True
+        # ---------------------------------
+        # first part of sub-udt (declaration line)
+        name, datatype, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3)
+        # get size of data
+        size = special_types["UDT"]
+        # collect data
+        entry = {
+            "name": name,
+            "datatype": datatype,
+            "comment": comment,
+            "visible": True,
+            "access": False,
+            "action": "open",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # append name prefix to list
+        foldernames.append(name + ".")
+        # ---------------------------------
+        # middle part of sub-udt (data)
+        path = dependencies[datatype]
+        tempheaderdata, filedata = get_structure(filedata=filedata, foldernames=foldernames,
+                                                 filepath=path, dependencies=dependencies)
+        # ---------------------------------
+        # delete name prefix from list
+        foldernames.pop()
+        # last part of sub-udt (end indicator)
+        # get size of data
+        size = special_types["UDT"]
+        # collect data
+        entry = {
+            "name": "",
+            "datatype": "",
+            "comment": "",
+            "visible": False,
+            "access": False,
+            "action": "close",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        # ---------------------------------
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result
+
+
+def get_header(rawdata, headerdata):
+    # check line for header name
+    get_header_name(rawdata=rawdata, headerdata=headerdata)
+    # check line for header description
+    get_header_description(rawdata=rawdata, headerdata=headerdata)
+    # check line for header version
+    get_header_version(rawdata=rawdata, headerdata=headerdata)
+    # check line for header info
+    get_header_info(rawdata=rawdata, headerdata=headerdata)
+    # check line for header end
+    headerend = get_header_end(rawdata=rawdata)
+    return headerend, headerdata
+
+
+def get_data(rawdata, filedata, foldernames, dependencies):
+    dataend = False
+    # get checking variables
+    endstruct = is_endstruct(line=rawdata[0])
+    datatype = get_datatype(rawdata[0])
+    subudt = is_udt(datatype=datatype)
+    # check line for endstruct
+    if endstruct:
+        # get and save data to filedata
+        get_data_endstruct(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+    # check line for standard datatype
+    elif datatype in standard_types:
+        # get and save data to filedata
+        get_data_standard(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+    # check line for special datatype string
+    elif (datatype in special_types) and (datatype[:6] == "String"):
+        # get and save data to filedata
+        get_data_string(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+    # check line for special datatype wstring
+    elif (datatype in special_types) and (datatype[:7] == "WString"):
+        # get and save data to filedata
+        get_data_wstring(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+    # check line for special datatype dtl
+    elif (datatype in special_types) and (datatype == "DTL"):
+        # get and save data to filedata
+        get_data_dtl(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+    # check line for special datatype struct
+    elif (datatype in special_types) and (datatype == "Struct"):
+        # get and save data to filedata
+        get_data_struct(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+    # check line for special datatype sub-udt
+    elif subudt:
+        # get and save data to filedata
+        get_data_subudt(rawdata=rawdata, filedata=filedata, foldernames=foldernames, dependencies=dependencies)
+    # check line for end of udt file
+    elif is_endtype(rawdata=rawdata):
+        # set end flag
+        dataend = True
+    else:
+        print("Line can not be interpreted: {line}".format(line=rawdata[0]))
+        # delete line from rawdata
+        rawdata.pop(0)
+    return dataend
+
+
+def get_structure(filedata=None, foldernames=None, filepath="", dependencies=None):
+    """
+    open udt file
+    read every line of file and process the information to dict "headerdata" and list "filedata"
+    """
+    # initialise variables
+    headerdata = {"name": "", "description": "", "version": "", "info": "", "size": "0"}
+    if filedata is None:
+        filedata = []
     if foldernames is None:
         foldernames = []
-    name = ""
-    description = ""
-    version = ""
-    info = ""
-    readheader = True
-    # read Data from udt-File
-    udt = read_udt_file(filepath)
-    # analyse Data from udt-File
-    for line in udt:
-        # read header
-        if readheader:
-            # get udt name
-            result, element = get_udt_name(line)
-            if result:
-                name = element
-            # get udt description
-            result, element = get_udt_description(line)
-            if result:
-                description = element
-            # get udt version
-            result, element = get_udt_version(line)
-            if result:
-                version = element
-            # get udt info
-            result, element = get_udt_info(line)
-            if result:
-                info = element
-            # get udt header end
-            result = get_udt_headerend(line)
-            if result:
-                readheader = False
-                foldernames.append("")
-        # read data
-        else:
-            # get endstruct
-            result, element = get_endstruct(line)
-            if result:
-                foldernames.pop()
-                save_element(data, foldernames, element)
-            # check datatype of element
-            result, datatype = get_datatype(line)
-            if result:
-                # standard datatype
-                if datatype in standard_types:
-                    result, element = get_var(line)
-                    if result:
-                        save_element(data, foldernames, element)
-                # special datatype
-                elif datatype in special_types:
-                    # special datatype struct
-                    if datatype == "Struct":
-                        result, element = get_struct(line)
-                        if result:
-                            save_element(data, foldernames, element)
-                            foldernames.append(element["name"]+".")
-                    # special datatype dtl
-                    elif datatype == "DTL":
-                        result, elements = get_dtl(line)
-                        if result:
-                            firstrun = True
-                            for element in elements:
-                                save_element(data, foldernames, element)
-                                if firstrun:
-                                    foldernames.append(element["name"] + ".")
-                                    firstrun = False
-                            foldernames.pop()
-                    # special datatype array
-                    elif datatype == "Array":
-                        result, elements = get_array(line)
-                        if result:
-                            firstrun = True
-                            for element in elements:
-                                save_element(data, foldernames, element)
-                                if firstrun:
-                                    foldernames.append(element["name"])
-                                    firstrun = False
-                            foldernames.pop()
-                # special datatype udt
-                elif element_is_udt(datatype)[0]:
-                    get_udt(line=line, data=data, foldernames=foldernames, dependencies=dependencies, datatype=datatype)
-                else:
-                    print("Datentyp {datatype} nicht implementiert!".format(datatype=datatype))
-    size = 0
-    return name, description, version, info, size, data
+    foldernames.append("")
+    if dependencies is None:
+        dependencies = {}
+    # read udt file
+    rawdata = read_file(filepath)
+    # read header data of rawdata as long as the flag is true
+    while True:
+        headerend, headerdata = get_header(rawdata=rawdata, headerdata=headerdata)
+        if headerend:
+            break
+    # read data of rawdata as long as data in rawdata
+    while True:
+        dataend = get_data(rawdata=rawdata, filedata=filedata, foldernames=foldernames, dependencies=dependencies)
+        if dataend:
+            break
+    return headerdata, filedata
 
 
-def get_udt_dependencies(path):
+def get_dependencies(path):
     """
-    -iterate trough udt file and find underlying udts
+    iterate trough udt file and find underlying udts
     """
     dependencies = {}
-    udt = read_udt_file(path)
-    # check every line in udt file for udt declaration
+    udt = read_file(path)
+    # get datatype for every line
+    # check datatype for udt declaration
+    # only check datatype to not get comments with "xxx" as udt declaration
     for line in udt:
-        result, datatype = get_datatype(line)
-        if result:
-            # declaration type udt in array
-            if datatype == "Array":
-                # get array data
-                result, elements = get_array(line)
-                if result:
-                    # check in (array[x..x] of datatype) if datatype is udt type
-                    if element_is_udt(elements[1]["datatype"])[0]:
-                        dependencies[elements[1]["datatype"]] = None
-            # declaration type udt direct or in struct
-            elif element_is_udt(datatype)[0]:
+        datatype = get_datatype(line)
+        if datatype != "":
+            # direct udt declaration
+            if is_udt(datatype):
                 dependencies[datatype] = None
+            # udt declaration in array
+            elif datatype == "Array":
+                # get array datatype
+                datatype = get_arraytype(line)
+                if datatype != "":
+                    if is_udt(datatype):
+                        dependencies[datatype] = None
     return dependencies

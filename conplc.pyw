@@ -28,10 +28,10 @@ import queue
 class Controller(object):
     def __init__(self):
         """
-        -open configuration file
-        -open default project file
-        -create instance of gui
-        -create instance of server
+        open configuration file
+        open default project file
+        create instance of gui
+        create instance of server
         """
         # get configdata from configfile
         # Read JSON file
@@ -51,7 +51,7 @@ class Controller(object):
 
     def run(self):
         """
-        -start mainloop of programm
+        start mainloop of programm
         """
         # refresh variables on screen server
         self.view.server_update()
@@ -73,7 +73,7 @@ class Controller(object):
 
     def stop(self):
         """
-        -stop mainloop of programm
+        stop mainloop of programm
         """
         # write eventmessage
         self.view.eventframe_post("Programm stopped")
@@ -82,11 +82,11 @@ class Controller(object):
 
     def trigger_100ms(self):
         """
-        -trigger self every 100ms
-        -read timestamp
-        -change led state
-        -check for messages from server
-        -check for received data from server
+        trigger self every 100ms
+        read timestamp
+        change led state
+        check for messages from server
+        check for received data from server
         """
         # trigger every 100ms
         self.view.window.after(100, self.trigger_100ms)
@@ -101,8 +101,8 @@ class Controller(object):
 
     def file_new(self):
         """
-        -open empty project file
-        -update screens with new data
+        open empty project file
+        update screens with new data
         """
         # read JSON file
         with open("empty.cplc") as file:
@@ -120,9 +120,9 @@ class Controller(object):
 
     def file_open(self, path=None):
         """
-        -choose project file
-        -open project file
-        -update screens with new data
+        choose project file
+        open project file
+        update screens with new data
         """
         if path is None:
             path = self.view.filepath_open(filetypes=(("cplc Files", "*.cplc"),))
@@ -142,7 +142,7 @@ class Controller(object):
 
     def file_save(self):
         """
-        -save project file to default
+        save project file to default
         """
         # write JSON file
         with open('default.cplc', 'w', encoding='utf-8') as f:
@@ -152,8 +152,8 @@ class Controller(object):
 
     def file_backup(self):
         """
-        -choose saving filepath of actual project file
-        -save project file on filepath
+        choose saving filepath of actual project file
+        save project file on filepath
         """
         path = self.view.filepath_saveas(filetypes=(("cplc Files", "*.cplc"),))
         # write JSON file
@@ -164,10 +164,10 @@ class Controller(object):
 
     def data_get(self):
         """
-        -choose filepath of udt file
-        -check udt file for underlying udt declarations and choose their filepath
-        -read contents of udt file
-        -update screens with new data
+        choose filepath of udt file
+        check udt file for underlying udt declarations and choose their filepath
+        read contents of udt file
+        update screens with new data
         """
         error = False
         # clear data in datatree
@@ -175,7 +175,7 @@ class Controller(object):
 
         # get the filepath of udt and its sub udts
         # create empty dict for dependencies
-        dependencies = {"UDT": None}  # {"sub_udt_name":"sub_udt_filepath", ...}
+        dependencies = {"Source": None}  # {"sub_udt_name":"sub_udt_filepath", ...}
         # loop until all entries in dictionary "dependencies" are filled with filepath
         # in every loop search for sub udts in udt
         # if sub udt found, add it to dependencies so the loop will run again
@@ -193,26 +193,25 @@ class Controller(object):
                     # save filepath to dependencies
                     dependencies[dep] = filepath
                     # search in udt for sub udts and save them to temporary dictionary
-                    sub.update(readudt.get_udt_dependencies(filepath))
+                    sub.update(readudt.get_dependencies(filepath))
             # save the found sub udts from temporary dictionary to dependencies
             dependencies.update(sub)
 
-        # get data / datastructure of the udt
+        # get datastructure of the udt
         if not error:
             # get data of main UDT and sub-UDTs
-            name, description, version, info, size, data = readudt.get_udt_data(filepath=dependencies["UDT"],
-                                                                                dependencies=dependencies)
-            self.projectfile["udt_name"] = name
-            self.projectfile["udt_description"] = description
-            self.projectfile["udt_version"] = version
-            self.projectfile["udt_info"] = info
-            self.projectfile["udt_size"] = size
-            self.projectfile["udt_data"] = data
+            headerdata, filedata = readudt.get_structure(filepath=dependencies["Source"], dependencies=dependencies)
+            self.projectfile["udt_name"] = headerdata["name"]
+            self.projectfile["udt_description"] = headerdata["description"]
+            self.projectfile["udt_version"] = headerdata["version"]
+            self.projectfile["udt_info"] = headerdata["info"]
+            self.projectfile["udt_size"] = headerdata["size"]
+            self.projectfile["udt_data"] = filedata
             # refresh variables on screen data
             self.view.datatree_update()
             # write eventmessage
             self.view.eventframe_post("Datastructure loaded")
-        if error:
+        else:
             self.projectfile["udt_name"] = ""
             self.projectfile["udt_description"] = ""
             self.projectfile["udt_version"] = ""
@@ -224,7 +223,7 @@ class Controller(object):
 
     def server_start(self):
         """
-        -start server
+        start server
         """
         ip = "{byte1}.{byte2}.{byte3}.{byte4}".format(byte1=str(int(self.projectfile["con_ip_byte1"])),
                                                       byte2=str(int(self.projectfile["con_ip_byte2"])),
@@ -236,13 +235,13 @@ class Controller(object):
 
     def server_stop(self):
         """
-        -stop server
+        stop server
         """
         self.server.stop()
 
     def server_message(self):
         """
-        -check for messages from server and post them
+        check for messages from server and post them
         """
         try:
             event, message = self.server.buffer_message.get(block=False)
@@ -255,9 +254,9 @@ class Controller(object):
 
     def server_data(self):
         """
-        -check for new data from server
-        -process data
-        -write answer to server
+        check for new data from server
+        process data
+        write answer to server
         """
         try:  # try to get data from recvbuffer
             recv = self.server.buffer_recv.get(block=False)
@@ -281,13 +280,13 @@ class Controller(object):
     @staticmethod
     def timestamp_get():
         """
-        -get actual timestamp from clock
+        get actual timestamp from clock
         """
         return time.strftime("%d.%m.%Y %H:%M:%S")
 
     def led_state(self):
         """
-        -change led state depending on the server state
+        change led state depending on the server state
         """
         if not self.server.active:
             self.view.led_state("error")

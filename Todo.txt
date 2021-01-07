@@ -1,3 +1,5 @@
+-datatree fill error
 -read udt new with underlying udt in arrays or structs
--how to handle strings?
+-array of udt
+-array of struct
 -Size of Elements

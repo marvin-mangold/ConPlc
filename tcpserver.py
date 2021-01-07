@@ -25,9 +25,9 @@ import time
 class Server(object):
     def __init__(self):
         """
-        -setup connection parameters
-        -setup buffers
-        -setup thread
+        setup connection parameters
+        setup buffers
+        setup thread
         """
         # connection parameters
         self.ip = "127.0.0.1"  # local ip-address
@@ -52,9 +52,9 @@ class Server(object):
 
     def run(self):
         """
-        -connect to partner
-        -receive data
-        -send data
+        connect to partner
+        receive data
+        send data
         """
         while True:  # infinite loop
             time.sleep(0.001)
@@ -139,7 +139,7 @@ class Server(object):
 
     def start(self, ip, port, datasize):
         """
-        -start communication
+        start communication
         """
         self.ip = ip
         self.port = port
@@ -150,7 +150,7 @@ class Server(object):
 
     def stop(self):
         """
-        -stop communication
+        stop communication
         """
         # set server to inactive
         self.active = False
@@ -159,6 +159,6 @@ class Server(object):
 
     def message(self, cmd, message):
         """
-        -put message to buffer
+        put message to buffer
         """
         self.buffer_message.put([cmd, message])
