@@ -3,31 +3,31 @@ TITLE = has no title
 VERSION : 0.1
 //some comment
    STRUCT
-      one : Bool;   // beschreibung one
-      two : Byte;   // beschreibung two
-      three : Word;   // beschreibung three
-      four : DWord;   // beschreibung four
-      five : LWord;   // beschreibung five
-      six : SInt;   // beschreibung six
-      seven : USInt;   // beschreibung seven
-      eight : Int;   // beschreibung eight
-      nine : UInt;   // beschreibung nine
-      ten : DInt;   // beschreibung ten
-      eleven : UDInt;   // beschreibung eleven
-      twelve : LInt;   // beschreibung twelve
-      thirteen : ULInt;   // beschreibung thirteen
-      fourteen : Real;   // beschreibung fourteen
-      fifteen : LReal;   // beschreibung fifteen
-      sixteen : Char;   // beschreibung sixteen
-      seventeen : WChar;   // beschreibung seventeen
-      eighteen : String;   // beschreibung eighteen
-      nineteen : WString;   // beschreibung nineteen
-      twenty {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // beschreibung twenty
-      twentyone : Array[0..10] of Byte;   // beschreibung twentyone
-      twentytwo : Struct   // beschreibung twentytwo
-         one : Bool;   // twentytwo one
-         two : Int;   // twentytwo two
-         three : DInt;   // twentytwo three
+      one : Bool;   // comment one
+      two : Byte;   // comment two
+      three : Word;   // comment three
+      four : DWord;   // comment four
+      five : LWord;   // comment five
+      six : SInt;   // comment six
+      seven : USInt;   // comment seven
+      eight : Int;   // comment eight
+      nine : UInt;   // comment nine
+      ten : DInt;   // comment ten
+      eleven : UDInt;   // comment eleven
+      twelve : LInt;   // comment twelve
+      thirteen : ULInt;   // comment thirteen
+      fourteen : Real;   // comment fourteen
+      fifteen : LReal;   // comment fifteen
+      sixteen : Char;   // comment sixteen
+      seventeen : WChar;   // comment seventeen
+      eighteen : String;   // comment eighteen
+      nineteen : WString;   // comment nineteen
+      twenty {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment twenty
+      twentyone : Array[0..10] of Byte;   // comment twentyone
+      twentytwo : Struct   // comment twentytwo
+         one : Bool;   // comment one
+         two : Int;   // comment  two
+         three : DInt;   // comment three
       END_STRUCT;
    END_STRUCT;
 

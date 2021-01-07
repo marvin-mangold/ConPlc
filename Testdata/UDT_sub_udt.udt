@@ -3,16 +3,16 @@ TITLE = has no title
 VERSION : 0.1
 //some comment
    STRUCT
-      one : Bool;   // beschreibung one
-      two : Byte;   // beschreibung two
-      three : Word;   // beschreibung three
-      four : DWord;   // beschreibung four
-      five : LWord;   // beschreibung five
-      six : SInt;   // beschreibung six
-      seven : USInt;   // beschreibung seven
-      eight : Int;   // beschreibung eight
-      nine : UInt;   // beschreibung nine
-      ten : DInt;   // beschreibung ten
+      _A : Bool;   // comment _A
+      _B : Byte;   // comment _B
+      _C : Word;   // comment _C
+      _D : DWord;   // comment _D
+      _E : LWord;   // comment _E
+      _F : SInt;   // comment _F
+      _G : USInt;   // comment _G
+      _H : Int;   // comment _H
+      _I : UInt;   // comment _I
+      _J : DInt;   // comment _J
    END_STRUCT;
 
 END_TYPE

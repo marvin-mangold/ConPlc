@@ -712,30 +712,30 @@ class View(object):
         self.udt_version.set(version)
         self.udt_info.set(info)
         # check every element,
-        folderpath = ["", ""]
+        folderpath = [""]
         for element in data:
-            print(element)
             # put actual data in datatree in the actual folder
-            name = element["name"]
-            datatype = element["datatype"]
-            comment = element["comment"]
-            visible = element["visible"]
-            action = element["action"]
-            value = element["value"]
-            # insert element if element has "visible" flag
-            if visible:
-                data = self.datatree.insert(folderpath[-1], "end", text=name, values=(datatype, value, comment))
-            # open new folder if element has "open" flag
-            if action == "open":
+            el_name = element["name"]
+            el_datatype = element["datatype"]
+            el_comment = element["comment"]
+            el_visible = element["visible"]
+            el_action = element["action"]
+            el_value = element["value"]
+            el_address = ""
+            # insert element to treeview if element has "visible" flag
+            if el_visible:
+                el_address = self.datatree.insert(folderpath[-1],
+                                                  "end",
+                                                  text=el_name,
+                                                  values=(el_datatype, el_value, el_comment))
+            # open this element as new folder if element has and "open" flag
+            if el_action == "open":
                 # save name to folderpath
-                folderpath.append(data)
+                folderpath.append(el_address)
             # close folder if element has "close" flag
-            elif action == "close":
+            if el_action == "close":
                 # delete name from folderpath
                 folderpath.pop()
-            # else keep folder
-            else:
-                pass
 
     def datatree_update(self):
         """

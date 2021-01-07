@@ -3,35 +3,35 @@ TITLE = has no title
 VERSION : 0.1
 //some comment
    STRUCT
-      one : Bool;   // comment one
-      two : Byte;   // comment two
-      three : Word;   // comment three
-      four : DWord;   // comment four
-      five : LWord;   // comment five
-      six : SInt;   // comment six
-      seven : USInt;   // comment seven
-      eight : Int;   // comment eight
-      nine : UInt;   // comment nine
-      ten : DInt;   // comment ten
-      eleven : UDInt;   // comment eleven
-      twelve : LInt;   // comment twelve
-      thirteen : ULInt;   // comment thirteen
-      fourteen : Real;   // comment fourteen
-      fifteen_one : LReal;   // comment fifteen_one
-      fifteen_two : Array[0..10] of "UDT_sub_udt";   // comment fifteen_two
-      sixteen : Char;   // comment sixteen
-      seventeen : WChar;   // comment seventeen
-      eighteen : String;   // comment eighteen
-      nineteen : WString;   // comment nineteen
-      twenty {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment twenty
-      twentyone : Array[0..10] of Byte;   // comment twentyone
-      twentytwo : Struct   // comment twentytwo
-         one : Bool;   // twentytwo one
-         two : Int;   // twentytwo two
-         three : DInt;   // twentytwo three
-         four : Array[0..2] of "UDT_sub_udt";   // comment four
+      1 : Bool;   // comment 1
+      2 : Byte;   // comment 2
+      3 : Word;   // comment 3
+      4 : DWord;   // comment 4
+      5 : LWord;   // comment 5
+      6 : SInt;   // comment 6
+      7 : USInt;   // comment 7
+      8 : Int;   // comment 8
+      9 : UInt;   // comment 9
+      10 : DInt;   // comment 10
+      11 : UDInt;   // comment 11
+      12 : LInt;   // comment 12
+      13 : ULInt;   // comment 13
+      14 : Real;   // comment 14
+      15 : LReal;   // comment 15
+      16 : Array[0..10] of "UDT_sub_udt";   // comment 16
+      17 : Char;   // comment 17
+      18 : WChar;   // comment 18
+      19 : String;   // comment 19
+      20 : WString;   // comment 20
+      21 {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment 21
+      22 : Array[0..10] of Byte;   // comment 22
+      23 : Struct   // comment 23
+         a : Bool;   // comment a
+         b : Int;   // comment b
+         c : DInt;   // comment c
+         d : Array[0..2] of "UDT_sub_udt";   // comment d
       END_STRUCT;
-      twentythree : "UDT_sub_udt";   // comment twentythree
+      24 : "UDT_sub_udt";   // comment 24
    END_STRUCT;
 
 END_TYPE

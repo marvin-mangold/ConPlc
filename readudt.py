@@ -98,6 +98,19 @@ def is_udt(datatype=""):
     return result
 
 
+def is_struct(line=""):
+    """
+    get start of udt declaration
+    regex searching for text "STRUCT"
+    sample: [STRUCT] --> "STRUCT"
+    """
+    result = False
+    regex = re.search(r'STRUCT$', line)
+    if regex is not None:
+        result = True
+    return result
+
+
 def is_endstruct(line=""):
     """
     get end of Struct declaration
@@ -229,15 +242,44 @@ def get_header_end(rawdata):
     sample: [STRUCT] --> "STRUCT"
     """
     result = False
-    regex = re.search(r'STRUCT', rawdata[0])
+    regex = re.search(r'STRUCT$', rawdata[0])
     if regex is not None:
         result = True
+    return result
+
+
+def get_struct(rawdata, filedata, foldernames):
+    """
+    get start of udt declaration
+    regex searching for text "STRUCT"
+    sample: [STRUCT] --> "STRUCT"
+    collect data and save it in filedata
+    """
+    result = False
+    regex = re.search(r'STRUCT$', rawdata[0])
+    if regex is not None:
+        result = True
+        # last part of struct (end indicator)
+        # collect data
+        entry = {
+            "name": "",
+            "datatype": "STRUCT",
+            "comment": "",
+            "visible": False,
+            "access": False,
+            "action": "none",
+            "value": "",
+            "size": 0}
+        # save entry to list "data"
+        save_entry(filedata=filedata, foldernames=[], entry=entry)
+        # append name prefix to list
+        foldernames.append("")
         # delete line from rawdata
         rawdata.pop(0)
     return result
 
 
-def get_data_endstruct(rawdata, filedata, foldernames):
+def get_endstruct(rawdata, filedata, foldernames):
     """
     get end of Struct declaration
     regex searching for text "END_STRUCT;"
@@ -254,7 +296,7 @@ def get_data_endstruct(rawdata, filedata, foldernames):
         # collect data
         entry = {
             "name": "",
-            "datatype": "",
+            "datatype": "END_STRUCT",
             "comment": "",
             "visible": False,
             "access": False,
@@ -262,7 +304,7 @@ def get_data_endstruct(rawdata, filedata, foldernames):
             "value": "",
             "size": 0}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        save_entry(filedata=filedata, foldernames=[], entry=entry)
         # delete line from rawdata
         rawdata.pop(0)
     return result
@@ -470,7 +512,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # collect data
         entry = {
             "name": "",
-            "datatype": "",
+            "datatype": "END_DTL",
             "comment": "",
             "visible": False,
             "access": False,
@@ -478,7 +520,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        save_entry(filedata=filedata, foldernames=[], entry=entry)
         # ---------------------------------
         # delete line from rawdata
         rawdata.pop(0)
@@ -567,15 +609,15 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         # collect data
         entry = {
             "name": "",
-            "datatype": "",
+            "datatype": "END_UDT",
             "comment": "",
             "visible": False,
             "access": False,
-            "action": "close",
+            "action": "none",
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        save_entry(filedata=filedata, foldernames=[], entry=entry)
         # ---------------------------------
         # delete line from rawdata
         rawdata.pop(0)
@@ -599,13 +641,18 @@ def get_header(rawdata, headerdata):
 def get_data(rawdata, filedata, foldernames, dependencies):
     dataend = False
     # get checking variables
+    struct = is_struct(line=rawdata[0])
     endstruct = is_endstruct(line=rawdata[0])
     datatype = get_datatype(rawdata[0])
     subudt = is_udt(datatype=datatype)
-    # check line for endstruct
-    if endstruct:
+    # check line for struct
+    if struct:
         # get and save data to filedata
-        get_data_endstruct(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+        get_struct(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+    # check line for endstruct
+    elif endstruct:
+        # get and save data to filedata
+        get_endstruct(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
     # check line for standard datatype
     elif datatype in standard_types:
         # get and save data to filedata
@@ -652,7 +699,6 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
         filedata = []
     if foldernames is None:
         foldernames = []
-    foldernames.append("")
     if dependencies is None:
         dependencies = {}
     # read udt file
