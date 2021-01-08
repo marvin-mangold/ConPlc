@@ -702,6 +702,7 @@ class View(object):
         self.udt_description.set("")
         self.udt_version.set("")
         self.udt_info.set("")
+        self.udt_size.set("")
 
     def datatree_fill(self, name, description, version, info, data):
         """

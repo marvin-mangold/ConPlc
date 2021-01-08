@@ -255,6 +255,8 @@ def get_struct(rawdata, filedata, foldernames):
     sample: [STRUCT] --> "STRUCT"
     collect data and save it in filedata
     """
+    error = False
+    errormessage = ""
     result = False
     regex = re.search(r'STRUCT$', rawdata[0])
     if regex is not None:
@@ -276,7 +278,7 @@ def get_struct(rawdata, filedata, foldernames):
         foldernames.append("")
         # delete line from rawdata
         rawdata.pop(0)
-    return result
+    return result, error, errormessage
 
 
 def get_endstruct(rawdata, filedata, foldernames):
@@ -286,6 +288,8 @@ def get_endstruct(rawdata, filedata, foldernames):
     sample: [END_STRUCT;] --> "END_STRUCT;"
     collect data and save it in filedata
     """
+    error = False
+    errormessage = ""
     result = False
     regex = re.search(r'END_STRUCT;', rawdata[0])
     if regex is not None:
@@ -307,7 +311,7 @@ def get_endstruct(rawdata, filedata, foldernames):
         save_entry(filedata=filedata, foldernames=[], entry=entry)
         # delete line from rawdata
         rawdata.pop(0)
-    return result
+    return result, error, errormessage
 
 
 def get_data_standard(rawdata, filedata, foldernames):
@@ -320,6 +324,8 @@ def get_data_standard(rawdata, filedata, foldernames):
     sample:  [Test : Bool;   // comment Test] --> "Test", "Bool", "comment Test"
     collect data and save it in filedata
     """
+    error = False
+    errormessage = ""
     result = False
     regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
@@ -341,7 +347,7 @@ def get_data_standard(rawdata, filedata, foldernames):
         save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
         # delete line from rawdata
         rawdata.pop(0)
-    return result
+    return result, error, errormessage
 
 
 def get_data_string(rawdata, filedata, foldernames):
@@ -357,6 +363,8 @@ def get_data_string(rawdata, filedata, foldernames):
     if datatype = String without [xxx] --> set it to String[254] after regex
     collect data and save it in filedata
     """
+    error = False
+    errormessage = ""
     result = False
     regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?;(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
@@ -386,7 +394,7 @@ def get_data_string(rawdata, filedata, foldernames):
         save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
         # delete line from rawdata
         rawdata.pop(0)
-    return result
+    return result, error, errormessage
 
 
 def get_data_wstring(rawdata, filedata, foldernames):
@@ -402,6 +410,8 @@ def get_data_wstring(rawdata, filedata, foldernames):
     if datatype = WString without [xxx] --> set it to WString[254] after regex
     collect data and save it in filedata
     """
+    error = False
+    errormessage = ""
     result = False
     regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?;(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
@@ -431,7 +441,7 @@ def get_data_wstring(rawdata, filedata, foldernames):
         save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
         # delete line from rawdata
         rawdata.pop(0)
-    return result
+    return result, error, errormessage
 
 
 def get_data_array(rawdata, filedata, foldernames, dependencies):
@@ -447,8 +457,8 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
     sample: [Test : Array[1..8] of Byte;   // comment Test] --> "Test", "Array", "1", "8", "Byte", "comment Test"
     collect data and save it in filedata
     """
-    # get VAR declaration (must have ":" and can have "// comment")
-    # -->name : Bool;   // comment
+    error = False
+    errormessage = ""
     result = False
     regex = re.search(r'(.*?) : ((.*)\[(.*)(?:\.\.)(.*)(?:] of )(.*));(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
@@ -490,8 +500,11 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
             name = "[{number}]".format(number=str(count))
             elements.append("{name} : {datatype};".format(name=name, datatype=arraydatatype))
         while True:
-            dataend = get_data(rawdata=elements, filedata=filedata, foldernames=foldernames, dependencies=dependencies)
-            if dataend:
+            dataend, error, errormessage = get_data(rawdata=elements,
+                                                    filedata=filedata,
+                                                    foldernames=foldernames,
+                                                    dependencies=dependencies)
+            if dataend or error:
                 break
         # ---------------------------------
         # delete name prefix from list
@@ -514,7 +527,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # delete line from rawdata
         rawdata.pop(0)
-    return result
+    return result, error, errormessage
 
 
 def get_data_dtl(rawdata, filedata, foldernames):
@@ -537,6 +550,8 @@ def get_data_dtl(rawdata, filedata, foldernames):
             "SECOND", "USInt"
             "NANOSECOND", "UDint"
     """
+    error = False
+    errormessage = ""
     result = False
     regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
@@ -607,7 +622,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # ---------------------------------
         # delete line from rawdata
         rawdata.pop(0)
-    return result
+    return result, error, errormessage
 
 
 def get_data_struct(rawdata, filedata, foldernames):
@@ -620,6 +635,8 @@ def get_data_struct(rawdata, filedata, foldernames):
     sample:  [Test : Struct   // comment Test] --> "Test", "Struct", "comment Test"
     collect data and save it in filedata
     """
+    error = False
+    errormessage = ""
     result = False
     regex = re.search(r'(.*) : (Struct)(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
@@ -644,7 +661,7 @@ def get_data_struct(rawdata, filedata, foldernames):
         foldernames.append(name + ".")
         # delete line from rawdata
         rawdata.pop(0)
-    return result
+    return result, error, errormessage
 
 
 def get_data_subudt(rawdata, filedata, foldernames, dependencies):
@@ -655,6 +672,8 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
     collect data and save it in filedata
     data: call the function where this function was called from --> get_structure()
     """
+    error = False
+    errormessage = ""
     result = False
     regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
@@ -681,8 +700,10 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # middle part of sub-udt (data)
         path = dependencies[datatype]
-        tempheaderdata, filedata = get_structure(filedata=filedata, foldernames=foldernames,
-                                                 filepath=path, dependencies=dependencies)
+        tempheaderdata, filedata, error, errormessage = get_structure(filedata=filedata,
+                                                                      foldernames=foldernames,
+                                                                      filepath=path,
+                                                                      dependencies=dependencies)
         # ---------------------------------
         # delete name prefix from list
         foldernames.pop()
@@ -704,7 +725,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # delete line from rawdata
         rawdata.pop(0)
-    return result
+    return result, error, errormessage
 
 
 def get_header(rawdata, headerdata):
@@ -722,6 +743,8 @@ def get_header(rawdata, headerdata):
 
 
 def get_data(rawdata, filedata, foldernames, dependencies):
+    error = False
+    errormessage = ""
     dataend = False
     # get checking variables
     struct = is_struct(line=rawdata[0])
@@ -732,52 +755,73 @@ def get_data(rawdata, filedata, foldernames, dependencies):
     # check line for struct
     if struct:
         # get and save data to filedata
-        get_struct(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+        result, error, errormessage = get_struct(rawdata=rawdata,
+                                                 filedata=filedata,
+                                                 foldernames=foldernames)
     # check line for endstruct
     elif endstruct:
         # get and save data to filedata
-        get_endstruct(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+        result, error, errormessage = get_endstruct(rawdata=rawdata,
+                                                    filedata=filedata,
+                                                    foldernames=foldernames)
     # check line for standard datatype
     elif datatype in standard_types:
         # get and save data to filedata
-        get_data_standard(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+        result, error, errormessage = get_data_standard(rawdata=rawdata,
+                                                        filedata=filedata,
+                                                        foldernames=foldernames)
     # check line for special datatype struct
     elif (datatype in special_types) and (datatype == "Array"):
         # get and save data to filedata
-        get_data_array(rawdata=rawdata, filedata=filedata, foldernames=foldernames, dependencies=dependencies)
+        result, error, errormessage = get_data_array(rawdata=rawdata,
+                                                     filedata=filedata,
+                                                     foldernames=foldernames,
+                                                     dependencies=dependencies)
     # check line for special datatype string
     elif (datatype in special_types) and (datatype[:6] == "String"):
         # get and save data to filedata
-        get_data_string(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+        result, error, errormessage = get_data_string(rawdata=rawdata,
+                                                      filedata=filedata,
+                                                      foldernames=foldernames)
     # check line for special datatype wstring
     elif (datatype in special_types) and (datatype[:7] == "WString"):
         # get and save data to filedata
-        get_data_wstring(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+        result, error, errormessage = get_data_wstring(rawdata=rawdata,
+                                                       filedata=filedata,
+                                                       foldernames=foldernames)
     # check line for special datatype dtl
     elif (datatype in special_types) and (datatype == "DTL"):
         # get and save data to filedata
-        get_data_dtl(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+        result, error, errormessage = get_data_dtl(rawdata=rawdata,
+                                                   filedata=filedata,
+                                                   foldernames=foldernames)
     # check line for special datatype struct
     elif (datatype in special_types) and (datatype == "Struct"):
         # get and save data to filedata
-        get_data_struct(rawdata=rawdata, filedata=filedata, foldernames=foldernames)
+        result, error, errormessage = get_data_struct(rawdata=rawdata,
+                                                      filedata=filedata,
+                                                      foldernames=foldernames)
     # check line for special datatype sub-udt
     elif subudt:
         # get and save data to filedata
-        get_data_subudt(rawdata=rawdata, filedata=filedata, foldernames=foldernames, dependencies=dependencies)
+        result, error, errormessage = get_data_subudt(rawdata=rawdata,
+                                                      filedata=filedata,
+                                                      foldernames=foldernames,
+                                                      dependencies=dependencies)
     # check line for end of udt file
     elif is_endtype(rawdata=rawdata):
         # set end flag
         dataend = True
     else:
-        print("Line can not be interpreted: {line}".format(line=rawdata[0]))
+        error = True
+        errormessage = "Dataerror: Line in File can not be interpreted: {line}".format(line=rawdata[0])
         # delete line from rawdata
         rawdata.pop(0)
     # check if rawdata is empty
     if not rawdata:
         # set end flag
         dataend = True
-    return dataend
+    return dataend, error, errormessage
 
 
 def get_structure(filedata=None, foldernames=None, filepath="", dependencies=None):
@@ -802,15 +846,18 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
             break
     # read data of rawdata as long as data in rawdata
     while True:
-        dataend = get_data(rawdata=rawdata, filedata=filedata, foldernames=foldernames, dependencies=dependencies)
-        if dataend:
+        dataend, error, errormessage = get_data(rawdata=rawdata,
+                                                filedata=filedata,
+                                                foldernames=foldernames,
+                                                dependencies=dependencies)
+        if dataend or error:
             break
     # get size of datastructure
     size = 0
     for entry in filedata:
         size = size + int(entry["size"])
     headerdata["size"] = str(size)
-    return headerdata, filedata
+    return headerdata, filedata, error, errormessage
 
 
 def get_dependencies(path):

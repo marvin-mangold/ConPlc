@@ -170,6 +170,7 @@ class Controller(object):
         update screens with new data
         """
         error = False
+        errormessage = ""
         # clear data in datatree
         self.view.datatree_clear()
         # get the filepath of udt and its sub udts
@@ -185,6 +186,7 @@ class Controller(object):
             filepath = self.view.filepath_open(message=message, filetypes=(("UDT Files", "*.udt"),))
             if filepath == "":  # filedialog got wrong path or was closed --> break loop
                 error = True
+                errormessage = "Dataerror: File not found"
                 break
             else:
                 # save filepath to dependencies
@@ -194,26 +196,30 @@ class Controller(object):
         # get datastructure of the udt
         if not error:
             # get data of main UDT and sub-UDTs
-            headerdata, filedata = readudt.get_structure(filepath=dependencies["Source"], dependencies=dependencies)
-            self.projectfile["udt_name"] = headerdata["name"]
-            self.projectfile["udt_description"] = headerdata["description"]
-            self.projectfile["udt_version"] = headerdata["version"]
-            self.projectfile["udt_info"] = headerdata["info"]
-            self.projectfile["udt_size"] = headerdata["size"]
-            self.projectfile["udt_data"] = filedata
-            # refresh variables on screen data
-            self.view.datatree_update()
-            # write eventmessage
-            self.view.eventframe_post("Datastructure loaded")
-        else:
-            self.projectfile["udt_name"] = ""
-            self.projectfile["udt_description"] = ""
-            self.projectfile["udt_version"] = ""
-            self.projectfile["udt_info"] = ""
-            self.projectfile["udt_size"] = "0"
-            self.projectfile["udt_data"] = []
-            # refresh variables on screen data
-            self.view.datatree_update()
+            headerdata, filedata, error, errormessage = readudt.get_structure(filepath=dependencies["Source"],
+                                                                              dependencies=dependencies)
+            if not error:
+                self.projectfile["udt_name"] = headerdata["name"]
+                self.projectfile["udt_description"] = headerdata["description"]
+                self.projectfile["udt_version"] = headerdata["version"]
+                self.projectfile["udt_info"] = headerdata["info"]
+                self.projectfile["udt_size"] = headerdata["size"]
+                self.projectfile["udt_data"] = filedata
+                # refresh variables on screen data
+                self.view.datatree_update()
+                # write eventmessage
+                self.view.eventframe_post("Datastructure loaded")
+            else:
+                self.projectfile["udt_name"] = ""
+                self.projectfile["udt_description"] = ""
+                self.projectfile["udt_version"] = ""
+                self.projectfile["udt_info"] = ""
+                self.projectfile["udt_size"] = "0"
+                self.projectfile["udt_data"] = []
+                # refresh variables on screen data
+                self.view.datatree_update()
+        if error:
+            self.view.eventframe_post(errormessage)
 
     def server_start(self):
         """
