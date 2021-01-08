@@ -172,7 +172,6 @@ class Controller(object):
         error = False
         # clear data in datatree
         self.view.datatree_clear()
-
         # get the filepath of udt and its sub udts
         # create empty dict for dependencies
         dependencies = {"Source": None}  # {"sub_udt_name":"sub_udt_filepath", ...}
@@ -180,23 +179,18 @@ class Controller(object):
         # in every loop search for sub udts in udt
         # if sub udt found, add it to dependencies so the loop will run again
         while (not error) and list(filter(lambda x: dependencies[x] is None, dependencies)):
-            # iterate over dependencies without filepath
-            sub = {}  # new found sub udt are temporary here
-            for dep in list(filter(lambda x: dependencies[x] is None, dependencies)):
-                # if udt with filepath = None found in dependencies, get its filepath
-                message = "select UDT: {dep}".format(dep=dep)
-                filepath = self.view.filepath_open(message=message, filetypes=(("UDT Files", "*.udt"),))
-                if filepath == "":  # filedialog got wrong path or was closed --> break loop
-                    error = True
-                    break
-                else:
-                    # save filepath to dependencies
-                    dependencies[dep] = filepath
-                    # search in udt for sub udts and save them to temporary dictionary
-                    sub.update(readudt.get_dependencies(filepath))
-            # save the found sub udts from temporary dictionary to dependencies
-            dependencies.update(sub)
-
+            # if udt with filepath = None found in dependencies, get its filepath
+            dep = list(filter(lambda x: dependencies[x] is None, dependencies))
+            message = "select UDT: {dep}".format(dep=dep[0])
+            filepath = self.view.filepath_open(message=message, filetypes=(("UDT Files", "*.udt"),))
+            if filepath == "":  # filedialog got wrong path or was closed --> break loop
+                error = True
+                break
+            else:
+                # save filepath to dependencies
+                dependencies[dep[0]] = filepath
+                # search in udt for sub udts and save them to dictionary to dependencies
+                dependencies.update(readudt.get_dependencies(filepath))
         # get datastructure of the udt
         if not error:
             # get data of main UDT and sub-UDTs

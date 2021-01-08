@@ -1,0 +1,36 @@
+﻿TYPE "UDT_commentfree"
+TITLE = without comments
+VERSION : 0.1
+   STRUCT
+      one : Bool;
+      three : Byte;
+      four : Word;
+      five : DWord;
+      six : DWord;
+      seven : SInt;
+      eight : USInt;
+      nine : Int;
+      ten : UInt;
+      eleven : DInt;
+      twelve : UDInt;
+      thirteen : Int;
+      twentytwo : Array[2..10] of Byte;
+      twentytfive : Array[1..8] of "UDT_without_sub_udt";
+      fourteen : Int;
+      fifteen : Real;
+      sixteenn : LReal;
+      seventeen : Char;
+      eighteen : WChar;
+      nineteen : String;
+      twenty : WString;
+      twentyone {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;
+      twentythree : Struct
+         A : Bool;
+         B : Int;
+         E : DInt;
+      END_STRUCT;
+      twentysix : Bool;
+   END_STRUCT;
+
+END_TYPE
+

@@ -8,15 +8,18 @@ VERSION : 0.1
       three : Byte;   // comment three
       four : Word;   // comment four
       five : DWord;   // comment five
-      six : LWord;   // comment six
+      aa_comment_free : "UDT_commentfree";
+      ab_with_subudt : "UDT with sub udt";   // comment UDT with subudt
+      ac_without_subudt : "UDT_without_sub_udt";   // comment UDT without subudt
+      six : Word;   // comment six
       seven : SInt;   // comment seven
       eight : USInt;   // comment eight
       nine : Int;   // comment nine
       ten : UInt;   // comment ten
       eleven : DInt;   // comment eleven
       twelve : UDInt;   // comment twelve
-      thirteen : LInt;   // comment thirteen
-      fourteen : ULInt;   // comment fourteen
+      thirteen : Int;   // comment thirteen
+      fourteen : Int;   // comment fourteen
       fifteen : Real;   // comment fifteen
       sixteenn : LReal;   // comment sixteen
       seventeen : Char;   // comment seventeen
@@ -32,8 +35,6 @@ VERSION : 0.1
          D : "UDT_without_sub_udt";   // comment D
          E : DInt;   // comment E
       END_STRUCT;
-      twentytfour : "UDT_with_sub_udt";   // comment twentyfour
-      twentytfive : "UDT_without_sub_udt";   // comment twentyfive
       twentysix : Bool;   // comment twentysix
    END_STRUCT;
 

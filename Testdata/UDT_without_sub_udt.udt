@@ -1,4 +1,4 @@
-﻿TYPE "UDT without sub udt"
+﻿TYPE "UDT_without_sub_udt"
 TITLE = has no title
 VERSION : 0.1
 //some comment
@@ -7,15 +7,15 @@ VERSION : 0.1
       two : Byte;   // comment two
       three : Word;   // comment three
       four : DWord;   // comment four
-      five : LWord;   // comment five
+      five : Word;   // comment five
       six : SInt;   // comment six
       seven : USInt;   // comment seven
       eight : Int;   // comment eight
       nine : UInt;   // comment nine
       ten : DInt;   // comment ten
       eleven : UDInt;   // comment eleven
-      twelve : LInt;   // comment twelve
-      thirteen : ULInt;   // comment thirteen
+      twelve : Int;   // comment twelve
+      thirteen : Int;   // comment thirteen
       fourteen : Real;   // comment fourteen
       fifteen : LReal;   // comment fifteen
       sixteen : Char;   // comment sixteen
