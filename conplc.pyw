@@ -126,19 +126,20 @@ class Controller(object):
         """
         if path is None:
             path = self.view.filepath_open(filetypes=(("cplc Files", "*.cplc"),))
-        # read JSON file
-        with open(path) as file:
-            self.projectfile = json.load(file)
-        # refresh variables on screen server
-        self.view.server_update()
-        # refresh variables on screen data
-        self.view.datatree_update()
-        # refresh variables on screen setup
-        self.view.setup_update()
-        # refresh windowsize and scaling
-        self.view.window_update()
-        # write eventmessage
-        self.view.eventframe_post("Project opened ({path})".format(path=path))
+        if path != "":
+            # read JSON file
+            with open(path) as file:
+                self.projectfile = json.load(file)
+            # refresh variables on screen server
+            self.view.server_update()
+            # refresh variables on screen data
+            self.view.datatree_update()
+            # refresh variables on screen setup
+            self.view.setup_update()
+            # refresh windowsize and scaling
+            self.view.window_update()
+            # write eventmessage
+            self.view.eventframe_post("Project opened ({path})".format(path=path))
 
     def file_save(self):
         """
@@ -156,11 +157,12 @@ class Controller(object):
         save project file on filepath
         """
         path = self.view.filepath_saveas(filetypes=(("cplc Files", "*.cplc"),))
-        # write JSON file
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
-        # write eventmessage
-        self.view.eventframe_post("Project saved ({path})".format(path=path))
+        if path != "":
+            # write JSON file
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(self.projectfile, f, ensure_ascii=False, indent=4)
+            # write eventmessage
+            self.view.eventframe_post("Project saved ({path})".format(path=path))
 
     def data_get(self):
         """
@@ -230,7 +232,8 @@ class Controller(object):
                                                       byte3=str(int(self.projectfile["con_ip_byte3"])),
                                                       byte4=str(int(self.projectfile["con_ip_byte4"])))
         port = int(self.projectfile["con_port"])
-        datasize = int(self.projectfile["udt_size"])
+        #  TODO datasize
+        datasize = 8  # int(self.projectfile["udt_size"])
         self.server.start(ip=ip, port=port, datasize=datasize)
 
     def server_stop(self):

@@ -82,26 +82,32 @@ class View(object):
 
         # style customisation--------------------------------------------------
         # define main colors
-        self.backcolor = self.style_main.lookup('TButton', 'background')
+        self.backcolor = self.style_main.lookup("TButton", "background")
         self.midcolor = "#3d4145"
-        self.frontcolor = self.style_main.lookup('TTreeview', 'background')
-        self.textcolor = self.style_main.lookup('TButton', 'foreground')
+        self.frontcolor = self.style_main.lookup("TTreeview", "background")
+        self.textcolor = self.style_main.lookup("TButton", "foreground")
         # actionbar
         self.style_btn_actionbar = ttk.Style()
         self.style_btn_actionbar.configure(
             "style_actionbar.TButton", font=("arial", 8), relief="flat")
         self.style_btn_actionbar.map(
-            "style_actionbar.TButton", background=[('selected', self.midcolor), ('active', "#000000")])
+            "style_actionbar.TButton", background=[("selected", self.midcolor), ("active", "#000000")])
         # infobar
         self.style_lbl_infobar = ttk.Style()
         self.style_lbl_infobar.configure(
             "style_infobar.TLabel", foreground=self.textcolor, background=self.backcolor)
+        # eventframe
+        self.style_btn_eventframe = ttk.Style()
+        self.style_btn_eventframe.configure(
+            "style_eventframe.TButton", relief="flat", background="#000000")
+        self.style_btn_eventframe.map(
+            "style_eventframe.TButton", background=[("selected", self.midcolor), ("active", "#111111")])
         # screen
         self.style_btn_screen = ttk.Style()
         self.style_btn_screen.configure(
             "style_screen.TButton", font=("arial", 10), relief="solid")
         self.style_btn_screen.map(
-            "style_screen.TButton", background=[('selected', self.midcolor), ('active', "#000000")])
+            "style_screen.TButton", background=[("selected", self.midcolor), ("active", "#000000")])
         self.style_lbl_screen = ttk.Style()
         self.style_lbl_screen.configure(
             "style_screen.TLabel", font=("arial", 10), relief="flat", background=self.midcolor)
@@ -123,7 +129,7 @@ class View(object):
         self.style_nb_screen.configure(
             "style_screen.TNotebook.Tab", focuscolor=self.style_nb_screen.configure(".")["background"])
         self.style_nb_screen.map(
-            "style_screen.TNotebook.Tab", background=[('selected', self.midcolor), ('active', "#000000")])
+            "style_screen.TNotebook.Tab", background=[("selected", self.midcolor), ("active", "#000000")])
         self.style_treeview = ttk.Style()
         self.style_treeview.configure(
             "Treeview.Heading", font=("arial", 10))
@@ -239,6 +245,15 @@ class View(object):
         self.lbl_eventframe.bind("<Button-1>", lambda x: self.eventframe_drag(mode="start"))
         self.lbl_eventframe.bind("<B1-Motion>", lambda x: self.eventframe_drag(mode="move"))
         self.lbl_eventframe.bind("<ButtonRelease-1>", lambda x: self.eventframe_drag(mode="stop"))
+
+        # create an place button autoscroll on eventframe
+        self.autoscroll = tk.BooleanVar()
+        self.autoscroll.set(True)
+        self.btn_autoscroll = ttk.Button(master=self.eventframe,
+                                         takefocus=0,
+                                         text='autoscroll',
+                                         style="style_eventframe.TButton",
+                                         command=self.eventlog_autoscroll)
 
         # create an place textfield on eventframe
         self.txt_eventframe = tk.Text(self.eventframe,
@@ -501,6 +516,7 @@ class View(object):
         # scale gui elements from screen home----------------------------------
         self.eventframe.place(x=0, y=482 + oy - self.eventframeoffs, height=35 + self.eventframeoffs, width=797 + ox)
         self.lbl_eventframe.place(x=1, y=1, width=795 + ox, height=20)
+        self.btn_autoscroll.place(x=724 + ox, y=-10, width=74, height=40)
         self.txt_eventframe.place(x=1, y=20, width=782 + ox, height=10 + self.eventframeoffs)
         self.eventframe_scrollx.place(x=1, y=20 + self.eventframeoffs, width=782 + ox)
         self.eventframe_scrolly.place(x=782 + ox, y=20, height=15 + self.eventframeoffs)
@@ -583,7 +599,8 @@ class View(object):
         timestamp = self.controller.timestamp_get()
         self.txt_eventframe.insert(tk.END, "{timestamp}: {text}\n".format(timestamp=timestamp, text=text))
         self.txt_eventframe.configure(state="disabled")
-        self.txt_eventframe.yview_moveto('1.0')
+        if self.autoscroll.get():
+            self.txt_eventframe.yview_moveto('1.0')
 
     def keyup(self, event):
         """
@@ -809,3 +826,14 @@ class View(object):
             self.controller.server_start()
         elif not state:
             self.controller.server_stop()
+
+    def eventlog_autoscroll(self):
+        """
+        toggle autoscroll
+        """
+        if self.autoscroll.get():
+            self.autoscroll.set(False)
+            self.style_btn_eventframe.configure("style_eventframe.TButton", foreground=self.midcolor)
+        else:
+            self.autoscroll.set(True)
+            self.style_btn_eventframe.configure("style_eventframe.TButton", foreground="#FFFFFF")

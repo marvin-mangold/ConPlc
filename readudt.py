@@ -85,6 +85,10 @@ def clean_name(name):
     return newname
 
 
+def is_odd(num):
+    return bool(num & 1)
+
+
 def is_udt(datatype=""):
     """
     check if datatype is special udt type
@@ -824,6 +828,24 @@ def get_data(rawdata, filedata, foldernames, dependencies):
     return dataend, error, errormessage
 
 
+def get_size(filedata):
+    # get size of datastructure
+    size = 0
+    # check for needed offsets
+    # -------------------------
+    # TODO data offset
+    # -------------------------
+    # add size of all entrys
+    for entry in filedata:
+        size = size + int(entry["size"])
+    # convert bits to bytes
+    size = size / 8
+    # check if datasize is even/odd
+    if is_odd(size):
+        size += 1
+    return size
+
+
 def get_structure(filedata=None, foldernames=None, filepath="", dependencies=None):
     """
     open udt file
@@ -852,11 +874,10 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
                                                 dependencies=dependencies)
         if dataend or error:
             break
-    # get size of datastructure
-    size = 0
-    for entry in filedata:
-        size = size + int(entry["size"])
-    headerdata["size"] = str(size)
+    # get udt size and fill offsets
+    if not error:
+        size = get_size(filedata=filedata)
+        headerdata["size"] = str(size)
     return headerdata, filedata, error, errormessage
 
 
