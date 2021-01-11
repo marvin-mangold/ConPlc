@@ -205,7 +205,7 @@ class Controller(object):
                 self.projectfile["udt_description"] = headerdata["description"]
                 self.projectfile["udt_version"] = headerdata["version"]
                 self.projectfile["udt_info"] = headerdata["info"]
-                self.projectfile["udt_size"] = headerdata["size"]
+                self.projectfile["udt_datasize"] = headerdata["datasize"]
                 self.projectfile["udt_data"] = filedata
                 # refresh variables on screen data
                 self.view.datatree_update()
@@ -216,7 +216,7 @@ class Controller(object):
                 self.projectfile["udt_description"] = ""
                 self.projectfile["udt_version"] = ""
                 self.projectfile["udt_info"] = ""
-                self.projectfile["udt_size"] = "0"
+                self.projectfile["udt_datasize"] = "0"
                 self.projectfile["udt_data"] = []
                 # refresh variables on screen data
                 self.view.datatree_update()
@@ -233,7 +233,7 @@ class Controller(object):
                                                       byte4=str(int(self.projectfile["con_ip_byte4"])))
         port = int(self.projectfile["con_port"])
         #  TODO datasize
-        datasize = 8  # int(self.projectfile["udt_size"])
+        datasize = 8  # int(self.projectfile["udt_datasize"])
         self.server.start(ip=ip, port=port, datasize=datasize)
 
     def server_stop(self):

@@ -266,6 +266,7 @@ def get_struct(rawdata, filedata, foldernames):
         entry = {
             "name": "",
             "datatype": "STRUCT",
+            "byte": 0.0,
             "comment": "",
             "visible": False,
             "access": False,
@@ -301,6 +302,7 @@ def get_endstruct(rawdata, filedata, foldernames):
         entry = {
             "name": "",
             "datatype": "END_STRUCT",
+            "byte": 0.0,
             "comment": "",
             "visible": False,
             "access": False,
@@ -337,6 +339,7 @@ def get_data_standard(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": datatype,
+            "byte": 0.0,
             "comment": comment,
             "visible": True,
             "access": True,
@@ -384,6 +387,7 @@ def get_data_string(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": "{datatype}[{length}]".format(datatype=datatype, length=length),
+            "byte": 0.0,
             "comment": comment,
             "visible": True,
             "access": True,
@@ -431,6 +435,7 @@ def get_data_wstring(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": "{datatype}[{length}]".format(datatype=datatype, length=length),
+            "byte": 0.0,
             "comment": comment,
             "visible": True,
             "access": True,
@@ -478,6 +483,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         entry = {
             "name": name,
             "datatype": arraydescription,
+            "byte": 0.0,
             "comment": comment,
             "visible": True,
             "access": False,
@@ -516,6 +522,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         entry = {
             "name": "",
             "datatype": "END_ARRAY",
+            "byte": 0.0,
             "comment": "",
             "visible": False,
             "access": False,
@@ -565,6 +572,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": datatype,
+            "byte": 0.0,
             "comment": comment,
             "visible": True,
             "access": False,
@@ -593,6 +601,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
             entry = {
                 "name": name,
                 "datatype": datatype,
+                "byte": 0.0,
                 "comment": comment,
                 "visible": True,
                 "access": True,
@@ -611,6 +620,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         entry = {
             "name": "",
             "datatype": "END_DTL",
+            "byte": 0.0,
             "comment": "",
             "visible": False,
             "access": False,
@@ -649,6 +659,7 @@ def get_data_struct(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": datatype,
+            "byte": 0.0,
             "comment": comment,
             "visible": True,
             "access": False,
@@ -687,6 +698,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         entry = {
             "name": name,
             "datatype": datatype,
+            "byte": 0.0,
             "comment": comment,
             "visible": True,
             "access": False,
@@ -714,6 +726,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         entry = {
             "name": "",
             "datatype": "END_UDT",
+            "byte": 0.0,
             "comment": "",
             "visible": False,
             "access": False,
@@ -828,21 +841,25 @@ def get_size(filedata):
     """
     get size of datastructure:
         count size of all entrys
+        write byte address of entry
         check for needed offsets
         insert needed offsets
     needed offsets:
-        if the final size is not even:
-            insert byte offset until size is even
-        if actual datatype and next datatype is not the same datatype:
-            if size of bytes is not integer:
-                insert bit offset until size of Bytes is integer
+        compare datatype and following datatype:
+         if datatype is bool and following is not bool:
+          -insert 1 bit offset until size is integer (to get full byte size after bool type)
+         if following datatype size is not 1 Byte:
+          -insert 1 byte offset (to get an even byte size for following ">1 Byte types")
+         if special flag in datatype ("END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"):
+          -insert 1 byte offset (to get even byte size after this special type)
     """
-    size = 0
+    size = 0.0
     # temporary copy filedata
     datalist = filedata[:]
     filedata.clear()
     for index, data in enumerate(datalist):
         # save data
+        data["byte"] = size
         filedata.append(data)
         # count size
         size = size + float(data["size"])
@@ -851,34 +868,7 @@ def get_size(filedata):
             next_data = datalist[index + 1]
         # end of data
         except IndexError:
-            next_data = None
-            # check if data is integer (full bytes)
-            # fill with bool until byte is full
-            while size % 1 != 0.0:
-                offset = {
-                    "name": "offset",
-                    "datatype": "Bool",
-                    "comment": "offset",
-                    "visible": False,
-                    "access": False,
-                    "action": None,
-                    "value": "",
-                    "size": 0.125}
-                size = size + 0.125
-                filedata.insert(-1, offset)
-            # check if size is even
-            if size % 2 != 0.0:
-                offset = {
-                    "name": "offset",
-                    "datatype": "Byte",
-                    "comment": "offset",
-                    "visible": False,
-                    "access": False,
-                    "action": None,
-                    "value": "",
-                    "size": 1}
-                size = size + 1
-                filedata.insert(-1, offset)
+            pass
         # next data exists
         else:
             # check if actual datatype != next datatype
@@ -889,14 +879,49 @@ def get_size(filedata):
                     offset = {
                         "name": "offset",
                         "datatype": "Bool",
+                        "byte": size,
                         "comment": "offset",
                         "visible": False,
                         "access": False,
-                        "action": None,
+                        "action": "offset",
                         "value": "",
                         "size": 0.125}
                     size = size + 0.125
                     filedata.append(offset)
+                # check if next data size is not 1 Byte
+                if next_data["size"] != 1:
+                    # check if size is even
+                    # fill with Byte to make size even
+                    if size % 2 != 0.0:
+                        offset = {
+                            "name": "offset",
+                            "datatype": "Byte",
+                            "byte": size,
+                            "comment": "offset",
+                            "visible": False,
+                            "access": False,
+                            "action": "offset",
+                            "value": "",
+                            "size": 1}
+                        size = size + 1
+                        filedata.append(offset)
+        # check if datatype is end of an special datatype
+        if data["datatype"] in ["END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"]:
+            # check if size is even
+            # fill with Byte to make size even
+            if size % 2 != 0.0:
+                offset = {
+                    "name": "offset",
+                    "datatype": "Byte",
+                    "byte": size,
+                    "comment": "offset",
+                    "visible": False,
+                    "access": False,
+                    "action": "offset",
+                    "value": "",
+                    "size": 1}
+                size = size + 1
+                filedata.insert(-1, offset)
     for x in filedata:
         print(x)
     return size
@@ -908,7 +933,7 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
     read every line of file and process the information to dict "headerdata" and list "filedata"
     """
     # initialise variables
-    headerdata = {"name": "", "description": "", "version": "", "info": "", "size": "0"}
+    headerdata = {"name": "", "description": "", "version": "", "info": "", "datasize": "0"}
     if filedata is None:
         filedata = []
     if foldernames is None:
@@ -932,8 +957,8 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
             break
     # get udt size and fill offsets
     if not error:
-        size = get_size(filedata=filedata)
-        headerdata["size"] = str(size)
+        datasize = get_size(filedata=filedata)
+        headerdata["datasize"] = str(datasize)
     return headerdata, filedata, error, errormessage
 
 

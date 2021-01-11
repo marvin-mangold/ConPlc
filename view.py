@@ -360,13 +360,13 @@ class View(object):
                                           selectimage=self.img_pause,
                                           indicatoron=False)
 
-        # create and place label for show received data in Eventlog
+        # create and place label for show received data in eventlog
         self.lbl_show_recvdata = ttk.Label(master=self.screen_server,
                                            style="style_screen.TLabel",
                                            text="Show received Data in Event log:",
                                            anchor="w")
 
-        # create checkbox for show received data in Eventlog
+        # create checkbox for show received data in eventlog
         self.con_show_recvdata = tk.BooleanVar()
         self.con_show_recvdata.set(self.controller.projectfile["con_show_recvdata"])
         self.cbx_show_recvdata = ttk.Checkbutton(master=self.screen_server,
@@ -375,58 +375,58 @@ class View(object):
                                                  style="style_screen.TCheckbutton")
 
         # screen data----------------------------------------------------------
-        # create frame on screen data for UDT name + description + version + info
+        # create frame on screen data for udt name + description + version + info
         self.udt_infos = tk.Canvas(master=self.screen_data,
                                    relief="flat",
                                    highlightthickness=0,
                                    bg=self.midcolor)
 
-        # create and place label for UDT name
+        # create and place label for udt name
         self.lbl_udt_name = ttk.Label(master=self.udt_infos,
                                       style="style_screen.TLabel",
                                       text="Name:",
                                       anchor="w")
 
-        # create and place variable label for UDT name
+        # create and place variable label for udt name
         self.udt_name = tk.StringVar()
         self.lbl_udt_name_var = ttk.Label(master=self.udt_infos,
                                           style="style_screen_var.TLabel",
                                           textvariable=self.udt_name,
                                           anchor="w")
 
-        # create and place label for UDT description
+        # create and place label for udt description
         self.lbl_udt_description = ttk.Label(master=self.udt_infos,
                                              style="style_screen.TLabel",
                                              text="Description:",
                                              anchor="w")
 
-        # create and place variable label for UDT description
+        # create and place variable label for udt description
         self.udt_description = tk.StringVar()
         self.lbl_udt_description_var = ttk.Label(master=self.udt_infos,
                                                  style="style_screen_var.TLabel",
                                                  textvariable=self.udt_description,
                                                  anchor="w")
 
-        # create and place label for UDT version
+        # create and place label for udt version
         self.lbl_udt_version = ttk.Label(master=self.udt_infos,
                                          style="style_screen.TLabel",
                                          text="Version:",
                                          anchor="w")
 
-        # create and place variable label for UDT version
+        # create and place variable label for udt version
         self.udt_version = tk.StringVar()
         self.lbl_udt_version_var = ttk.Label(master=self.udt_infos,
                                              style="style_screen_var.TLabel",
                                              textvariable=self.udt_version,
                                              anchor="w")
 
-        # create and place label for UDT info
+        # create and place label for udt info
         self.lbl_udt_info = ttk.Label(master=self.udt_infos,
                                       style="style_screen.TLabel",
                                       text="Information:",
                                       anchor="w")
 
-        # create and place variable label for UDT info
+        # create and place variable label for udt info
         self.udt_info = tk.StringVar()
         self.lbl_udt_info_var = ttk.Label(master=self.udt_infos,
                                           style="style_screen_var.TLabel",
@@ -435,14 +435,16 @@ class View(object):
 
         # create and place treeview for data structure
         self.datatree = ttk.Treeview(self.screen_data)
-        self.datatree["columns"] = ("Datatype", "Value", "Comment")
-        self.datatree.column("#0", width=200, minwidth=100, stretch=tk.NO)
-        self.datatree.column("Datatype", width=150, minwidth=100, stretch=tk.NO)
-        self.datatree.column("Value", width=150, minwidth=100, stretch=tk.NO)
-        self.datatree.column("Comment", width=200, minwidth=100, stretch=tk.YES)
+        self.datatree["columns"] = ("Datatype", "Value", "Byte", "Comment")
+        self.datatree.column("#0", width=200, minwidth=50, stretch=tk.NO)
+        self.datatree.column("Datatype", width=150, minwidth=50, stretch=tk.NO)
+        self.datatree.column("Value", width=100, minwidth=50, stretch=tk.NO)
+        self.datatree.column("Byte", width=50, minwidth=50, stretch=tk.NO)
+        self.datatree.column("Comment", width=200, minwidth=50, stretch=tk.YES)
         self.datatree.heading("#0", text="Name", anchor=tk.W)
         self.datatree.heading("Datatype", text="Datatype", anchor=tk.W)
         self.datatree.heading("Value", text="Value", anchor=tk.W)
+        self.datatree.heading("Byte", text="Byte", anchor=tk.W)
         self.datatree.heading("Comment", text="Comment", anchor=tk.W)
         # add scrollbar to treeview
         self.datatree_scrollx = ttk.Scrollbar(self.screen_data, orient="horizontal", command=self.datatree.xview)
@@ -457,18 +459,27 @@ class View(object):
                                                   style="style_screen.TButton",
                                                   command=self.controller.data_get)
 
-        # create and place label for UDT info
-        self.lbl_udt_size = ttk.Label(master=self.screen_data,
-                                      style="style_screen.TLabel",
-                                      text="Size [Bytes]:",
-                                      anchor="w")
+        # create and place label for udt info
+        self.lbl_udt_datasize = ttk.Label(master=self.screen_data,
+                                          style="style_screen.TLabel",
+                                          text="Size [Bytes]:",
+                                          anchor="w")
 
-        # create and place variable label for UDT info
-        self.udt_size = tk.StringVar()
-        self.lbl_udt_size_var = ttk.Label(master=self.screen_data,
-                                          style="style_screen_var.TLabel",
-                                          textvariable=self.udt_size,
-                                          anchor="center")
+        # create and place variable label for udt info
+        self.udt_datasize = tk.StringVar()
+        self.lbl_udt_datasize_var = ttk.Label(master=self.screen_data,
+                                              style="style_screen_var.TLabel",
+                                              textvariable=self.udt_datasize,
+                                              anchor="center")
+
+        # create checkbox for show offset data in treeview
+        self.udt_show_offset = tk.BooleanVar()
+        self.udt_show_offset.set(False)
+        self.cbx_show_offset = ttk.Checkbutton(master=self.screen_data,
+                                               text="Show offset",
+                                               variable=self.udt_show_offset,
+                                               command=self.treeview_show_offset,
+                                               style="style_screen.TCheckbutton")
 
         # screen setup---------------------------------------------------------
         # create checkbox for option fullscreen
@@ -548,8 +559,9 @@ class View(object):
         self.datatree_scrollx.place(x=50, y=415 + oy, width=691 + ox)
         self.datatree_scrolly.place(x=740 + ox, y=92, height=337 + oy)
         self.btn_import_datasructure.place(x=50, y=437 + oy, width=150, height=30)
-        self.lbl_udt_size.place(x=580 + ox, y=437 + oy, width=85, height=25)
-        self.lbl_udt_size_var.place(x=670 + ox, y=437 + oy, width=83, height=25)
+        self.lbl_udt_datasize.place(x=580 + ox, y=437 + oy, width=85, height=25)
+        self.lbl_udt_datasize_var.place(x=670 + ox, y=437 + oy, width=83, height=25)
+        self.cbx_show_offset.place(x=580 + ox, y=465 + oy, width=100, height=25)
         # scale gui elements from screen setup---------------------------------
         self.cbx_fullscreen.place(x=50, y=25, width=90, height=40)
         if not self.controller.projectfile["opt_fullscreen"]:
@@ -719,7 +731,7 @@ class View(object):
         self.udt_description.set("")
         self.udt_version.set("")
         self.udt_info.set("")
-        self.udt_size.set("")
+        self.udt_datasize.set("")
 
     def datatree_fill(self, name, description, version, info, data):
         """
@@ -735,6 +747,7 @@ class View(object):
             # put actual data in datatree in the actual folder
             el_name = element["name"]
             el_datatype = element["datatype"]
+            el_byte = element["byte"]
             el_comment = element["comment"]
             el_visible = element["visible"]
             el_action = element["action"]
@@ -745,8 +758,14 @@ class View(object):
                 el_address = self.datatree.insert(folderpath[-1],
                                                   "end",
                                                   text=el_name,
-                                                  values=(el_datatype, el_value, el_comment))
-            # open this element as new folder if element has and "open" flag
+                                                  values=(el_datatype, el_value, el_byte, el_comment))
+            # insert element to treeview if element has "offset" flag
+            if el_action == "offset" and self.udt_show_offset.get():
+                el_address = self.datatree.insert(folderpath[-1],
+                                                  "end",
+                                                  text=el_name,
+                                                  values=(el_datatype, el_value, el_byte, el_comment))
+            # open this element as new folder if element has "open" flag
             if el_action == "open":
                 # save name to folderpath
                 folderpath.append(el_address)
@@ -764,13 +783,13 @@ class View(object):
         description = self.controller.projectfile["udt_description"]
         version = self.controller.projectfile["udt_version"]
         info = self.controller.projectfile["udt_info"]
-        size = self.controller.projectfile["udt_size"]
+        datasize = self.controller.projectfile["udt_datasize"]
         data = self.controller.projectfile["udt_data"]
         # clear data in datatree
         self.datatree_clear()
         # fill data in datatree
         self.datatree_fill(name, description, version, info, data)
-        self.udt_size.set(size)
+        self.udt_datasize.set(datasize)
 
     def server_update(self):
         """
@@ -837,3 +856,9 @@ class View(object):
         else:
             self.autoscroll.set(True)
             self.style_btn_eventframe.configure("style_eventframe.TButton", foreground="#FFFFFF")
+
+    def treeview_show_offset(self):
+        """
+        trigger datatree_update after state has changed
+        """
+        self.datatree_update()
