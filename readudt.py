@@ -471,28 +471,36 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
     regex searching for:
         text between start and before " :"
         text between ": " and "["
-        text between "[" and ".."
-        text between ".." and "]"
+        text between "[" and "]"
         text between "of " and ";"
         text between "// " and end
-    sample: [Test : Array[1..8] of Byte;   // comment Test] --> "Test", "Array", "1", "8", "Byte", "comment Test"
+    sample: [Test : Array[1..8] of Byte;   // comment Test] --> "Test", "Array", "1..8, 0..10", "Byte", "comment Test"
+    split "1..8, 0..10" at "," to get all available dimensions of the array
+    sample: "1..8, 0..10" --> [1..8, 0..10]
+    regex searching for arraysize in every dimension"
+        text before ".."
+        text after ".."
     collect data and save it in filedata
     """
     error = False
     errormessage = ""
     result = False
-    regex = re.search(r'(.*?) : ((.*)\[(.*)(?:\.\.)(.*)(?:] of )(.*));(?:\s{3}// )?(.*)?', rawdata[0])
+    regex = re.search(r'(.*?) : ((.*)\[(.*)\] of (.*));(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
+        name = clean_name(regex.group(1))  # "Test"
+        arraydescription = regex.group(2)  # "Array[1..8, 0..10] of Byte"
+        datatype = regex.group(3)  # "Array"
+        dimensions = regex.group(4).split(",")  # 1..8, 0..10
+        arraydatatype = regex.group(5)  # "Byte"
+        comment = regex.group(6)  # "// comment Test"
+        # get start and end of arraysize for each dimension
+        dimensiondata = []  # [{"start": 1, "end": 8}, {"start": 0, "end": 10}]
+        for dimension in dimensions:
+            dimensionbounds = dimension.split(".")
+            dimensiondata.append({"start": dimensionbounds[0], "end": dimensionbounds[2]})
+        print(dimensiondata)
         # ---------------------------------
         # first part of array (declaration line)
-        result = True
-        name = clean_name(regex.group(1))  # "Test"
-        arraydescription = regex.group(2)  # "Array[1..8] of Byte"
-        datatype = regex.group(3)  # "Array"
-        start = int(regex.group(4))  # "1"
-        end = int(regex.group(5))  # "8"
-        arraydatatype = regex.group(6)  # "Byte"
-        comment = regex.group(7)
         # get size of data
         size = special_types[datatype]
         # collect data
@@ -518,7 +526,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # "[2] : Byte;",
         # "[3] : Byte;",
         # ... and save it to filedata
-        for count in range(start, end+1):
+        for count in range(0, 0+1):
             name = "[{number}]".format(number=str(count))
             elements.append("{name} : {datatype};".format(name=name, datatype=arraydatatype))
         while True:
