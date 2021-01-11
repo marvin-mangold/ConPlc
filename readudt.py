@@ -20,26 +20,26 @@ import re
 
 
 # define possible Datatypes and its bit-size
-standard_types = {"Bool": 1,
-                  "Byte": 8,
-                  "Word": 16,
-                  "DWord": 32,
-                  "LWord": 64,
-                  "SInt": 8,
-                  "USInt": 8,
-                  "Int": 16,
-                  "UInt": 16,
-                  "DInt": 32,
-                  "UDInt": 32,
-                  "LInt": 64,
-                  "ULInt": 64,
-                  "Real": 32,
-                  "LReal": 64,
-                  "Char": 8,
-                  "WChar": 16}
+standard_types = {"Bool": 0.125,
+                  "Byte": 1,
+                  "Word": 2,
+                  "DWord": 4,
+                  "LWord": 8,
+                  "SInt": 1,
+                  "USInt": 1,
+                  "Int": 2,
+                  "UInt": 2,
+                  "DInt": 4,
+                  "UDInt": 4,
+                  "LInt": 8,
+                  "ULInt": 8,
+                  "Real": 4,
+                  "LReal": 8,
+                  "Char": 1,
+                  "WChar": 2}
 
-special_types = {"String": 16,
-                 "WString": 32,
+special_types = {"String": 2,
+                 "WString": 4,
                  "Array": 0,
                  "DTL": 0,
                  "Struct": 0,
@@ -83,10 +83,6 @@ def clean_name(name):
     if regex is not None:
         newname = regex.group(1)
     return newname
-
-
-def is_odd(num):
-    return bool(num & 1)
 
 
 def is_udt(datatype=""):
@@ -273,7 +269,7 @@ def get_struct(rawdata, filedata, foldernames):
             "comment": "",
             "visible": False,
             "access": False,
-            "action": "none",
+            "action": None,
             "value": "",
             "size": 0}
         # save entry to list "data"
@@ -344,7 +340,7 @@ def get_data_standard(rawdata, filedata, foldernames):
             "comment": comment,
             "visible": True,
             "access": True,
-            "action": "none",
+            "action": None,
             "value": "",
             "size": size}
         # save entry to list "data"
@@ -391,7 +387,7 @@ def get_data_string(rawdata, filedata, foldernames):
             "comment": comment,
             "visible": True,
             "access": True,
-            "action": "none",
+            "action": None,
             "value": "",
             "size": size}
         # save entry to list "data"
@@ -438,7 +434,7 @@ def get_data_wstring(rawdata, filedata, foldernames):
             "comment": comment,
             "visible": True,
             "access": True,
-            "action": "none",
+            "action": None,
             "value": "",
             "size": size}
         # save entry to list "data"
@@ -600,7 +596,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
                 "comment": comment,
                 "visible": True,
                 "access": True,
-                "action": "none",
+                "action": None,
                 "value": "",
                 "size": size}
             # save entry to list "data"
@@ -721,7 +717,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
             "comment": "",
             "visible": False,
             "access": False,
-            "action": "none",
+            "action": None,
             "value": "",
             "size": size}
         # save entry to list "data"
@@ -829,20 +825,80 @@ def get_data(rawdata, filedata, foldernames, dependencies):
 
 
 def get_size(filedata):
-    # get size of datastructure
+    """
+    get size of datastructure:
+        count size of all entrys
+        check for needed offsets
+        insert needed offsets
+    needed offsets:
+        if the final size is not even:
+            insert byte offset until size is even
+        if actual datatype and next datatype is not the same datatype:
+            if size of bytes is not integer:
+                insert bit offset until size of Bytes is integer
+    """
     size = 0
-    # check for needed offsets
-    # -------------------------
-    # TODO data offset
-    # -------------------------
-    # add size of all entrys
-    for entry in filedata:
-        size = size + int(entry["size"])
-    # convert bits to bytes
-    size = size / 8
-    # check if datasize is even/odd
-    if is_odd(size):
-        size += 1
+    # temporary copy filedata
+    datalist = filedata[:]
+    filedata.clear()
+    for index, data in enumerate(datalist):
+        # save data
+        filedata.append(data)
+        # count size
+        size = size + float(data["size"])
+        # check if next data exist
+        try:
+            next_data = datalist[index + 1]
+        # end of data
+        except IndexError:
+            next_data = None
+            # check if data is integer (full bytes)
+            # fill with bool until byte is full
+            while size % 1 != 0.0:
+                offset = {
+                    "name": "offset",
+                    "datatype": "Bool",
+                    "comment": "offset",
+                    "visible": False,
+                    "access": False,
+                    "action": None,
+                    "value": "",
+                    "size": 0.125}
+                size = size + 0.125
+                filedata.insert(-1, offset)
+            # check if size is even
+            if size % 2 != 0.0:
+                offset = {
+                    "name": "offset",
+                    "datatype": "Byte",
+                    "comment": "offset",
+                    "visible": False,
+                    "access": False,
+                    "action": None,
+                    "value": "",
+                    "size": 1}
+                size = size + 1
+                filedata.insert(-1, offset)
+        # next data exists
+        else:
+            # check if actual datatype != next datatype
+            if data["datatype"] != next_data["datatype"]:
+                # check if data is integer (full bytes)
+                # fill with bool until byte is full
+                while size % 1 != 0.0:
+                    offset = {
+                        "name": "offset",
+                        "datatype": "Bool",
+                        "comment": "offset",
+                        "visible": False,
+                        "access": False,
+                        "action": None,
+                        "value": "",
+                        "size": 0.125}
+                    size = size + 0.125
+                    filedata.append(offset)
+    for x in filedata:
+        print(x)
     return size
 
 
