@@ -232,8 +232,7 @@ class Controller(object):
                                                       byte3=str(int(self.projectfile["con_ip_byte3"])),
                                                       byte4=str(int(self.projectfile["con_ip_byte4"])))
         port = int(self.projectfile["con_port"])
-        #  TODO datasize
-        datasize = 8  # int(self.projectfile["udt_datasize"])
+        datasize = int(self.projectfile["udt_datasize"])
         self.server.start(ip=ip, port=port, datasize=datasize)
 
     def server_stop(self):

@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-
+#TODO multidimensional array
 import re
 
 
@@ -853,6 +853,19 @@ def get_size(filedata):
          if special flag in datatype ("END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"):
           -insert 1 byte offset (to get even byte size after this special type)
     """
+
+    # TODO change bit addresses
+    """
+    0 = 0,000 / 0,125 = 0
+    1 = 0,125 / 0,125 = 1
+    2 = 0,250 / 0,125 = 2
+    3 = 0,375 / 0,125 = 3
+    4 = 0,500 / 0,125 = 4
+    5 = 0,625 / 0,125 = 5
+    6 = 0,750 / 0,125 = 6
+    7 = 0,875 / 0,125 = 7
+    """
+
     size = 0.0
     # temporary copy filedata
     datalist = filedata[:]
@@ -922,8 +935,6 @@ def get_size(filedata):
                     "size": 1}
                 size = size + 1
                 filedata.insert(-1, offset)
-    for x in filedata:
-        print(x)
     return size
 
 
@@ -940,14 +951,15 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
         foldernames = []
     if dependencies is None:
         dependencies = {}
+    datasize = 0.0
     # read udt file
     rawdata = read_file(filepath)
-    # read header data of rawdata as long as the flag is true
+    # read header data of rawdata until headerend is reached
     while True:
         headerend, headerdata = get_header(rawdata=rawdata, headerdata=headerdata)
         if headerend:
             break
-    # read data of rawdata as long as data in rawdata
+    # read data of rawdata until dataend is reached
     while True:
         dataend, error, errormessage = get_data(rawdata=rawdata,
                                                 filedata=filedata,
