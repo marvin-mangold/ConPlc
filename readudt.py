@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-#TODO multidimensional array
+# TODO multidimensional array
 import re
 
 
@@ -59,7 +59,7 @@ def read_file(path):
     return data
 
 
-def save_entry(filedata, foldernames, entry):
+def save_entry(filedata, foldernames, entry, saveposition="end"):
     """
     concat prefix to name and save entry in data
     """
@@ -70,7 +70,10 @@ def save_entry(filedata, foldernames, entry):
         varname += prefix
     newentry["name"] = varname + newentry["name"]
     # save element
-    filedata.append(newentry)
+    if saveposition == "end":
+        filedata.append(newentry)
+    elif saveposition == "-1":
+        filedata.insert(-1, newentry)
 
 
 def clean_name(name):
@@ -135,6 +138,19 @@ def is_endtype(rawdata):
     if regex is not None:
         result = True
     return result
+
+
+def to_bitaddress(size):
+    """
+    bits are saved as 0.125 Bytes
+    the byteaddress of 8 bits after 10 Bytes is 10.0 - 10.875
+    format this to show the byteaddress as 10.0 - 10.7
+    sample: 10.857 --> 10.0 + 0,875
+    """
+    predecimalplace = int(size)
+    decimalplace = int(size % 1 / 0.125)
+    bitaddress = "{predecimalplace}.{decimalplace}".format(predecimalplace=predecimalplace, decimalplace=decimalplace)
+    return float(bitaddress)
 
 
 def get_datatype(line=""):
@@ -712,10 +728,10 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # middle part of sub-udt (data)
         path = dependencies[datatype]
-        tempheaderdata, filedata, error, errormessage = get_structure(filedata=filedata,
-                                                                      foldernames=foldernames,
-                                                                      filepath=path,
-                                                                      dependencies=dependencies)
+        tempheaderdata, filedata, datasize, error, errormessage = get_structure(filedata=filedata,
+                                                                                foldernames=foldernames,
+                                                                                filepath=path,
+                                                                                dependencies=dependencies)
         # ---------------------------------
         # delete name prefix from list
         foldernames.pop()
@@ -853,26 +869,16 @@ def get_size(filedata):
          if special flag in datatype ("END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"):
           -insert 1 byte offset (to get even byte size after this special type)
     """
-
-    # TODO change bit addresses
-    """
-    0 = 0,000 / 0,125 = 0
-    1 = 0,125 / 0,125 = 1
-    2 = 0,250 / 0,125 = 2
-    3 = 0,375 / 0,125 = 3
-    4 = 0,500 / 0,125 = 4
-    5 = 0,625 / 0,125 = 5
-    6 = 0,750 / 0,125 = 6
-    7 = 0,875 / 0,125 = 7
-    """
-
     size = 0.0
     # temporary copy filedata
     datalist = filedata[:]
     filedata.clear()
     for index, data in enumerate(datalist):
         # save data
-        data["byte"] = size
+        if data["datatype"] == "Bool":
+            data["byte"] = to_bitaddress(size)
+        else:
+            data["byte"] = size
         filedata.append(data)
         # count size
         size = size + float(data["size"])
@@ -889,10 +895,10 @@ def get_size(filedata):
                 # check if data is integer (full bytes)
                 # fill with bool until byte is full
                 while size % 1 != 0.0:
-                    offset = {
+                    entry = {
                         "name": "offset",
                         "datatype": "Bool",
-                        "byte": size,
+                        "byte": to_bitaddress(size),
                         "comment": "offset",
                         "visible": False,
                         "access": False,
@@ -900,13 +906,13 @@ def get_size(filedata):
                         "value": "",
                         "size": 0.125}
                     size = size + 0.125
-                    filedata.append(offset)
+                    save_entry(filedata=filedata, foldernames=[], entry=entry)
                 # check if next data size is not 1 Byte
                 if next_data["size"] != 1:
                     # check if size is even
                     # fill with Byte to make size even
                     if size % 2 != 0.0:
-                        offset = {
+                        entry = {
                             "name": "offset",
                             "datatype": "Byte",
                             "byte": size,
@@ -917,13 +923,13 @@ def get_size(filedata):
                             "value": "",
                             "size": 1}
                         size = size + 1
-                        filedata.append(offset)
+                        save_entry(filedata=filedata, foldernames=[], entry=entry)
         # check if datatype is end of an special datatype
         if data["datatype"] in ["END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"]:
             # check if size is even
             # fill with Byte to make size even
             if size % 2 != 0.0:
-                offset = {
+                entry = {
                     "name": "offset",
                     "datatype": "Byte",
                     "byte": size,
@@ -934,7 +940,7 @@ def get_size(filedata):
                     "value": "",
                     "size": 1}
                 size = size + 1
-                filedata.insert(-1, offset)
+                save_entry(filedata=filedata, foldernames=[], entry=entry, saveposition="-1")
     return size
 
 
@@ -944,14 +950,14 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
     read every line of file and process the information to dict "headerdata" and list "filedata"
     """
     # initialise variables
-    headerdata = {"name": "", "description": "", "version": "", "info": "", "datasize": "0"}
+    datasize = 0.0
+    headerdata = {"name": "", "description": "", "version": "", "info": ""}
     if filedata is None:
         filedata = []
     if foldernames is None:
         foldernames = []
     if dependencies is None:
         dependencies = {}
-    datasize = 0.0
     # read udt file
     rawdata = read_file(filepath)
     # read header data of rawdata until headerend is reached
@@ -970,8 +976,7 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
     # get udt size and fill offsets
     if not error:
         datasize = get_size(filedata=filedata)
-        headerdata["datasize"] = str(datasize)
-    return headerdata, filedata, error, errormessage
+    return headerdata, filedata, datasize, error, errormessage
 
 
 def get_dependencies(path):

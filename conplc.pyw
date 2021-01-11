@@ -198,14 +198,14 @@ class Controller(object):
         # get datastructure of the udt
         if not error:
             # get data of main UDT and sub-UDTs
-            headerdata, filedata, error, errormessage = readudt.get_structure(filepath=dependencies["Source"],
-                                                                              dependencies=dependencies)
+            headerdata, filedata, datasize, error, errormessage = readudt.get_structure(filepath=dependencies["Source"],
+                                                                                        dependencies=dependencies)
             if not error:
                 self.projectfile["udt_name"] = headerdata["name"]
                 self.projectfile["udt_description"] = headerdata["description"]
                 self.projectfile["udt_version"] = headerdata["version"]
                 self.projectfile["udt_info"] = headerdata["info"]
-                self.projectfile["udt_datasize"] = headerdata["datasize"]
+                self.projectfile["udt_datasize"] = str(datasize)
                 self.projectfile["udt_data"] = filedata
                 # refresh variables on screen data
                 self.view.datatree_update()
