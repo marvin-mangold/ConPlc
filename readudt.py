@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-# TODO multidimensional array
+
 import re
 
 
@@ -59,7 +59,7 @@ def read_file(path):
     return data
 
 
-def save_entry(filedata, foldernames, entry, saveposition="end"):
+def entry_save(filedata, foldernames, entry, saveposition="end"):
     """
     concat prefix to name and save entry in data
     """
@@ -76,7 +76,7 @@ def save_entry(filedata, foldernames, entry, saveposition="end"):
         filedata.insert(-1, newentry)
 
 
-def clean_name(name):
+def name_clean(name):
     """
     erase additional info in Varname (internal settings in {} brackets)
     sample: [Test {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // comment Test] --> "Test"
@@ -153,6 +153,48 @@ def to_bitaddress(size):
     return float(bitaddress)
 
 
+def format_array(line):
+    """
+    format array declaration from siemens style to universal style
+    siemens style:      [Test : Array[0..10, 1..5] of Byte;   // comment Test]
+    universal style:    [Test : Array[0..10] of Array[1..5] of Byte;   // comment Test]
+    if universal style gets formatted it will stay the same
+    -split line in its individual parts:
+        name = "Test"
+        arraysize = "Array[0..10, 1..5]"
+        datatype = "Byte"
+        comment = "   // comment Test"
+    -split arraysize at ","
+        arraysize[0] = 0..10
+        arraysize[1] = 1..5
+    -concat all to universal style
+    return universal style
+    """
+    result = False
+    newline = ""
+    # get name, size, datatype and comment of array
+    regex = re.search(r'(.*) : (.*) of (.*)?;(.*)?', line)
+    if regex is not None:
+        name = regex.group(1)
+        arraysize = regex.group(2)
+        datatype = regex.group(3)
+        comment = regex.group(4)
+        # find all "x..x" in array[0..10, 1..5]
+        regex = re.findall(r'(\d*\.\.\d*)', arraysize)
+        if regex is not None:
+            arraysizes = regex
+            # concat formatted line
+            arraystring = ""
+            for size in arraysizes:
+                arraystring += "Array[{array}] of ".format(array=size)
+            newline = "{name} : {arrays}{datatype};{comment}".format(name=name,
+                                                                     arrays=arraystring,
+                                                                     datatype=datatype,
+                                                                     comment=comment)
+            result = True
+    return result, newline
+
+
 def get_datatype(line=""):
     """
     get datatype from VAR declaration datatype
@@ -173,9 +215,9 @@ def get_arraytype(line=""):
     sample: [Test : Array[0..10] of String;   // comment Test] --> "String"
     """
     datatype = ""
-    regex = re.search(r'of (.*);', line)
+    regex = re.search(r'(.*) of (.*);', line)
     if regex is not None:
-        datatype = regex.group(1)
+        datatype = regex.group(2)
     return datatype
 
 
@@ -290,7 +332,7 @@ def get_struct(rawdata, filedata, foldernames):
             "value": "",
             "size": 0}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=[], entry=entry)
+        entry_save(filedata=filedata, foldernames=[], entry=entry)
         # append name prefix to list
         foldernames.append("")
         # delete line from rawdata
@@ -326,7 +368,7 @@ def get_endstruct(rawdata, filedata, foldernames):
             "value": "",
             "size": 0}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=[], entry=entry)
+        entry_save(filedata=filedata, foldernames=[], entry=entry)
         # delete line from rawdata
         rawdata.pop(0)
     return result, error, errormessage
@@ -348,7 +390,7 @@ def get_data_standard(rawdata, filedata, foldernames):
     regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
-        name, datatype, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3)
+        name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
         # get size of data
         size = standard_types[datatype]
         # collect data
@@ -363,7 +405,7 @@ def get_data_standard(rawdata, filedata, foldernames):
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
         # delete line from rawdata
         rawdata.pop(0)
     return result, error, errormessage
@@ -388,7 +430,7 @@ def get_data_string(rawdata, filedata, foldernames):
     regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?;(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
-        name, datatype, length, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3), regex.group(4)
+        name, datatype, length, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3), regex.group(4)
         if length is not None:
             length = int(length)
         else:
@@ -411,7 +453,7 @@ def get_data_string(rawdata, filedata, foldernames):
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
         # delete line from rawdata
         rawdata.pop(0)
     return result, error, errormessage
@@ -436,7 +478,7 @@ def get_data_wstring(rawdata, filedata, foldernames):
     regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?;(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
-        name, datatype, length, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3), regex.group(4)
+        name, datatype, length, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3), regex.group(4)
         if length is not None:
             length = int(length)
         else:
@@ -459,7 +501,7 @@ def get_data_wstring(rawdata, filedata, foldernames):
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
         # delete line from rawdata
         rawdata.pop(0)
     return result, error, errormessage
@@ -471,93 +513,87 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
     regex searching for:
         text between start and before " :"
         text between ": " and "["
-        text between "[" and "]"
+        text between "[" and ".."
+        text between ".." and "]"
         text between "of " and ";"
         text between "// " and end
-    sample: [Test : Array[1..8] of Byte;   // comment Test] --> "Test", "Array", "1..8, 0..10", "Byte", "comment Test"
-    split "1..8, 0..10" at "," to get all available dimensions of the array
-    sample: "1..8, 0..10" --> [1..8, 0..10]
-    regex searching for arraysize in every dimension"
-        text before ".."
-        text after ".."
+    sample: [Test : Array[1..8] of Byte;   // comment Test] --> "Test", "Array", "1", "8", "Byte", "comment Test"
     collect data and save it in filedata
     """
     error = False
     errormessage = ""
-    result = False
-    regex = re.search(r'(.*?) : ((.*)\[(.*)\] of (.*));(?:\s{3}// )?(.*)?', rawdata[0])
-    if regex is not None:
-        name = clean_name(regex.group(1))  # "Test"
-        arraydescription = regex.group(2)  # "Array[1..8, 0..10] of Byte"
-        datatype = regex.group(3)  # "Array"
-        dimensions = regex.group(4).split(",")  # 1..8, 0..10
-        arraydatatype = regex.group(5)  # "Byte"
-        comment = regex.group(6)  # "// comment Test"
-        # get start and end of arraysize for each dimension
-        dimensiondata = []  # [{"start": 1, "end": 8}, {"start": 0, "end": 10}]
-        for dimension in dimensions:
-            dimensionbounds = dimension.split(".")
-            dimensiondata.append({"start": dimensionbounds[0], "end": dimensionbounds[2]})
-        print(dimensiondata)
-        # ---------------------------------
-        # first part of array (declaration line)
-        # get size of data
-        size = special_types[datatype]
-        # collect data
-        entry = {
-            "name": name,
-            "datatype": arraydescription,
-            "byte": 0.0,
-            "comment": comment,
-            "visible": True,
-            "access": False,
-            "action": "open",
-            "value": "",
-            "size": size}
-        # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
-        # append name prefix to list
-        foldernames.append(name + ".")
-        # ---------------------------------
-        # middle part of array (data)
-        # create list of entrys in range arraysize
-        elements = []
-        # "[1] : Byte;",
-        # "[2] : Byte;",
-        # "[3] : Byte;",
-        # ... and save it to filedata
-        for count in range(0, 0+1):
-            name = "[{number}]".format(number=str(count))
-            elements.append("{name} : {datatype};".format(name=name, datatype=arraydatatype))
-        while True:
-            dataend, error, errormessage = get_data(rawdata=elements,
-                                                    filedata=filedata,
-                                                    foldernames=foldernames,
-                                                    dependencies=dependencies)
-            if dataend or error:
-                break
-        # ---------------------------------
-        # delete name prefix from list
-        foldernames.pop()
-        # last part of array (end indicator)
-        # get size of data
-        size = special_types[datatype]
-        # collect data
-        entry = {
-            "name": "",
-            "datatype": "END_ARRAY",
-            "byte": 0.0,
-            "comment": "",
-            "visible": False,
-            "access": False,
-            "action": "close",
-            "value": "",
-            "size": size}
-        # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=[], entry=entry)
-        # ---------------------------------
-        # delete line from rawdata
-        rawdata.pop(0)
+    result, newline = format_array(rawdata[0])
+    if result:
+        result = False
+        regex = re.search(r'(.*?) : ((.*?)\[(.*?)(?:\.\.)(.*?)(?:] of )(.*));(?:\s{3}// )?(.*)?', newline)
+        if regex is not None:
+            # ---------------------------------
+            # first part of array (declaration line)
+            result = True
+            name = name_clean(regex.group(1))  # "Test"
+            arraydescription = regex.group(2)  # "Array[1..8] of Byte"
+            datatype = regex.group(3)  # "Array"
+            start = int(regex.group(4))  # "1"
+            end = int(regex.group(5))  # "8"
+            arraydatatype = regex.group(6)  # "Byte"
+            comment = regex.group(7)
+            # get size of data
+            size = special_types[datatype]
+            # collect data
+            entry = {
+                "name": name,
+                "datatype": arraydescription,
+                "byte": 0.0,
+                "comment": comment,
+                "visible": True,
+                "access": False,
+                "action": "open",
+                "value": "",
+                "size": size}
+            # save entry to list "data"
+            entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
+            # append name prefix to list
+            foldernames.append(name + ".")
+            # ---------------------------------
+            # middle part of array (data)
+            # create list of entrys in range arraysize
+            elements = []
+            # "[1] : Byte;",
+            # "[2] : Byte;",
+            # "[3] : Byte;",
+            # ... and save it to filedata
+            for count in range(start, end + 1):
+                name = "[{number}]".format(number=str(count))
+                elements.append("{name} : {datatype};".format(name=name, datatype=arraydatatype))
+            while True:
+                dataend, error, errormessage = get_data(rawdata=elements,
+                                                        filedata=filedata,
+                                                        foldernames=foldernames,
+                                                        dependencies=dependencies)
+                if dataend or error:
+                    break
+            # ---------------------------------
+            # delete name prefix from list
+            foldernames.pop()
+            # last part of array (end indicator)
+            # get size of data
+            size = special_types[datatype]
+            # collect data
+            entry = {
+                "name": "",
+                "datatype": "END_ARRAY",
+                "byte": 0.0,
+                "comment": "",
+                "visible": False,
+                "access": False,
+                "action": "close",
+                "value": "",
+                "size": size}
+            # save entry to list "data"
+            entry_save(filedata=filedata, foldernames=[], entry=entry)
+            # ---------------------------------
+            # delete line from rawdata
+            rawdata.pop(0)
     return result, error, errormessage
 
 
@@ -589,7 +625,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         result = True
         # ---------------------------------
         # first part of dtl (declaration line)
-        name, datatype, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3)
+        name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
         # get size of data
         size = special_types[datatype]
         # collect data
@@ -604,7 +640,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
         # append name prefix to list
         foldernames.append(name + ".")
         # ---------------------------------
@@ -633,7 +669,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
                 "value": "",
                 "size": size}
             # save entry to list "data"
-            save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+            entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
         # ---------------------------------
         # delete name prefix from list
         foldernames.pop()
@@ -652,7 +688,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=[], entry=entry)
+        entry_save(filedata=filedata, foldernames=[], entry=entry)
         # ---------------------------------
         # delete line from rawdata
         rawdata.pop(0)
@@ -676,7 +712,7 @@ def get_data_struct(rawdata, filedata, foldernames):
     if regex is not None:
         result = True
         # first part of struct (declaration line)
-        name, datatype, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3)
+        name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
         # get size of data
         size = special_types[datatype]
         # collect data
@@ -691,7 +727,7 @@ def get_data_struct(rawdata, filedata, foldernames):
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
         # append name prefix to list
         foldernames.append(name + ".")
         # delete line from rawdata
@@ -715,7 +751,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         result = True
         # ---------------------------------
         # first part of sub-udt (declaration line)
-        name, datatype, comment = clean_name(regex.group(1)), regex.group(2), regex.group(3)
+        name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
         # get size of data
         size = special_types["UDT"]
         # collect data
@@ -730,7 +766,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=foldernames, entry=entry)
+        entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
         # append name prefix to list
         foldernames.append(name + ".")
         # ---------------------------------
@@ -758,7 +794,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
             "value": "",
             "size": size}
         # save entry to list "data"
-        save_entry(filedata=filedata, foldernames=[], entry=entry)
+        entry_save(filedata=filedata, foldernames=[], entry=entry)
         # ---------------------------------
         # delete line from rawdata
         rawdata.pop(0)
@@ -788,7 +824,6 @@ def get_data(rawdata, filedata, foldernames, dependencies):
     endstruct = is_endstruct(line=rawdata[0])
     datatype = get_datatype(rawdata[0])
     subudt = is_udt(datatype=datatype)
-
     # check line for struct
     if struct:
         # get and save data to filedata
@@ -914,7 +949,7 @@ def get_size(filedata):
                         "value": "",
                         "size": 0.125}
                     size = size + 0.125
-                    save_entry(filedata=filedata, foldernames=[], entry=entry)
+                    entry_save(filedata=filedata, foldernames=[], entry=entry)
                 # check if next data size is not 1 Byte
                 if next_data["size"] != 1:
                     # check if size is even
@@ -931,7 +966,7 @@ def get_size(filedata):
                             "value": "",
                             "size": 1}
                         size = size + 1
-                        save_entry(filedata=filedata, foldernames=[], entry=entry)
+                        entry_save(filedata=filedata, foldernames=[], entry=entry)
         # check if datatype is end of an special datatype
         if data["datatype"] in ["END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"]:
             # check if size is even
@@ -948,7 +983,7 @@ def get_size(filedata):
                     "value": "",
                     "size": 1}
                 size = size + 1
-                save_entry(filedata=filedata, foldernames=[], entry=entry, saveposition="-1")
+                entry_save(filedata=filedata, foldernames=[], entry=entry, saveposition="-1")
     return size
 
 
