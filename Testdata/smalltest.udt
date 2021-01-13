@@ -1,9 +1,0 @@
-﻿TYPE "smalltest"
-VERSION : 0.1
-   STRUCT
-      one : Bool;
-      two : Byte;
-   END_STRUCT;
-
-END_TYPE
-

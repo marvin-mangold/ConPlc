@@ -153,48 +153,6 @@ def to_bitaddress(size):
     return float(bitaddress)
 
 
-def format_array(line):
-    """
-    format array declaration from siemens style to universal style
-    siemens style:      [Test : Array[0..10, 1..5] of Byte;   // comment Test]
-    universal style:    [Test : Array[0..10] of Array[1..5] of Byte;   // comment Test]
-    if universal style gets formatted it will stay the same
-    -split line in its individual parts:
-        name = "Test"
-        arraysize = "Array[0..10, 1..5]"
-        datatype = "Byte"
-        comment = "   // comment Test"
-    -split arraysize at ","
-        arraysize[0] = 0..10
-        arraysize[1] = 1..5
-    -concat all to universal style
-    return universal style
-    """
-    result = False
-    newline = ""
-    # get name, size, datatype and comment of array
-    regex = re.search(r'(.*) : (.*) of (.*)?;(.*)?', line)
-    if regex is not None:
-        name = regex.group(1)
-        arraysize = regex.group(2)
-        datatype = regex.group(3)
-        comment = regex.group(4)
-        # find all "x..x" in array[0..10, 1..5]
-        regex = re.findall(r'(\d*\.\.\d*)', arraysize)
-        if regex is not None:
-            arraysizes = regex
-            # concat formatted line
-            arraystring = ""
-            for size in arraysizes:
-                arraystring += "Array[{array}] of ".format(array=size)
-            newline = "{name} : {arrays}{datatype};{comment}".format(name=name,
-                                                                     arrays=arraystring,
-                                                                     datatype=datatype,
-                                                                     comment=comment)
-            result = True
-    return result, newline
-
-
 def get_datatype(line=""):
     """
     get datatype from VAR declaration datatype
@@ -507,93 +465,157 @@ def get_data_wstring(rawdata, filedata, foldernames):
     return result, error, errormessage
 
 
+def get_dimension(dimensiondata, dimension=None, dimensionnames=None, data=None, addbefore="", addafter=""):
+    """
+    get list of all elements of an multidimensional array
+    Array: "Array[0..5, 0..2, 1..3] of Bool"
+    takes dimensiondata: [{'start': 0, 'end': 5}, {'start': 0, 'end': 2}, {'start': 1, 'end': 3}]
+    can append an additional string before data and after data
+    returns als combination as list:
+        ...         with additional
+        "[0][2][1]"       -->       "[0][2][1] : Byte;"
+        "[0][2][2]"       -->       "[0][2][2] : Byte;"
+        "[0][2][3]"       -->       "[0][2][3] : Byte;"
+        "[1][0][1]"       -->       "[1][0][1] : Byte;"
+        "[1][0][2]"       -->       "[1][0][2] : Byte;"
+        "[1][0][3]"       -->       "[1][0][3] : Byte;"
+        ....
+    """
+    # initialise variables if this is the first call
+    if data is None:
+        data = []
+    if dimension is None:
+        dimension = 0
+    if dimensionnames is None:
+        dimensionnames = [""]
+    # get start and end parameters of array in actual dimension
+    start = dimensiondata[dimension]["start"]
+    end = dimensiondata[dimension]["end"]
+    # check if "save data" or "go one dimension deeper"
+    for step in range(start, end + 1):
+        # change actual dimensionname in name list
+        dimensionnames[-1] = "[{x}]".format(x=step)
+        # check if this is the deepest dimension
+        # not deepest dimension --> go one dimension deeper
+        if dimension < len(dimensiondata)-1:
+            nextdimension = dimension + 1
+            # save next dimensionname in name list
+            dimensionnames.append("[{x}]".format(x=nextdimension))
+            # function calls itself to go one dimension deeper
+            get_dimension(dimensiondata=dimensiondata,
+                          dimension=nextdimension,
+                          dimensionnames=dimensionnames,
+                          data=data,
+                          addbefore=addbefore,
+                          addafter=addafter)
+            # delete last dimensionname from name list
+            dimensionnames.pop()
+        # deepest dimension --> save data in datalist
+        else:
+            # concat dimension names
+            actualname = ""
+            for name in dimensionnames:
+                actualname += name
+            savename = addbefore + actualname + addafter
+            # save to data
+            data.append(savename)
+    return data
+
+
 def get_data_array(rawdata, filedata, foldernames, dependencies):
     """
     get data from VAR declaration of a array datatype
     regex searching for:
         text between start and before " :"
         text between ": " and "["
-        text between "[" and ".."
-        text between ".." and "]"
+        text between "[" and "]"
         text between "of " and ";"
         text between "// " and end
-    sample: [Test : Array[1..8] of Byte;   // comment Test] --> "Test", "Array", "1", "8", "Byte", "comment Test"
+    sample: [Test : Array[1..8] of Byte;   // comment Test] --> "Test", "Array", "1..8, 0..10", "Byte", "comment Test"
+    split "1..8, 0..10" at "," to get all available dimensions of the array
+    sample: "1..8, 0..10" --> [1..8, 0..10]
+    regex searching for arraysize in every dimension"
+        text before ".."
+        text after ".."
     collect data and save it in filedata
     """
     error = False
     errormessage = ""
-    result, newline = format_array(rawdata[0])
-    if result:
-        result = False
-        regex = re.search(r'(.*?) : ((.*?)\[(.*?)(?:\.\.)(.*?)(?:] of )(.*));(?:\s{3}// )?(.*)?', newline)
-        if regex is not None:
-            # ---------------------------------
-            # first part of array (declaration line)
-            result = True
-            name = name_clean(regex.group(1))  # "Test"
-            arraydescription = regex.group(2)  # "Array[1..8] of Byte"
-            datatype = regex.group(3)  # "Array"
-            start = int(regex.group(4))  # "1"
-            end = int(regex.group(5))  # "8"
-            arraydatatype = regex.group(6)  # "Byte"
-            comment = regex.group(7)
-            # get size of data
-            size = special_types[datatype]
-            # collect data
-            entry = {
-                "name": name,
-                "datatype": arraydescription,
-                "byte": 0.0,
-                "comment": comment,
-                "visible": True,
-                "access": False,
-                "action": "open",
-                "value": "",
-                "size": size}
-            # save entry to list "data"
-            entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
-            # append name prefix to list
-            foldernames.append(name + ".")
-            # ---------------------------------
-            # middle part of array (data)
-            # create list of entrys in range arraysize
-            elements = []
-            # "[1] : Byte;",
-            # "[2] : Byte;",
-            # "[3] : Byte;",
-            # ... and save it to filedata
-            for count in range(start, end + 1):
-                name = "[{number}]".format(number=str(count))
-                elements.append("{name} : {datatype};".format(name=name, datatype=arraydatatype))
-            while True:
-                dataend, error, errormessage = get_data(rawdata=elements,
-                                                        filedata=filedata,
-                                                        foldernames=foldernames,
-                                                        dependencies=dependencies)
-                if dataend or error:
-                    break
-            # ---------------------------------
-            # delete name prefix from list
-            foldernames.pop()
-            # last part of array (end indicator)
-            # get size of data
-            size = special_types[datatype]
-            # collect data
-            entry = {
-                "name": "",
-                "datatype": "END_ARRAY",
-                "byte": 0.0,
-                "comment": "",
-                "visible": False,
-                "access": False,
-                "action": "close",
-                "value": "",
-                "size": size}
-            # save entry to list "data"
-            entry_save(filedata=filedata, foldernames=[], entry=entry)
-            # ---------------------------------
-            # delete line from rawdata
-            rawdata.pop(0)
+    result = False
+    regex = re.search(r'(.*?) : ((.*)\[(.*)] of (.*));(?:\s{3}// )?(.*)?', rawdata[0])
+    if regex is not None:
+        name = name_clean(regex.group(1))  # "Test"
+        arraydescription = regex.group(2)  # "Array[1..8, 0..10] of Byte"
+        datatype = regex.group(3)  # "Array"
+        dimensions = regex.group(4).split(",")  # 1..8, 0..10
+        arraydatatype = regex.group(5)  # "Byte"
+        comment = regex.group(6)  # "// comment Test"
+        # get start and end of arraysize for each dimension
+        # ---------------------------------
+        # first part of array (declaration line)
+        # get size of data
+        size = special_types[datatype]
+        # collect data
+        entry = {
+            "name": name,
+            "datatype": arraydescription,
+            "byte": 0.0,
+            "comment": comment,
+            "visible": True,
+            "access": False,
+            "action": "open",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
+        # append name prefix to list
+        foldernames.append(name + ".")
+        # ---------------------------------
+        # create dict with dimension count and bounds [{"start": 1, "end": 8}, {"start": 0, "end": 10}]
+        dimensiondata = []
+        for dimension in dimensions:
+            dimensionbounds = dimension.split(".")
+            dimensiondata.append({"start": int(dimensionbounds[0]), "end": int(dimensionbounds[2])})
+        # TODO need gaps in multidimarray of bool
+        # middle part of array (data)
+        # create list of entrys in range arraysize
+        # ["[0][1][0] : Byte;"
+        #  "[0][1][1] : Byte;"
+        #  "[0][1][2] : Byte;"
+        #  "[0][1][3] : Byte;"]
+        # and save it to filedata
+        additional = " : {add};".format(add=arraydatatype)
+        elements = get_dimension(dimensiondata=dimensiondata, addafter=additional)
+        # get data of the array elements
+        while True:
+            dataend, error, errormessage = get_data(rawdata=elements,
+                                                    filedata=filedata,
+                                                    foldernames=foldernames,
+                                                    dependencies=dependencies)
+            if dataend or error:
+                break
+        # ---------------------------------
+        # delete name prefix from list
+        foldernames.pop()
+        # last part of array (end indicator)
+        # get size of data
+        size = special_types[datatype]
+        # collect data
+        entry = {
+            "name": "",
+            "datatype": "END_ARRAY",
+            "byte": 0.0,
+            "comment": "",
+            "visible": False,
+            "access": False,
+            "action": "close",
+            "value": "",
+            "size": size}
+        # save entry to list "data"
+        entry_save(filedata=filedata, foldernames=[], entry=entry)
+        # ---------------------------------
+        # delete line from rawdata
+        rawdata.pop(0)
     return result, error, errormessage
 
 
