@@ -332,6 +332,40 @@ def get_endstruct(rawdata, filedata, foldernames):
     return result, error, errormessage
 
 
+def get_enddimension(rawdata, filedata, foldernames):
+    """
+    get end of Struct declaration
+    regex searching for text "END_STRUCT;"
+    sample: [END_STRUCT;] --> "END_STRUCT;"
+    collect data and save it in filedata
+    """
+    error = False
+    errormessage = ""
+    result = False
+    regex = re.search(r'END_STRUCT;', rawdata[0])
+    if regex is not None:
+        result = True
+        # delete name prefix from list
+        foldernames.pop()
+        # last part of struct (end indicator)
+        # collect data
+        entry = {
+            "name": "",
+            "datatype": "END_STRUCT",
+            "byte": 0.0,
+            "comment": "",
+            "visible": False,
+            "access": False,
+            "action": "close",
+            "value": "",
+            "size": 0}
+        # save entry to list "data"
+        entry_save(filedata=filedata, foldernames=[], entry=entry)
+        # delete line from rawdata
+        rawdata.pop(0)
+    return result, error, errormessage
+
+
 def get_data_standard(rawdata, filedata, foldernames):
     """
     get data from VAR declaration of a standard datatype
@@ -470,15 +504,29 @@ def get_dimension(dimensiondata, dimension=None, dimensionnames=None, data=None,
     get list of all elements of an multidimensional array
     Array: "Array[0..5, 0..2, 1..3] of Bool"
     takes dimensiondata: [{'start': 0, 'end': 5}, {'start': 0, 'end': 2}, {'start': 1, 'end': 3}]
+    adds a special marker after all elements in the deepest dimension are processed
     can append an additional string before data and after data
     returns als combination as list:
         ...         with additional
-        "[0][2][1]"       -->       "[0][2][1] : Byte;"
-        "[0][2][2]"       -->       "[0][2][2] : Byte;"
-        "[0][2][3]"       -->       "[0][2][3] : Byte;"
-        "[1][0][1]"       -->       "[1][0][1] : Byte;"
-        "[1][0][2]"       -->       "[1][0][2] : Byte;"
-        "[1][0][3]"       -->       "[1][0][3] : Byte;"
+        "[0,0,1]"       -->       "addbefore [0,0,1]" addafter
+        "[0,0,2]"       -->       "addbefore [0,0,2]" addafter
+        "[0,0,3]"       -->       "addbefore [0,0,3]" addafter
+        "Marker"          -->     "END_DIMENSION"
+        "[0,1,1]"       -->       "addbefore [0,1,1]" addafter
+        "[0,1,2]"       -->       "addbefore [0,1,2]" addafter
+        "[0,1,3]"       -->       "addbefore [0,1,3]" addafter
+        "Marker"          -->     "END_DIMENSION"
+        "[0,2,1]"       -->       "addbefore [0,2,1]" addafter
+        "[0,2,2]"       -->       "addbefore [0,2,2]" addafter
+        "[0,2,3]"       -->       "addbefore [0,2,3]" addafter
+        "Marker"          -->     "END_DIMENSION"
+        "[1,0,1]"       -->       "addbefore [1,0,1]" addafter
+        "[1,0,2]"       -->       "addbefore [1,0,2]" addafter
+        "[1,0,3]"       -->       "addbefore [1,0,3]" addafter
+        "Marker"          -->     "END_DIMENSION"
+        "[1,1,1]"       -->       "addbefore [1,1,1]" addafter
+        "[1,1,2]"       -->       "addbefore [1,1,2]" addafter
+        "[1,1,3]"       -->       "addbefore [1,1,3]" addafter
         ....
     """
     # initialise variables if this is the first call
@@ -494,13 +542,13 @@ def get_dimension(dimensiondata, dimension=None, dimensionnames=None, data=None,
     # check if "save data" or "go one dimension deeper"
     for step in range(start, end + 1):
         # change actual dimensionname in name list
-        dimensionnames[-1] = "[{x}]".format(x=step)
+        dimensionnames[-1] = str(step)
         # check if this is the deepest dimension
         # not deepest dimension --> go one dimension deeper
         if dimension < len(dimensiondata)-1:
             nextdimension = dimension + 1
             # save next dimensionname in name list
-            dimensionnames.append("[{x}]".format(x=nextdimension))
+            dimensionnames.append(str(nextdimension))
             # function calls itself to go one dimension deeper
             get_dimension(dimensiondata=dimensiondata,
                           dimension=nextdimension,
@@ -513,12 +561,14 @@ def get_dimension(dimensiondata, dimension=None, dimensionnames=None, data=None,
         # deepest dimension --> save data in datalist
         else:
             # concat dimension names
-            actualname = ""
-            for name in dimensionnames:
-                actualname += name
+            actualname = ",".join(dimensionnames)
+            actualname = "[{actualname}]".format(actualname=actualname)
             savename = addbefore + actualname + addafter
             # save to data
             data.append(savename)
+    # if the deepest dimension is processes insert a marker
+    if dimension == len(dimensiondata)-1:
+        data.append("END_DIMENSION")
     return data
 
 
@@ -571,29 +621,38 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # append name prefix to list
         foldernames.append(name + ".")
         # ---------------------------------
+        # middle part of array (data)
         # create dict with dimension count and bounds [{"start": 1, "end": 8}, {"start": 0, "end": 10}]
         dimensiondata = []
         for dimension in dimensions:
             dimensionbounds = dimension.split(".")
             dimensiondata.append({"start": int(dimensionbounds[0]), "end": int(dimensionbounds[2])})
-        # TODO need gaps in multidimarray of bool
-        # middle part of array (data)
         # create list of entrys in range arraysize
-        # ["[0][1][0] : Byte;"
-        #  "[0][1][1] : Byte;"
-        #  "[0][1][2] : Byte;"
-        #  "[0][1][3] : Byte;"]
-        # and save it to filedata
-        additional = " : {add};".format(add=arraydatatype)
-        elements = get_dimension(dimensiondata=dimensiondata, addafter=additional)
-        # get data of the array elements
-        while True:
-            dataend, error, errormessage = get_data(rawdata=elements,
-                                                    filedata=filedata,
-                                                    foldernames=foldernames,
-                                                    dependencies=dependencies)
-            if dataend or error:
-                break
+        addition = " : {datatype};".format(datatype=arraydatatype)
+        elements = get_dimension(dimensiondata=dimensiondata, addafter=addition)
+        # get data of all elements
+        for element in elements:
+            if element == "END_DIMENSION":
+                # get size of data
+                size = special_types[datatype]
+                # collect data
+                entry = {
+                    "name": "",
+                    "datatype": "END_DIMENSION",
+                    "byte": 0.0,
+                    "comment": "",
+                    "visible": False,
+                    "access": False,
+                    "action": None,
+                    "value": "",
+                    "size": size}
+                # save entry to list "data"
+                entry_save(filedata=filedata, foldernames=[], entry=entry)
+            else:
+                dataend, error, errormessage = get_data(rawdata=[element],
+                                                        filedata=filedata,
+                                                        foldernames=foldernames,
+                                                        dependencies=dependencies)
         # ---------------------------------
         # delete name prefix from list
         foldernames.pop()
@@ -972,8 +1031,11 @@ def get_size(filedata):
                         "size": 0.125}
                     size = size + 0.125
                     entry_save(filedata=filedata, foldernames=[], entry=entry)
+                # in multidimensional arrays "END_DIMENSION" marks the end of the deepest dimension
+                # for Bool arrays the only allowed offset is at this marker, also skip next if for boolean multiarrays
+                is_endimension = (data["datatype"] == "END_DIMENSION") or (next_data["datatype"] == "END_DIMENSION")
                 # check if next data size is not 1 Byte
-                if next_data["size"] != 1:
+                if next_data["size"] != 1 and not is_endimension:
                     # check if size is even
                     # fill with Byte to make size even
                     if size % 2 != 0.0:
@@ -991,8 +1053,6 @@ def get_size(filedata):
                         entry_save(filedata=filedata, foldernames=[], entry=entry)
         # check if datatype is end of an special datatype
         if data["datatype"] in ["END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"]:
-            # check if size is even
-            # fill with Byte to make size even
             if size % 2 != 0.0:
                 entry = {
                     "name": "offset",
