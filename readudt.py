@@ -1014,6 +1014,7 @@ def get_size(filedata):
             pass
         # next data exists
         else:
+            # TODO offset error array
             # check if actual datatype != next datatype
             if data["datatype"] != next_data["datatype"]:
                 # check if data is integer (full bytes)
@@ -1039,8 +1040,10 @@ def get_size(filedata):
                     # check if size is even
                     # fill with Byte to make size even
                     if size % 2 != 0.0:
+                        print(size)
+                        print(next_data)
                         entry = {
-                            "name": "offset",
+                            "name": "boffset",
                             "datatype": "Byte",
                             "byte": size,
                             "comment": "offset",
@@ -1055,7 +1058,7 @@ def get_size(filedata):
         if data["datatype"] in ["END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"]:
             if size % 2 != 0.0:
                 entry = {
-                    "name": "offset",
+                    "name": "aoffset",
                     "datatype": "Byte",
                     "byte": size,
                     "comment": "offset",

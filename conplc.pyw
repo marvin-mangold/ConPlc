@@ -220,6 +220,8 @@ class Controller(object):
                 self.projectfile["udt_data"] = []
                 # refresh variables on screen data
                 self.view.datatree_update()
+            for c in filedata:
+                print(c)
         if error:
             self.view.eventframe_post(errormessage)
 
