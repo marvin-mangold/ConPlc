@@ -264,6 +264,14 @@ def get_header_end(rawdata):
     return result
 
 
+def get_byteoffset(mode, filedata):
+    if len(filedata) == 0:
+        byteoffset = 0.0
+    else:
+        byteoffset = filedata[-1]["byte"] + filedata[-1]["size"]
+    return byteoffset
+
+
 def get_struct(rawdata, filedata, foldernames):
     """
     get start of udt declaration
@@ -279,10 +287,11 @@ def get_struct(rawdata, filedata, foldernames):
         result = True
         # last part of struct (end indicator)
         # collect data
+        # get byteoffset
         entry = {
             "name": "",
             "datatype": "START_STRUCT",
-            "byte": 0.0,
+            "byte": get_byteoffset(mode="START_STRUCT", filedata=filedata),
             "comment": "",
             "visible": False,
             "access": False,
@@ -318,7 +327,7 @@ def get_endstruct(rawdata, filedata, foldernames):
         entry = {
             "name": "",
             "datatype": "END_STRUCT",
-            "byte": 0.0,
+            "byte": get_byteoffset(mode="END_STRUCT", filedata=filedata),
             "comment": "",
             "visible": False,
             "access": False,
@@ -355,7 +364,7 @@ def get_endudt(rawdata, filedata, foldernames):
         entry = {
             "name": "",
             "datatype": "END_UDT",
-            "byte": 0.0,
+            "byte": get_byteoffset(mode="END_UDT", filedata=filedata),
             "comment": "",
             "visible": False,
             "access": False,
@@ -392,7 +401,7 @@ def get_data_standard(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": datatype,
-            "byte": 0.0,
+            "byte": get_byteoffset(mode=datatype, filedata=filedata),
             "comment": comment,
             "visible": True,
             "access": True,
@@ -440,7 +449,7 @@ def get_data_string(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": "{datatype}[{length}]".format(datatype=datatype, length=length),
-            "byte": 0.0,
+            "byte": get_byteoffset(mode=datatype, filedata=filedata),
             "comment": comment,
             "visible": True,
             "access": True,
@@ -488,7 +497,7 @@ def get_data_wstring(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": "{datatype}[{length}]".format(datatype=datatype, length=length),
-            "byte": 0.0,
+            "byte": get_byteoffset(mode=datatype, filedata=filedata),
             "comment": comment,
             "visible": True,
             "access": True,
@@ -612,7 +621,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         entry = {
             "name": "",
             "datatype": "START_ARRAY",
-            "byte": 0.0,
+            "byte": get_byteoffset(mode="START_ARRAY", filedata=filedata),
             "comment": "",
             "visible": False,
             "access": False,
@@ -635,7 +644,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         entry = {
             "name": name,
             "datatype": arraydescription,
-            "byte": 0.0,
+            "byte": get_byteoffset(mode=datatype, filedata=filedata),
             "comment": comment,
             "visible": True,
             "access": False,
@@ -665,7 +674,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
                 entry = {
                     "name": "",
                     "datatype": "START_DIMENSION",
-                    "byte": 0.0,
+                    "byte": get_byteoffset(mode="START_DIMENSION", filedata=filedata),
                     "comment": "",
                     "visible": False,
                     "access": False,
@@ -681,7 +690,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
                 entry = {
                     "name": "",
                     "datatype": "END_DIMENSION",
-                    "byte": 0.0,
+                    "byte": get_byteoffset(mode="END_DIMENSION", filedata=filedata),
                     "comment": "",
                     "visible": False,
                     "access": False,
@@ -704,7 +713,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         entry = {
             "name": "",
             "datatype": "END_ARRAY",
-            "byte": 0.0,
+            "byte": get_byteoffset(mode="END_ARRAY", filedata=filedata),
             "comment": "",
             "visible": False,
             "access": False,
@@ -751,7 +760,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         entry = {
             "name": "",
             "datatype": "START_DTL",
-            "byte": 0.0,
+            "byte": get_byteoffset(mode="START_DTL", filedata=filedata),
             "comment": "",
             "visible": False,
             "access": False,
@@ -769,7 +778,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": datatype,
-            "byte": 0.0,
+            "byte": get_byteoffset(mode=datatype, filedata=filedata),
             "comment": comment,
             "visible": True,
             "access": False,
@@ -798,7 +807,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
             entry = {
                 "name": name,
                 "datatype": datatype,
-                "byte": 0.0,
+                "byte": get_byteoffset(mode=datatype, filedata=filedata),
                 "comment": comment,
                 "visible": True,
                 "access": True,
@@ -816,7 +825,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         entry = {
             "name": "",
             "datatype": "END_DTL",
-            "byte": 0.0,
+            "byte": get_byteoffset(mode="END_DTL", filedata=filedata),
             "comment": "",
             "visible": False,
             "access": False,
@@ -858,7 +867,7 @@ def get_data_struct(rawdata, filedata, foldernames):
         entry = {
             "name": name,
             "datatype": datatype,
-            "byte": 0.0,
+            "byte": get_byteoffset(mode=datatype, filedata=filedata),
             "comment": comment,
             "visible": True,
             "access": False,
@@ -898,7 +907,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         entry = {
             "name": "",
             "datatype": "START_UDT",
-            "byte": 0.0,
+            "byte": get_byteoffset(mode="START_UDT", filedata=filedata),
             "comment": "",
             "visible": False,
             "access": False,
@@ -916,7 +925,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         entry = {
             "name": name,
             "datatype": datatype,
-            "byte": 0.0,
+            "byte": get_byteoffset(mode="UDT", filedata=filedata),
             "comment": comment,
             "visible": True,
             "access": False,
@@ -1133,7 +1142,7 @@ def get_size(filedata):
     return size
 
 
-def get_structure(filedata=None, foldernames=None, filepath="", dependencies=None, datasize=None):
+def get_structure(filedata=None, foldernames=None, filepath="", dependencies=None):
     """
     open udt file
     read every line of file and process the information to dict "headerdata" and list "filedata"
@@ -1146,8 +1155,6 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
         foldernames = []
     if dependencies is None:
         dependencies = {}
-    if datasize is None:
-        datasize = 0.0
     # read udt file
     rawdata = read_file(filepath)
     # read header data of rawdata until headerend is reached
@@ -1163,6 +1170,7 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
                                                 dependencies=dependencies)
         if dataend or error:
             break
+    datasize = filedata[-1]["byte"]
     return headerdata, filedata, datasize, error, errormessage
 
 
