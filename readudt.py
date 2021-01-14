@@ -88,14 +88,14 @@ def name_clean(name):
     return newname
 
 
-def is_udt(datatype=""):
+def is_udt(line=""):
     """
     check if datatype is special udt type
     regex searching for text between quotation marks
     sample: [Test : "some_UDT";   // comment Test] --> "some_UDT"
     """
     result = False
-    regex = re.search(r'"(.*)"', datatype)
+    regex = re.search(r'"(.*)"', line)
     if regex is not None:
         result = True
     return result
@@ -127,14 +127,14 @@ def is_endstruct(line=""):
     return result
 
 
-def is_endtype(rawdata):
+def is_endudt(line=""):
     """
     get udt-file end indicator
     regex searching for text "END_TYPE"
     sample: [END_TYPE] --> "END_TYPE"
     """
     result = False
-    regex = re.search(r'END_TYPE', rawdata[0])
+    regex = re.search(r'END_TYPE', line)
     if regex is not None:
         result = True
     return result
@@ -281,7 +281,7 @@ def get_struct(rawdata, filedata, foldernames):
         # collect data
         entry = {
             "name": "",
-            "datatype": "STRUCT",
+            "datatype": "START_STRUCT",
             "byte": 0.0,
             "comment": "",
             "visible": False,
@@ -300,7 +300,7 @@ def get_struct(rawdata, filedata, foldernames):
 
 def get_endstruct(rawdata, filedata, foldernames):
     """
-    get end of Struct declaration
+    get end of struct declaration
     regex searching for text "END_STRUCT;"
     sample: [END_STRUCT;] --> "END_STRUCT;"
     collect data and save it in filedata
@@ -332,9 +332,9 @@ def get_endstruct(rawdata, filedata, foldernames):
     return result, error, errormessage
 
 
-def get_enddimension(rawdata, filedata, foldernames):
+def get_endudt(rawdata, filedata, foldernames):
     """
-    get end of Struct declaration
+    get end of udt declaration
     regex searching for text "END_STRUCT;"
     sample: [END_STRUCT;] --> "END_STRUCT;"
     collect data and save it in filedata
@@ -342,21 +342,24 @@ def get_enddimension(rawdata, filedata, foldernames):
     error = False
     errormessage = ""
     result = False
-    regex = re.search(r'END_STRUCT;', rawdata[0])
+    regex = re.search(r'END_TYPE', rawdata[0])
     if regex is not None:
         result = True
-        # delete name prefix from list
-        foldernames.pop()
+        try:
+            # delete name prefix from list
+            foldernames.pop()
+        except IndexError:
+            pass
         # last part of struct (end indicator)
         # collect data
         entry = {
             "name": "",
-            "datatype": "END_STRUCT",
+            "datatype": "END_UDT",
             "byte": 0.0,
             "comment": "",
             "visible": False,
             "access": False,
-            "action": "close",
+            "action": None,
             "value": "",
             "size": 0}
         # save entry to list "data"
@@ -508,25 +511,31 @@ def get_dimension(dimensiondata, dimension=None, dimensionnames=None, data=None,
     can append an additional string before data and after data
     returns als combination as list:
         ...         with additional
+        "Marker"        -->       "START_DIMENSION"
         "[0,0,1]"       -->       "addbefore [0,0,1]" addafter
         "[0,0,2]"       -->       "addbefore [0,0,2]" addafter
         "[0,0,3]"       -->       "addbefore [0,0,3]" addafter
         "Marker"          -->     "END_DIMENSION"
+        "Marker"        -->       "START_DIMENSION"
         "[0,1,1]"       -->       "addbefore [0,1,1]" addafter
         "[0,1,2]"       -->       "addbefore [0,1,2]" addafter
         "[0,1,3]"       -->       "addbefore [0,1,3]" addafter
         "Marker"          -->     "END_DIMENSION"
+        "Marker"        -->       "START_DIMENSION"
         "[0,2,1]"       -->       "addbefore [0,2,1]" addafter
         "[0,2,2]"       -->       "addbefore [0,2,2]" addafter
         "[0,2,3]"       -->       "addbefore [0,2,3]" addafter
         "Marker"          -->     "END_DIMENSION"
+        "Marker"        -->       "START_DIMENSION"
         "[1,0,1]"       -->       "addbefore [1,0,1]" addafter
         "[1,0,2]"       -->       "addbefore [1,0,2]" addafter
         "[1,0,3]"       -->       "addbefore [1,0,3]" addafter
         "Marker"          -->     "END_DIMENSION"
+        "Marker"        -->       "START_DIMENSION"
         "[1,1,1]"       -->       "addbefore [1,1,1]" addafter
         "[1,1,2]"       -->       "addbefore [1,1,2]" addafter
         "[1,1,3]"       -->       "addbefore [1,1,3]" addafter
+        "Marker"          -->     "END_DIMENSION"
         ....
     """
     # initialise variables if this is the first call
@@ -539,6 +548,9 @@ def get_dimension(dimensiondata, dimension=None, dimensionnames=None, data=None,
     # get start and end parameters of array in actual dimension
     start = dimensiondata[dimension]["start"]
     end = dimensiondata[dimension]["end"]
+    # if the deepest dimension is processes insert a marker
+    if dimension == len(dimensiondata) - 1:
+        data.append("START_DIMENSION")
     # check if "save data" or "go one dimension deeper"
     for step in range(start, end + 1):
         # change actual dimensionname in name list
@@ -594,14 +606,28 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
     result = False
     regex = re.search(r'(.*?) : ((.*)\[(.*)] of (.*));(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
+        # ---------------------------------
+        # insert start marker array
+        # collect data
+        entry = {
+            "name": "",
+            "datatype": "START_ARRAY",
+            "byte": 0.0,
+            "comment": "",
+            "visible": False,
+            "access": False,
+            "action": None,
+            "value": "",
+            "size": 0}
+        # save entry to list "data"
+        entry_save(filedata=filedata, foldernames=[], entry=entry)
+        # ---------------------------------
         name = name_clean(regex.group(1))  # "Test"
         arraydescription = regex.group(2)  # "Array[1..8, 0..10] of Byte"
         datatype = regex.group(3)  # "Array"
         dimensions = regex.group(4).split(",")  # 1..8, 0..10
         arraydatatype = regex.group(5)  # "Byte"
         comment = regex.group(6)  # "// comment Test"
-        # get start and end of arraysize for each dimension
-        # ---------------------------------
         # first part of array (declaration line)
         # get size of data
         size = special_types[datatype]
@@ -632,9 +658,25 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         elements = get_dimension(dimensiondata=dimensiondata, addafter=addition)
         # get data of all elements
         for element in elements:
-            if element == "END_DIMENSION":
-                # get size of data
-                size = special_types[datatype]
+            if element == "START_DIMENSION":
+                # ---------------------------------
+                # insert start marker dimension
+                # collect data
+                entry = {
+                    "name": "",
+                    "datatype": "START_DIMENSION",
+                    "byte": 0.0,
+                    "comment": "",
+                    "visible": False,
+                    "access": False,
+                    "action": None,
+                    "value": "",
+                    "size": 0}
+                # save entry to list "data"
+                entry_save(filedata=filedata, foldernames=[], entry=entry)
+            elif element == "END_DIMENSION":
+                # ---------------------------------
+                # insert end marker dimension
                 # collect data
                 entry = {
                     "name": "",
@@ -645,7 +687,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
                     "access": False,
                     "action": None,
                     "value": "",
-                    "size": size}
+                    "size": 0}
                 # save entry to list "data"
                 entry_save(filedata=filedata, foldernames=[], entry=entry)
             else:
@@ -656,9 +698,8 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # delete name prefix from list
         foldernames.pop()
-        # last part of array (end indicator)
-        # get size of data
-        size = special_types[datatype]
+        # ---------------------------------
+        # insert end marker array
         # collect data
         entry = {
             "name": "",
@@ -669,7 +710,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
             "access": False,
             "action": "close",
             "value": "",
-            "size": size}
+            "size": 0}
         # save entry to list "data"
         entry_save(filedata=filedata, foldernames=[], entry=entry)
         # ---------------------------------
@@ -704,6 +745,21 @@ def get_data_dtl(rawdata, filedata, foldernames):
     regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
+        # ---------------------------------
+        # insert start marker dtl
+        # collect data
+        entry = {
+            "name": "",
+            "datatype": "START_DTL",
+            "byte": 0.0,
+            "comment": "",
+            "visible": False,
+            "access": False,
+            "action": None,
+            "value": "",
+            "size": 0}
+        # save entry to list "data"
+        entry_save(filedata=filedata, foldernames=[], entry=entry)
         # ---------------------------------
         # first part of dtl (declaration line)
         name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
@@ -754,9 +810,8 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # ---------------------------------
         # delete name prefix from list
         foldernames.pop()
-        # last part of dtl (end indicator)
-        # get size of data
-        size = special_types["DTL"]
+        # ---------------------------------
+        # insert end marker dtl
         # collect data
         entry = {
             "name": "",
@@ -767,7 +822,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
             "access": False,
             "action": "close",
             "value": "",
-            "size": size}
+            "size": 0}
         # save entry to list "data"
         entry_save(filedata=filedata, foldernames=[], entry=entry)
         # ---------------------------------
@@ -792,6 +847,9 @@ def get_data_struct(rawdata, filedata, foldernames):
     regex = re.search(r'(.*) : (Struct)(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
+        # ---------------------------------
+        # insert start marker struct in get_struct() because it has an extra line in raw data
+        # ---------------------------------
         # first part of struct (declaration line)
         name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
         # get size of data
@@ -809,8 +867,12 @@ def get_data_struct(rawdata, filedata, foldernames):
             "size": size}
         # save entry to list "data"
         entry_save(filedata=filedata, foldernames=foldernames, entry=entry)
+        # ---------------------------------
         # append name prefix to list
         foldernames.append(name + ".")
+        # ---------------------------------
+        # insert end marker struct in get_endstruct() because it has an extra line in raw data
+        # ---------------------------------
         # delete line from rawdata
         rawdata.pop(0)
     return result, error, errormessage
@@ -830,6 +892,21 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
     regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
+        # ---------------------------------
+        # insert end marker subudt
+        # collect data
+        entry = {
+            "name": "",
+            "datatype": "START_UDT",
+            "byte": 0.0,
+            "comment": "",
+            "visible": False,
+            "access": False,
+            "action": None,
+            "value": "",
+            "size": 0}
+        # save entry to list "data"
+        entry_save(filedata=filedata, foldernames=[], entry=entry)
         # ---------------------------------
         # first part of sub-udt (declaration line)
         name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
@@ -858,24 +935,8 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
                                                                                 filepath=path,
                                                                                 dependencies=dependencies)
         # ---------------------------------
-        # delete name prefix from list
-        foldernames.pop()
-        # last part of sub-udt (end indicator)
-        # get size of data
-        size = special_types["UDT"]
-        # collect data
-        entry = {
-            "name": "",
-            "datatype": "END_UDT",
-            "byte": 0.0,
-            "comment": "",
-            "visible": False,
-            "access": False,
-            "action": None,
-            "value": "",
-            "size": size}
-        # save entry to list "data"
-        entry_save(filedata=filedata, foldernames=[], entry=entry)
+        # insert end marker udt in get_endstruct() because it has an extra line in raw data
+        # insert end marker udt in get_endudt() because it has an extra line in raw data
         # ---------------------------------
         # delete line from rawdata
         rawdata.pop(0)
@@ -897,14 +958,13 @@ def get_header(rawdata, headerdata):
 
 
 def get_data(rawdata, filedata, foldernames, dependencies):
-    error = False
-    errormessage = ""
     dataend = False
     # get checking variables
     struct = is_struct(line=rawdata[0])
     endstruct = is_endstruct(line=rawdata[0])
     datatype = get_datatype(rawdata[0])
-    subudt = is_udt(datatype=datatype)
+    udt = is_udt(line=datatype)
+    endudt = is_endudt(line=rawdata[0])
     # check line for struct
     if struct:
         # get and save data to filedata
@@ -955,14 +1015,18 @@ def get_data(rawdata, filedata, foldernames, dependencies):
                                                       filedata=filedata,
                                                       foldernames=foldernames)
     # check line for special datatype sub-udt
-    elif subudt:
+    elif udt:
         # get and save data to filedata
         result, error, errormessage = get_data_subudt(rawdata=rawdata,
                                                       filedata=filedata,
                                                       foldernames=foldernames,
                                                       dependencies=dependencies)
     # check line for end of udt file
-    elif is_endtype(rawdata=rawdata):
+    elif endudt:
+        # get and save data to filedata
+        result, error, errormessage = get_endudt(rawdata=rawdata,
+                                                 filedata=filedata,
+                                                 foldernames=foldernames)
         # set end flag
         dataend = True
     else:
@@ -1014,7 +1078,6 @@ def get_size(filedata):
             pass
         # next data exists
         else:
-            # TODO offset error array
             # check if actual datatype != next datatype
             if data["datatype"] != next_data["datatype"]:
                 # check if data is integer (full bytes)
@@ -1040,8 +1103,6 @@ def get_size(filedata):
                     # check if size is even
                     # fill with Byte to make size even
                     if size % 2 != 0.0:
-                        print(size)
-                        print(next_data)
                         entry = {
                             "name": "boffset",
                             "datatype": "Byte",
@@ -1058,7 +1119,7 @@ def get_size(filedata):
         if data["datatype"] in ["END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"]:
             if size % 2 != 0.0:
                 entry = {
-                    "name": "aoffset",
+                    "name": "offset",
                     "datatype": "Byte",
                     "byte": size,
                     "comment": "offset",
@@ -1072,13 +1133,12 @@ def get_size(filedata):
     return size
 
 
-def get_structure(filedata=None, foldernames=None, filepath="", dependencies=None):
+def get_structure(filedata=None, foldernames=None, filepath="", dependencies=None, datasize=None):
     """
     open udt file
     read every line of file and process the information to dict "headerdata" and list "filedata"
     """
     # initialise variables
-    datasize = 0.0
     headerdata = {"name": "", "description": "", "version": "", "info": ""}
     if filedata is None:
         filedata = []
@@ -1086,6 +1146,8 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
         foldernames = []
     if dependencies is None:
         dependencies = {}
+    if datasize is None:
+        datasize = 0.0
     # read udt file
     rawdata = read_file(filepath)
     # read header data of rawdata until headerend is reached
@@ -1101,9 +1163,6 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
                                                 dependencies=dependencies)
         if dataend or error:
             break
-    # get udt size and fill offsets
-    if not error:
-        datasize = get_size(filedata=filedata)
     return headerdata, filedata, datasize, error, errormessage
 
 
