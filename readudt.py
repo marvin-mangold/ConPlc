@@ -140,17 +140,83 @@ def is_endudt(line=""):
     return result
 
 
-def to_bitaddress(size):
+def formatbit_save_to_show(size=0.0):
     """
+    input float, return string
     bits are saved as 0.125 Bytes
-    the byteaddress of 8 bits after 10 Bytes is 10.0 - 10.875
-    format this to show the byteaddress as 10.0 - 10.7
-    sample: 10.857 --> 10.0 + 0,875
+    bits are shown as 0.1 Bytes
+    save form: the byteaddress of 8 bits are saved as 10.0 - 10.875
+    show form: the byteaddress of 8 bits are shown as 10.0 - 10.7
+    format save form to show form
+    sample: 10.875 --> 10.7
     """
-    predecimalplace = int(size)
-    decimalplace = int(size % 1 / 0.125)
-    bitaddress = "{predecimalplace}.{decimalplace}".format(predecimalplace=predecimalplace, decimalplace=decimalplace)
-    return float(bitaddress)
+    size = "{x:.3f}".format(x=size)
+    size = size.split(".")  # ["10", "875"]
+    size[1] = str(int(int(size[1]) / 125))  # 875 / 125 = 7
+    bitaddress = "{predecimalplace}.{decimalplace}".format(predecimalplace=size[0], decimalplace=size[1])
+    return bitaddress  # 10.7
+
+
+def formatbit_show_to_save(size):
+    """
+    input string, return float
+    bits are saved as 0.125 Bytes
+    bits are shown as 0.1 Bytes
+    save form: the byteaddress of 8 bits are saved as 10.0 - 10.875
+    show form: the byteaddress of 8 bits are shown as 10.0 - 10.7
+    format show form to save form
+    sample: 10.7 --> 10.875
+    """
+    size = size.split(".")  # ["10", "7"]
+    size[1] = str(int(size[1]) * 125)  # 7 * 125 = 875
+    bitaddress = "{predecimalplace}.{decimalplace}".format(predecimalplace=size[0], decimalplace=size[1])
+    return float(bitaddress)  # 10.875
+
+
+def get_address(filedata):
+    """
+    look at last entry in filedata and calculate actual address:
+    add size of last data to address of last data
+    keep format at 10.0 - 10.7 even if a bool (0.125 byte) is added
+    """
+    if len(filedata) == 0:
+        address = "0.0"
+    else:
+        address = formatbit_show_to_save(filedata[-1]["byte"])  # format "10.7" to 10.875
+        address = filedata[-1]["size"] + address  # 10.875 + 0.125
+        address = formatbit_save_to_show(address)  # format 11.000 to "11.0"
+    return address
+
+
+def get_offset(mode, filedata):
+    """
+    look at last entry in filedata and insert offset if needed:
+    if mode is not "Bool" and (address of last data is not X.7 (last bit):
+        insert boolean offset until last address is X.7 (to get full byte size after bool type)
+--------if following datatype size is not 1 Byte:
+------------insert 1 byte offset (to get an even byte size for following ">1 Byte types")
+--------if special flag in datatype ("END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"):
+------------insert 1 byte offset (to get even byte size after this special type)
+    """
+    if len(filedata) == 0:
+        pass
+    else:
+        if mode != "Bool":
+            while ".0" not in filedata[-1]["byte"]:
+                address = get_address(filedata=filedata)
+                print(address)
+                # TODO offsets new
+                entry = {
+                    "name": "offset",
+                    "datatype": "Bool",
+                    "byte": address,
+                    "comment": "offset",
+                    "visible": False,
+                    "access": False,
+                    "action": "offset",
+                    "value": "",
+                    "size": 0.125}
+                entry_save(filedata=filedata, foldernames=[], entry=entry)
 
 
 def get_datatype(line=""):
@@ -264,14 +330,6 @@ def get_header_end(rawdata):
     return result
 
 
-def get_byteoffset(mode, filedata):
-    if len(filedata) == 0:
-        byteoffset = 0.0
-    else:
-        byteoffset = filedata[-1]["byte"] + filedata[-1]["size"]
-    return byteoffset
-
-
 def get_struct(rawdata, filedata, foldernames):
     """
     get start of udt declaration
@@ -287,11 +345,12 @@ def get_struct(rawdata, filedata, foldernames):
         result = True
         # last part of struct (end indicator)
         # collect data
-        # get byteoffset
+        get_offset(mode="START_STRUCT", filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": "",
             "datatype": "START_STRUCT",
-            "byte": get_byteoffset(mode="START_STRUCT", filedata=filedata),
+            "byte": address,
             "comment": "",
             "visible": False,
             "access": False,
@@ -324,10 +383,12 @@ def get_endstruct(rawdata, filedata, foldernames):
         foldernames.pop()
         # last part of struct (end indicator)
         # collect data
+        get_offset(mode="END_STRUCT", filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": "",
             "datatype": "END_STRUCT",
-            "byte": get_byteoffset(mode="END_STRUCT", filedata=filedata),
+            "byte": address,
             "comment": "",
             "visible": False,
             "access": False,
@@ -361,10 +422,12 @@ def get_endudt(rawdata, filedata, foldernames):
             pass
         # last part of struct (end indicator)
         # collect data
+        get_offset(mode="END_UDT", filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": "",
             "datatype": "END_UDT",
-            "byte": get_byteoffset(mode="END_UDT", filedata=filedata),
+            "byte": address,
             "comment": "",
             "visible": False,
             "access": False,
@@ -398,10 +461,12 @@ def get_data_standard(rawdata, filedata, foldernames):
         # get size of data
         size = standard_types[datatype]
         # collect data
+        get_offset(mode=datatype, filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": name,
             "datatype": datatype,
-            "byte": get_byteoffset(mode=datatype, filedata=filedata),
+            "byte": address,
             "comment": comment,
             "visible": True,
             "access": True,
@@ -446,10 +511,12 @@ def get_data_string(rawdata, filedata, foldernames):
         size_data = standard_types["Char"] * length  # size of data = count of chars * bit-size of a char
         size = size_decalration + size_data
         # collect data
+        get_offset(mode=datatype, filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": name,
             "datatype": "{datatype}[{length}]".format(datatype=datatype, length=length),
-            "byte": get_byteoffset(mode=datatype, filedata=filedata),
+            "byte": address,
             "comment": comment,
             "visible": True,
             "access": True,
@@ -494,10 +561,12 @@ def get_data_wstring(rawdata, filedata, foldernames):
         size_data = standard_types["WChar"] * length  # size of data = count of wchars * bit-size of a wchar
         size = size_decalration + size_data
         # collect data
+        get_offset(mode=datatype, filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": name,
             "datatype": "{datatype}[{length}]".format(datatype=datatype, length=length),
-            "byte": get_byteoffset(mode=datatype, filedata=filedata),
+            "byte": address,
             "comment": comment,
             "visible": True,
             "access": True,
@@ -618,10 +687,12 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # insert start marker array
         # collect data
+        get_offset(mode="START_ARRAY", filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": "",
             "datatype": "START_ARRAY",
-            "byte": get_byteoffset(mode="START_ARRAY", filedata=filedata),
+            "byte": address,
             "comment": "",
             "visible": False,
             "access": False,
@@ -641,10 +712,12 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # get size of data
         size = special_types[datatype]
         # collect data
+        get_offset(mode=datatype, filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": name,
             "datatype": arraydescription,
-            "byte": get_byteoffset(mode=datatype, filedata=filedata),
+            "byte": address,
             "comment": comment,
             "visible": True,
             "access": False,
@@ -671,10 +744,12 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
                 # ---------------------------------
                 # insert start marker dimension
                 # collect data
+                get_offset(mode="START_DIMENSION", filedata=filedata)
+                address = get_address(filedata=filedata)
                 entry = {
                     "name": "",
                     "datatype": "START_DIMENSION",
-                    "byte": get_byteoffset(mode="START_DIMENSION", filedata=filedata),
+                    "byte": address,
                     "comment": "",
                     "visible": False,
                     "access": False,
@@ -687,10 +762,12 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
                 # ---------------------------------
                 # insert end marker dimension
                 # collect data
+                get_offset(mode="END_DIMENSION", filedata=filedata)
+                address = get_address(filedata=filedata)
                 entry = {
                     "name": "",
                     "datatype": "END_DIMENSION",
-                    "byte": get_byteoffset(mode="END_DIMENSION", filedata=filedata),
+                    "byte": address,
                     "comment": "",
                     "visible": False,
                     "access": False,
@@ -710,10 +787,12 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # insert end marker array
         # collect data
+        get_offset(mode="END_ARRAY", filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": "",
             "datatype": "END_ARRAY",
-            "byte": get_byteoffset(mode="END_ARRAY", filedata=filedata),
+            "byte": address,
             "comment": "",
             "visible": False,
             "access": False,
@@ -757,10 +836,12 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # ---------------------------------
         # insert start marker dtl
         # collect data
+        get_offset(mode="START_DTL", filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": "",
             "datatype": "START_DTL",
-            "byte": get_byteoffset(mode="START_DTL", filedata=filedata),
+            "byte": address,
             "comment": "",
             "visible": False,
             "access": False,
@@ -775,10 +856,12 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # get size of data
         size = special_types[datatype]
         # collect data
+        get_offset(mode=datatype, filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": name,
             "datatype": datatype,
-            "byte": get_byteoffset(mode=datatype, filedata=filedata),
+            "byte": address,
             "comment": comment,
             "visible": True,
             "access": False,
@@ -804,10 +887,12 @@ def get_data_dtl(rawdata, filedata, foldernames):
             # get size of data
             size = standard_types[datatype]
             # collect data
+            get_offset(mode=datatype, filedata=filedata)
+            address = get_address(filedata=filedata)
             entry = {
                 "name": name,
                 "datatype": datatype,
-                "byte": get_byteoffset(mode=datatype, filedata=filedata),
+                "byte": address,
                 "comment": comment,
                 "visible": True,
                 "access": True,
@@ -822,10 +907,12 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # ---------------------------------
         # insert end marker dtl
         # collect data
+        get_offset(mode="END_DTL", filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": "",
             "datatype": "END_DTL",
-            "byte": get_byteoffset(mode="END_DTL", filedata=filedata),
+            "byte": address,
             "comment": "",
             "visible": False,
             "access": False,
@@ -864,10 +951,12 @@ def get_data_struct(rawdata, filedata, foldernames):
         # get size of data
         size = special_types[datatype]
         # collect data
+        get_offset(mode=datatype, filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": name,
             "datatype": datatype,
-            "byte": get_byteoffset(mode=datatype, filedata=filedata),
+            "byte": address,
             "comment": comment,
             "visible": True,
             "access": False,
@@ -904,10 +993,12 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # insert end marker subudt
         # collect data
+        get_offset(mode="START_UDT", filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": "",
             "datatype": "START_UDT",
-            "byte": get_byteoffset(mode="START_UDT", filedata=filedata),
+            "byte": address,
             "comment": "",
             "visible": False,
             "access": False,
@@ -922,10 +1013,12 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         # get size of data
         size = special_types["UDT"]
         # collect data
+        get_offset(mode="UDT", filedata=filedata)
+        address = get_address(filedata=filedata)
         entry = {
             "name": name,
             "datatype": datatype,
-            "byte": get_byteoffset(mode="UDT", filedata=filedata),
+            "byte": address,
             "comment": comment,
             "visible": True,
             "access": False,
@@ -1073,7 +1166,7 @@ def get_size(filedata):
     for index, data in enumerate(datalist):
         # save data
         if data["datatype"] == "Bool":
-            data["byte"] = to_bitaddress(size)
+            data["byte"] = "t"
         else:
             data["byte"] = size
         filedata.append(data)
@@ -1095,7 +1188,7 @@ def get_size(filedata):
                     entry = {
                         "name": "offset",
                         "datatype": "Bool",
-                        "byte": to_bitaddress(size),
+                        "byte": "",
                         "comment": "offset",
                         "visible": False,
                         "access": False,
@@ -1113,7 +1206,7 @@ def get_size(filedata):
                     # fill with Byte to make size even
                     if size % 2 != 0.0:
                         entry = {
-                            "name": "boffset",
+                            "name": "offset",
                             "datatype": "Byte",
                             "byte": size,
                             "comment": "offset",
