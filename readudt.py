@@ -188,34 +188,53 @@ def get_address(filedata):
     return address
 
 
-def get_offset(mode, filedata):
+def get_offset(datatype, filedata):
     """
     look at last entry in filedata and insert offset if needed:
-    if mode is not "Bool" and (address of last data is not X.7 (last bit):
-        insert boolean offset until last address is X.7 (to get full byte size after bool type)
---------if following datatype size is not 1 Byte:
-------------insert 1 byte offset (to get an even byte size for following ">1 Byte types")
---------if special flag in datatype ("END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"):
-------------insert 1 byte offset (to get even byte size after this special type)
+    if (actual type is not bool) and (last one was bool) and (actual address is not integer ("X.7")):
+        insert boolean offsets until actual address is X.0 (to get a full byte address after bool type)
+    if actual datatype has an even size but actual address is odd:
+        insert byte offset to make address even
     """
     if len(filedata) == 0:
         pass
     else:
-        if mode != "Bool":
-            while ".0" not in filedata[-1]["byte"]:
-                address = get_address(filedata=filedata)
-                print(address)
-                # TODO offsets new
+        # ----------------------------------------------------------
+        # get full byte address after bool type
+        if datatype != "Bool" and filedata[-1]["datatype"] == "Bool":
+            # if actual address is not ".0" then insert 1 bool offset
+            while ".0" not in get_address(filedata=filedata):
                 entry = {
                     "name": "offset",
                     "datatype": "Bool",
-                    "byte": address,
+                    "byte": get_address(filedata=filedata),
                     "comment": "offset",
                     "visible": False,
                     "access": False,
                     "action": "offset",
                     "value": "",
                     "size": 0.125}
+                entry_save(filedata=filedata, foldernames=[], entry=entry)
+        # ----------------------------------------------------------
+        # get even byte address for datatypes where size is an even integer
+        # get dict of all datatype where a even address is needed
+        even_types = standard_types.copy()
+        even_types.update(special_types)
+        even_types = dict(filter(lambda x: (x[1] % 2 == 0), even_types.items()))
+        # check if actual data size is not 1 byte
+        if datatype in even_types:
+            # if actual address is not even then insert 1 byte offset
+            if int(float(get_address(filedata=filedata))) % 2 != 0:
+                entry = {
+                    "name": "offset",
+                    "datatype": "Byte",
+                    "byte": get_address(filedata=filedata),
+                    "comment": "offset",
+                    "visible": False,
+                    "access": False,
+                    "action": "offset",
+                    "value": "",
+                    "size": 1}
                 entry_save(filedata=filedata, foldernames=[], entry=entry)
 
 
@@ -345,7 +364,7 @@ def get_struct(rawdata, filedata, foldernames):
         result = True
         # last part of struct (end indicator)
         # collect data
-        get_offset(mode="START_STRUCT", filedata=filedata)
+        get_offset(datatype="START_STRUCT", filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": "",
@@ -383,7 +402,7 @@ def get_endstruct(rawdata, filedata, foldernames):
         foldernames.pop()
         # last part of struct (end indicator)
         # collect data
-        get_offset(mode="END_STRUCT", filedata=filedata)
+        get_offset(datatype="END_STRUCT", filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": "",
@@ -422,7 +441,7 @@ def get_endudt(rawdata, filedata, foldernames):
             pass
         # last part of struct (end indicator)
         # collect data
-        get_offset(mode="END_UDT", filedata=filedata)
+        get_offset(datatype="END_UDT", filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": "",
@@ -461,7 +480,7 @@ def get_data_standard(rawdata, filedata, foldernames):
         # get size of data
         size = standard_types[datatype]
         # collect data
-        get_offset(mode=datatype, filedata=filedata)
+        get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": name,
@@ -511,7 +530,7 @@ def get_data_string(rawdata, filedata, foldernames):
         size_data = standard_types["Char"] * length  # size of data = count of chars * bit-size of a char
         size = size_decalration + size_data
         # collect data
-        get_offset(mode=datatype, filedata=filedata)
+        get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": name,
@@ -561,7 +580,7 @@ def get_data_wstring(rawdata, filedata, foldernames):
         size_data = standard_types["WChar"] * length  # size of data = count of wchars * bit-size of a wchar
         size = size_decalration + size_data
         # collect data
-        get_offset(mode=datatype, filedata=filedata)
+        get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": name,
@@ -687,7 +706,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # insert start marker array
         # collect data
-        get_offset(mode="START_ARRAY", filedata=filedata)
+        get_offset(datatype="START_ARRAY", filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": "",
@@ -712,7 +731,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # get size of data
         size = special_types[datatype]
         # collect data
-        get_offset(mode=datatype, filedata=filedata)
+        get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": name,
@@ -744,7 +763,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
                 # ---------------------------------
                 # insert start marker dimension
                 # collect data
-                get_offset(mode="START_DIMENSION", filedata=filedata)
+                get_offset(datatype="START_DIMENSION", filedata=filedata)
                 address = get_address(filedata=filedata)
                 entry = {
                     "name": "",
@@ -762,7 +781,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
                 # ---------------------------------
                 # insert end marker dimension
                 # collect data
-                get_offset(mode="END_DIMENSION", filedata=filedata)
+                get_offset(datatype="END_DIMENSION", filedata=filedata)
                 address = get_address(filedata=filedata)
                 entry = {
                     "name": "",
@@ -787,7 +806,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # insert end marker array
         # collect data
-        get_offset(mode="END_ARRAY", filedata=filedata)
+        get_offset(datatype="END_ARRAY", filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": "",
@@ -836,7 +855,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # ---------------------------------
         # insert start marker dtl
         # collect data
-        get_offset(mode="START_DTL", filedata=filedata)
+        get_offset(datatype="START_DTL", filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": "",
@@ -856,7 +875,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # get size of data
         size = special_types[datatype]
         # collect data
-        get_offset(mode=datatype, filedata=filedata)
+        get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": name,
@@ -887,7 +906,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
             # get size of data
             size = standard_types[datatype]
             # collect data
-            get_offset(mode=datatype, filedata=filedata)
+            get_offset(datatype=datatype, filedata=filedata)
             address = get_address(filedata=filedata)
             entry = {
                 "name": name,
@@ -907,7 +926,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # ---------------------------------
         # insert end marker dtl
         # collect data
-        get_offset(mode="END_DTL", filedata=filedata)
+        get_offset(datatype="END_DTL", filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": "",
@@ -951,7 +970,7 @@ def get_data_struct(rawdata, filedata, foldernames):
         # get size of data
         size = special_types[datatype]
         # collect data
-        get_offset(mode=datatype, filedata=filedata)
+        get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": name,
@@ -993,7 +1012,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         # ---------------------------------
         # insert end marker subudt
         # collect data
-        get_offset(mode="START_UDT", filedata=filedata)
+        get_offset(datatype="START_UDT", filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": "",
@@ -1013,7 +1032,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         # get size of data
         size = special_types["UDT"]
         # collect data
-        get_offset(mode="UDT", filedata=filedata)
+        get_offset(datatype="UDT", filedata=filedata)
         address = get_address(filedata=filedata)
         entry = {
             "name": name,
@@ -1143,98 +1162,6 @@ def get_data(rawdata, filedata, foldernames, dependencies):
     return dataend, error, errormessage
 
 
-def get_size(filedata):
-    """
-    get size of datastructure:
-        count size of all entrys
-        write byte address of entry
-        check for needed offsets
-        insert needed offsets
-    needed offsets:
-        compare datatype and following datatype:
-         if datatype is bool and following is not bool:
-          -insert 1 bit offset until size is integer (to get full byte size after bool type)
-         if following datatype size is not 1 Byte:
-          -insert 1 byte offset (to get an even byte size for following ">1 Byte types")
-         if special flag in datatype ("END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"):
-          -insert 1 byte offset (to get even byte size after this special type)
-    """
-    size = 0.0
-    # temporary copy filedata
-    datalist = filedata[:]
-    filedata.clear()
-    for index, data in enumerate(datalist):
-        # save data
-        if data["datatype"] == "Bool":
-            data["byte"] = "t"
-        else:
-            data["byte"] = size
-        filedata.append(data)
-        # count size
-        size = size + float(data["size"])
-        # check if next data exist
-        try:
-            next_data = datalist[index + 1]
-        # end of data
-        except IndexError:
-            pass
-        # next data exists
-        else:
-            # check if actual datatype != next datatype
-            if data["datatype"] != next_data["datatype"]:
-                # check if data is integer (full bytes)
-                # fill with bool until byte is full
-                while size % 1 != 0.0:
-                    entry = {
-                        "name": "offset",
-                        "datatype": "Bool",
-                        "byte": "",
-                        "comment": "offset",
-                        "visible": False,
-                        "access": False,
-                        "action": "offset",
-                        "value": "",
-                        "size": 0.125}
-                    size = size + 0.125
-                    entry_save(filedata=filedata, foldernames=[], entry=entry)
-                # in multidimensional arrays "END_DIMENSION" marks the end of the deepest dimension
-                # for Bool arrays the only allowed offset is at this marker, also skip next if for boolean multiarrays
-                is_endimension = (data["datatype"] == "END_DIMENSION") or (next_data["datatype"] == "END_DIMENSION")
-                # check if next data size is not 1 Byte
-                if next_data["size"] != 1 and not is_endimension:
-                    # check if size is even
-                    # fill with Byte to make size even
-                    if size % 2 != 0.0:
-                        entry = {
-                            "name": "offset",
-                            "datatype": "Byte",
-                            "byte": size,
-                            "comment": "offset",
-                            "visible": False,
-                            "access": False,
-                            "action": "offset",
-                            "value": "",
-                            "size": 1}
-                        size = size + 1
-                        entry_save(filedata=filedata, foldernames=[], entry=entry)
-        # check if datatype is end of an special datatype
-        if data["datatype"] in ["END_STRUCT", "END_ARRAY", "END_DTL", "END_UDT"]:
-            if size % 2 != 0.0:
-                entry = {
-                    "name": "offset",
-                    "datatype": "Byte",
-                    "byte": size,
-                    "comment": "offset",
-                    "visible": False,
-                    "access": False,
-                    "action": "offset",
-                    "value": "",
-                    "size": 1}
-                size = size + 1
-                entry_save(filedata=filedata, foldernames=[], entry=entry, saveposition="-1")
-    return size
-
-
 def get_structure(filedata=None, foldernames=None, filepath="", dependencies=None):
     """
     open udt file
@@ -1263,7 +1190,11 @@ def get_structure(filedata=None, foldernames=None, filepath="", dependencies=Non
                                                 dependencies=dependencies)
         if dataend or error:
             break
+    # datasize has to be even
     datasize = filedata[-1]["byte"]
+    if int(float(datasize)) % 2 != 0:
+        datasize = str(float(datasize) + 1.0)
+
     return headerdata, filedata, datasize, error, errormessage
 
 
