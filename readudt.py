@@ -245,7 +245,7 @@ def get_datatype(line=""):
     sample:  [Test : Bool;   // comment Test] --> "Bool"
     """
     datatype = ""
-    regex = re.search(r'(.*) : (.*?)(;|$|\s{3}|\[)', line)
+    regex = re.search(r'(.*) : (.*?)(;|$|\s{3}|\[| :=)', line)
     if regex is not None:
         datatype = regex.group(2)
     return datatype
@@ -467,13 +467,13 @@ def get_data_standard(rawdata, filedata, foldernames):
         text between start and before " :"
         text between ": " and ";"
         text between "// " and end
-    sample:  [Test : Bool;   // comment Test] --> "Test", "Bool", "comment Test"
+    sample:  [Test : Bool := False;   // comment Test] --> "Test", "Bool", "comment Test"
     collect data and save it in filedata
     """
     error = False
     errormessage = ""
     result = False
-    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
+    regex = re.search(r'(.*) : (.*?)(?: :=.*?)?;(?:\s{3}// )?(.*)', rawdata[0])
     if regex is not None:
         result = True
         name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
@@ -507,15 +507,15 @@ def get_data_string(rawdata, filedata, foldernames):
         text between ": " and "["
         text between "[ " and "]"
         text between "// " and end
-    sample:  [Test : String[10];   // comment Test] --> "Test", "String", "10", "comment Test"
-    sample:  [Test : String;   // comment Test] --> "Test", "String", None, "comment Test"
+    sample:  [Test : String[10] := 'test';   // comment Test] --> "Test", "String", "10", "comment Test"
+    sample:  [Test : String := 'test';   // comment Test] --> "Test", "String", None, "comment Test"
     if datatype = String without [xxx] --> set it to String[254] after regex
     collect data and save it in filedata
     """
     error = False
     errormessage = ""
     result = False
-    regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?;(?:\s{3}// )?(.*)?', rawdata[0])
+    regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?(?: :=.*?)?;(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
         name, datatype, length, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3), regex.group(4)
@@ -557,15 +557,15 @@ def get_data_wstring(rawdata, filedata, foldernames):
         text between ": " and "["
         text between "[ " and "]"
         text between "// " and end
-    sample:  [Test : WString[10];   // comment Test] --> "Test", "WString", "10", "comment Test"
-    sample:  [Test : WString;   // comment Test] --> "Test", "WString", None, "comment Test"
+    sample:  [Test : WString[10] := 'test';   // comment Test] --> "Test", "WString", "10", "comment Test"
+    sample:  [Test : WString := 'test';   // comment Test] --> "Test", "WString", None, "comment Test"
     if datatype = WString without [xxx] --> set it to WString[254] after regex
     collect data and save it in filedata
     """
     error = False
     errormessage = ""
     result = False
-    regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?;(?:\s{3}// )?(.*)?', rawdata[0])
+    regex = re.search(r'(.*) : (.*?)(?:\[(.*?)?])?(?: :=.*?)?;(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
         name, datatype, length, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3), regex.group(4)
@@ -849,7 +849,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
     error = False
     errormessage = ""
     result = False
-    regex = re.search(r'(.*) : (.*);(?:\s{3}// )?(.*)?', rawdata[0])
+    regex = re.search(r'(.*) : (.*?)(?: :=.*?)?;(?:\s{3}// )?(.*)?', rawdata[0])
     if regex is not None:
         result = True
         # ---------------------------------
