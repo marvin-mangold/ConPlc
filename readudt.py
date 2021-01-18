@@ -20,30 +20,29 @@ import re
 
 
 # define possible Datatypes and its bit-size
-standard_types = {"Bool": 0.125,
-                  "Byte": 1,
-                  "Word": 2,
-                  "DWord": 4,
-                  "LWord": 8,
-                  "SInt": 1,
-                  "USInt": 1,
-                  "Int": 2,
-                  "UInt": 2,
-                  "DInt": 4,
-                  "UDInt": 4,
-                  "LInt": 8,
-                  "ULInt": 8,
-                  "Real": 4,
-                  "LReal": 8,
-                  "Char": 1,
-                  "WChar": 2}
-
-special_types = {"String": 2,
-                 "WString": 4,
-                 "Array": 0,
-                 "DTL": 0,
-                 "Struct": 0,
-                 "UDT": 0}
+datatypes = {"Bool": 0.125,
+             "Byte": 1,
+             "Word": 2,
+             "DWord": 4,
+             "LWord": 8,
+             "SInt": 1,
+             "USInt": 1,
+             "Int": 2,
+             "UInt": 2,
+             "DInt": 4,
+             "UDInt": 4,
+             "LInt": 8,
+             "ULInt": 8,
+             "Real": 4,
+             "LReal": 8,
+             "Char": 1,
+             "WChar": 2,
+             "String": 2,
+             "WString": 4,
+             "Array": 0,
+             "DTL": 0,
+             "Struct": 0,
+             "UDT": 0}
 
 
 def read_file(path):
@@ -218,9 +217,7 @@ def get_offset(datatype, filedata):
         # ----------------------------------------------------------
         # get even byte address for datatypes where size is an even integer
         # get dict of all datatype where a even address is needed
-        even_types = standard_types.copy()
-        even_types.update(special_types)
-        even_types = dict(filter(lambda x: (x[1] % 2 == 0), even_types.items()))
+        even_types = dict(filter(lambda x: (x[1] % 2 == 0), datatypes.items()))
         # check if actual data size is not 1 byte
         if datatype in even_types:
             # if actual address is not even then insert 1 byte offset
@@ -478,7 +475,7 @@ def get_data_standard(rawdata, filedata, foldernames):
         result = True
         name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
         # get size of data
-        size = standard_types[datatype]
+        size = datatypes[datatype]
         # collect data
         get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
@@ -526,8 +523,8 @@ def get_data_string(rawdata, filedata, foldernames):
         # get size of data
         # first Byte of String = maximal length of String
         # second Byte of String = actual length of String
-        size_decalration = special_types["String"]
-        size_data = standard_types["Char"] * length  # size of data = count of chars * bit-size of a char
+        size_decalration = datatypes["String"]
+        size_data = datatypes["Char"] * length  # size of data = count of chars * bit-size of a char
         size = size_decalration + size_data
         # collect data
         get_offset(datatype=datatype, filedata=filedata)
@@ -576,8 +573,8 @@ def get_data_wstring(rawdata, filedata, foldernames):
         # get size of data
         # first Word of WString = maximal length of WString
         # second Word of WString = actual length of WString
-        size_decalration = special_types["WString"]
-        size_data = standard_types["WChar"] * length  # size of data = count of wchars * bit-size of a wchar
+        size_decalration = datatypes["WString"]
+        size_data = datatypes["WChar"] * length  # size of data = count of wchars * bit-size of a wchar
         size = size_decalration + size_data
         # collect data
         get_offset(datatype=datatype, filedata=filedata)
@@ -729,7 +726,7 @@ def get_data_array(rawdata, filedata, foldernames, dependencies):
         comment = regex.group(6)  # "// comment Test"
         # first part of array (declaration line)
         # get size of data
-        size = special_types[datatype]
+        size = datatypes[datatype]
         # collect data
         get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
@@ -873,7 +870,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         # first part of dtl (declaration line)
         name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
         # get size of data
-        size = special_types[datatype]
+        size = datatypes[datatype]
         # collect data
         get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
@@ -904,7 +901,7 @@ def get_data_dtl(rawdata, filedata, foldernames):
         for element in data:
             name, datatype, comment = element
             # get size of data
-            size = standard_types[datatype]
+            size = datatypes[datatype]
             # collect data
             get_offset(datatype=datatype, filedata=filedata)
             address = get_address(filedata=filedata)
@@ -968,7 +965,7 @@ def get_data_struct(rawdata, filedata, foldernames):
         # first part of struct (declaration line)
         name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
         # get size of data
-        size = special_types[datatype]
+        size = datatypes[datatype]
         # collect data
         get_offset(datatype=datatype, filedata=filedata)
         address = get_address(filedata=filedata)
@@ -1030,7 +1027,7 @@ def get_data_subudt(rawdata, filedata, foldernames, dependencies):
         # first part of sub-udt (declaration line)
         name, datatype, comment = name_clean(regex.group(1)), regex.group(2), regex.group(3)
         # get size of data
-        size = special_types["UDT"]
+        size = datatypes["UDT"]
         # collect data
         get_offset(datatype="UDT", filedata=filedata)
         address = get_address(filedata=filedata)
@@ -1099,38 +1096,39 @@ def get_data(rawdata, filedata, foldernames, dependencies):
                                                     filedata=filedata,
                                                     foldernames=foldernames)
     # check line for standard datatype
-    elif datatype in standard_types:
+    elif datatype in ["Bool", "Byte", "Word", "DWord", "LWord", "SInt", "USInt", "Int", "UInt",
+                      "DInt", "UDInt", "LInt", "ULInt", "Real", "LReal", "Char", "WChar"]:
         # get and save data to filedata
         result, error, errormessage = get_data_standard(rawdata=rawdata,
                                                         filedata=filedata,
                                                         foldernames=foldernames)
     # check line for special datatype struct
-    elif (datatype in special_types) and (datatype == "Array"):
+    elif datatype == "Array":
         # get and save data to filedata
         result, error, errormessage = get_data_array(rawdata=rawdata,
                                                      filedata=filedata,
                                                      foldernames=foldernames,
                                                      dependencies=dependencies)
     # check line for special datatype string
-    elif (datatype in special_types) and (datatype[:6] == "String"):
+    elif datatype[:6] == "String":
         # get and save data to filedata
         result, error, errormessage = get_data_string(rawdata=rawdata,
                                                       filedata=filedata,
                                                       foldernames=foldernames)
     # check line for special datatype wstring
-    elif (datatype in special_types) and (datatype[:7] == "WString"):
+    elif datatype[:7] == "WString":
         # get and save data to filedata
         result, error, errormessage = get_data_wstring(rawdata=rawdata,
                                                        filedata=filedata,
                                                        foldernames=foldernames)
     # check line for special datatype dtl
-    elif (datatype in special_types) and (datatype == "DTL"):
+    elif datatype == "DTL":
         # get and save data to filedata
         result, error, errormessage = get_data_dtl(rawdata=rawdata,
                                                    filedata=filedata,
                                                    foldernames=foldernames)
     # check line for special datatype struct
-    elif (datatype in special_types) and (datatype == "Struct"):
+    elif datatype == "Struct":
         # get and save data to filedata
         result, error, errormessage = get_data_struct(rawdata=rawdata,
                                                       filedata=filedata,

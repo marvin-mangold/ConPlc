@@ -9,8 +9,9 @@ VERSION : 0.1
       four : Word;   // comment four
       five : DWord;   // comment five
       aa_comment_free : "UDT_commentfree";   // comment aa_comment_free
-      ab_with_subudt : "UDT with sub udt";   // comment UDT with subudt
-      ac_without_subudt : "UDT_without_sub_udt";   // comment UDT without subudt
+      ab_startvalue : "UDT_startvalue";   // comment ab_startvalue
+      ac_with_subudt : "UDT with sub udt";   // comment ac_with_subudt
+      ad_without_subudt : "UDT_without_sub_udt";   // comment ad_without_subudt
       six : Word;   // comment six
       seven : SInt;   // comment seven
       eight : USInt;   // comment eight

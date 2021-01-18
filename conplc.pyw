@@ -49,6 +49,10 @@ class Controller(object):
         # call server (handles the tcp connection)
         self.server = tcpserver.Server()
 
+    # TODO delete this
+    def x(self):
+        readplc.get_plc_data("", self.projectfile["udt_datastructure"])
+
     def run(self):
         """
         start mainloop of programm
@@ -206,7 +210,7 @@ class Controller(object):
                 self.projectfile["udt_version"] = headerdata["version"]
                 self.projectfile["udt_info"] = headerdata["info"]
                 self.projectfile["udt_datasize"] = str(datasize)
-                self.projectfile["udt_data"] = filedata
+                self.projectfile["udt_datastructure"] = filedata
                 # refresh variables on screen data
                 self.view.datatree_update()
                 # write eventmessage
@@ -217,7 +221,7 @@ class Controller(object):
                 self.projectfile["udt_version"] = ""
                 self.projectfile["udt_info"] = ""
                 self.projectfile["udt_datasize"] = "0"
-                self.projectfile["udt_data"] = []
+                self.projectfile["udt_datastructure"] = []
                 # refresh variables on screen data
                 self.view.datatree_update()
         if error:
@@ -232,7 +236,7 @@ class Controller(object):
                                                       byte3=str(int(self.projectfile["con_ip_byte3"])),
                                                       byte4=str(int(self.projectfile["con_ip_byte4"])))
         port = int(self.projectfile["con_port"])
-        datasize = int(self.projectfile["udt_datasize"])
+        datasize = int(float(self.projectfile["udt_datasize"]))
         self.server.start(ip=ip, port=port, datasize=datasize)
 
     def server_stop(self):
@@ -266,18 +270,18 @@ class Controller(object):
             pass
         else:  # data from recvbuffer taken
             # convert received bytestring to list of integer
-            data = list(recv)
+            receivedbytes = list(recv)
             # write eventmessage
             message = "Server received data"
             if self.projectfile["con_show_recvdata"]:
-                message = "{msg}: {data}".format(msg=message, data=data)
+                message = "{msg}: {data}".format(msg=message, data=receivedbytes)
             self.view.eventframe_post(message)
             # work with received data
-            readplc.get_plc_data(plcdata=data, udtdata=self.projectfile["udt_data"])
+            readplc.get_plc_data(receivedbytes=receivedbytes, datastructure=self.projectfile["udt_datastructure"])
             # convert list of integer to bytestring
-            data = bytes(data)
+            sendbytes = bytes(receivedbytes)
             # put data back in sendbuffer
-            self.server.buffer_send.put(data)
+            self.server.buffer_send.put(sendbytes)
 
     @staticmethod
     def timestamp_get():

@@ -4,7 +4,7 @@
     "udt_version": "",
     "udt_info": "",
     "udt_datasize": "0",
-    "udt_data": [],
+    "udt_datastructure": [],
     "opt_windowwidth": 1015,
     "opt_windowheight": 710,
     "opt_fullscreen": false,
