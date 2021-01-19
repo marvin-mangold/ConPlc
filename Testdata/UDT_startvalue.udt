@@ -1,0 +1,36 @@
+﻿TYPE "UDT_startvalue"
+TITLE = without comments
+VERSION : 0.1
+   STRUCT
+      one : Bool := false;
+      three : Byte := 3;
+      four : Word := 4;
+      five : DWord := 5;
+      six : DWord := 6;
+      seven : SInt := 7;
+      eight : USInt := 8;
+      nine : Int := 9;
+      ten : UInt := 11;
+      eleven : DInt := 12;
+      twelve : UDInt := 13;
+      thirteen : Int := 14;
+      twentytwo : Array[2..10] of Byte;
+      twentytfive : Array[1..8] of "UDT_without_sub_udt";
+      fourteen : Int := 15;
+      fifteen : Real := 16.0;
+      sixteenn : LReal := 17.0;
+      seventeen : Char := 'a';
+      eighteen : WChar := WCHAR#'a';
+      nineteen : String := 'test';
+      twenty : WString := WSTRING#'test';
+      twentyone {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL := DTL#1970-01-01-01:01:01;
+      twentythree : Struct
+         A : Bool;
+         B : Int;
+         E : DInt;
+      END_STRUCT;
+      twentysix : Bool := false;
+   END_STRUCT;
+
+END_TYPE
+

@@ -49,10 +49,6 @@ class Controller(object):
         # call server (handles the tcp connection)
         self.server = tcpserver.Server()
 
-    # TODO delete this
-    def x(self):
-        readplc.get_plc_data("", self.projectfile["udt_datastructure"])
-
     def run(self):
         """
         start mainloop of programm
@@ -224,6 +220,7 @@ class Controller(object):
                 self.projectfile["udt_datastructure"] = []
                 # refresh variables on screen data
                 self.view.datatree_update()
+
         if error:
             self.view.eventframe_post(errormessage)
 
@@ -278,6 +275,12 @@ class Controller(object):
             self.view.eventframe_post(message)
             # work with received data
             readplc.get_plc_data(receivedbytes=receivedbytes, datastructure=self.projectfile["udt_datastructure"])
+            # TODO
+            children = self.view.datatree.get_children()
+            a = self.view.datatree.item(children[0])
+            my_item = next((item for item in self.projectfile["udt_datastructure"] if item['name'] == a["text"]), None)
+            # refresh variables on screen data
+            #self.view.datatree_update()
             # convert list of integer to bytestring
             sendbytes = bytes(receivedbytes)
             # put data back in sendbuffer

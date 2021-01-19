@@ -232,14 +232,6 @@ class View(object):
                                     highlightthickness=1,
                                     highlightbackground="black")
 
-        # TODO delete this
-        # create button for datasructure import
-        self.btn_test = ttk.Button(master=self.screen_home,
-                                   takefocus=0,
-                                   text='test',
-                                   style="style_screen.TButton",
-                                   command=self.controller.x).place(x=200, y=200, width=100, height=50)
-
         # create and place label for eventframe
         self.lbl_eventframe = ttk.Label(master=self.eventframe,
                                         style="style_infobar.TLabel",

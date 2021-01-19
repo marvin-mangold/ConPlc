@@ -3,7 +3,7 @@
     "udt_description": "daten",
     "udt_version": "0.1",
     "udt_info": "hier stehen die daten",
-    "udt_datasize": "268.0",
+    "udt_datasize": "18.0",
     "udt_datastructure": [
         {
             "name": "",
@@ -149,20 +149,31 @@
             "size": 4
         },
         {
-            "name": "einstring",
-            "datatype": "String[254]",
+            "name": "einword",
+            "datatype": "Word",
             "byte": "12.0",
-            "comment": "",
+            "comment": "das ist ein word",
             "visible": true,
             "access": true,
             "action": null,
             "value": "",
-            "size": 256
+            "size": 2
+        },
+        {
+            "name": "eindword",
+            "datatype": "DWord",
+            "byte": "14.0",
+            "comment": "das ist ein dword",
+            "visible": true,
+            "access": true,
+            "action": null,
+            "value": "",
+            "size": 4
         },
         {
             "name": "",
             "datatype": "END_STRUCT",
-            "byte": "268.0",
+            "byte": "18.0",
             "comment": "",
             "visible": false,
             "access": false,
@@ -173,7 +184,7 @@
         {
             "name": "",
             "datatype": "END_UDT",
-            "byte": "268.0",
+            "byte": "18.0",
             "comment": "",
             "visible": false,
             "access": false,
