@@ -278,8 +278,8 @@ class Controller(object):
             self.view.eventframe_post(message)
             # work with received data
             readplc.get_plc_data(receivedbytes=receivedbytes, datastructure=self.projectfile["udt_datastructure"])
-            # set the values in datatree with the new received data
-            self.view.datatree_set_values()
+            # update the values in datatree with the new received data
+            self.view.datatree_values_set()
             # convert list of integer to bytestring
             sendbytes = bytes(receivedbytes)
             # put data back in sendbuffer
