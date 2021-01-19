@@ -223,7 +223,6 @@ class Controller(object):
                 self.projectfile["udt_datastructure"] = []
                 # refresh variables on screen data
                 self.view.datatree_update()
-
         if error:
             self.view.eventframe_post(errormessage)
 

@@ -129,7 +129,7 @@ class Server(object):
                         else:
                             self.timeout = False
                             message = "Servererror length of received data " \
-                                      "({recvsize} Bytes) does not matches length expected data " \
+                                      "({recvsize} Bytes) does not match expected length of data " \
                                       "({expectedsize} Bytes)".format(recvsize=len(recv), expectedsize=self.datasize)
                             self.message("stop", message)
                             self.connection.close()
