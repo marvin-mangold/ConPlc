@@ -291,6 +291,9 @@ def get_wstring(recvbytes, element):
 
 
 def get_plc_data(receivedbytes, datastructure):
+    """
+    for every data in datastructure read its values from receivedbytes
+    """
     recvbytes = receivedbytes[:]
     for element in datastructure:
         datatype = element["datatype"]
