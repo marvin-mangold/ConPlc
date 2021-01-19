@@ -307,3 +307,4 @@ class Controller(object):
 if __name__ == '__main__':
     app = Controller()
     app.run()
+    # TODO error log to file all modules all errors
