@@ -40,7 +40,8 @@ class Server(object):
         self.connected = False  # flat to indicate if connection is established
         self.partner_ip = ""  # ip-address of connected partner
         self.partner_id = None  # connection id to receive and end data
-        self.datasize = 0
+        self.datasize = 0  # number of bytes to collect while receiving
+        self.buffer_package = []  # bytes from the received packages
         # buffers
         self.buffer_recv = queue.Queue()  # buffer for received data
         self.buffer_send = queue.Queue()  # buffer for data to send
@@ -88,9 +89,10 @@ class Server(object):
                     self.connected = True
 
             while self.active and self.connected:  # start datatransfer
+
                 try:  # try to receive data
                     self.partner_id.settimeout(1)  # turn on listeningtime to check if server is turned off manually
-                    recv = self.partner_id.recv(self.datasize)  # waiting for data
+                    recv = self.partner_id.recv(1000)  # waiting for maximal 1000 bytes data
                 except Exception as errormessage:  # an error occurred
                     if "timed out" in str(errormessage):  # if error = timeout --> retry receiving data
                         self.timeout = True
@@ -110,9 +112,16 @@ class Server(object):
                         self.connected = False
                         break
                     else:
-                        # check if length of received data matches expected length of data
-                        if len(recv) == self.datasize:
-                            self.buffer_recv.put(recv)  # put received data in buffer
+                        self.buffer_package += recv  # save received data in package buffer
+                        print("Server received {x}/{y} bytes".format(x=len(self.buffer_package), y=self.datasize))
+                        # check if all bytes (defined by self.datasize) are collected
+                        if len(self.buffer_package) >= self.datasize:
+                            # if more bytes in package buffer than expected put the expected bytes in receive buffer
+                            # save the leftover bytes for the next receiving
+                            newdata = self.buffer_package[:self.datasize]  # = expected size of bytes
+                            nextdata = self.buffer_package[self.datasize:]  # > expected size of bytes
+                            self.buffer_recv.put(newdata)  # put received data in buffer
+                            self.buffer_package = nextdata  # save the leftover bytes
                             # send answer to partner
                             send = self.buffer_send.get(block=True)  # waiting for data in buffer
                             if self.encode_decode:  # if activated the data will be  encoded
@@ -125,17 +134,9 @@ class Server(object):
                                 self.connection.close()
                                 self.connected = False
                                 break
-                        # length of received data does not matches expected length of data
+                        # not all bytes received keep on receiving
                         else:
                             self.timeout = False
-                            message = "Servererror length of received data " \
-                                      "({recvsize} Bytes) does not match expected length of data " \
-                                      "({expectedsize} Bytes)".format(recvsize=len(recv), expectedsize=self.datasize)
-                            self.message("stop", message)
-                            self.connection.close()
-                            self.connected = False
-                            self.active = False
-                            break
 
     def start(self, ip, port, datasize):
         """

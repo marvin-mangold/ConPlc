@@ -280,6 +280,7 @@ class Controller(object):
             # update the values in datatree with the new received data
             self.view.datatree_values_set()
             # convert list of integer to bytestring
+            # TODO answer length to long, timeout when sending
             sendbytes = bytes(receivedbytes)
             # put data back in sendbuffer
             self.server.buffer_send.put(sendbytes)
