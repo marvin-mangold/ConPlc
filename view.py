@@ -791,6 +791,29 @@ class View(object):
         self.datatree_fill(name, description, version, info, data)
         self.udt_datasize.set(datasize)
 
+    def datatree_set_values(self):
+        """
+        update values for every element in datatree with data from projectfile
+        """
+        # get datastructure from projectfile
+        datastructure = self.controller.projectfile["udt_datastructure"]
+        # get all entries in datatree
+        entries = self.datatree.get_children()
+        # iterate over all entries in datatree
+        for entry in entries:
+            # get name and values from this entry in datatree
+            entry_data = self.datatree.item(entry)
+            entry_name = entry_data["text"]
+            entry_values = entry_data["values"]
+            # search for the data where datastructure["name"] = ["text"] of this entry
+            data = next((item for item in datastructure if item['name'] == entry_name), None)
+            # if data is found
+            if data is not None:
+                # update values
+                entry_values[1] = data["value"]
+                # save values
+                self.datatree.item(entry, values=entry_values)
+
     def server_update(self):
         """
         update data on screen server

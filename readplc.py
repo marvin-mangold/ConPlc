@@ -39,7 +39,7 @@ def get_byte(recvbytes, element):
     """
     data = struct.unpack('!B', bytes([recvbytes[0]]))[0]
     data = format(data, '#01x')
-    data = "16#{data}".format(data=data[2:])
+    data = "16#{data}".format(data=data[2:]).upper()
     element["value"] = data
     recvbytes.pop(0)
 
@@ -51,7 +51,7 @@ def get_word(recvbytes, element):
     """
     data = struct.unpack('!H', bytes(recvbytes[0:2]))[0]
     data = format(data, '#04x')
-    data = "16#{data}".format(data=data[2:])
+    data = "16#{data}".format(data=data[2:]).upper()
     element["value"] = data
     recvbytes.pop(0)
     recvbytes.pop(0)
@@ -64,7 +64,7 @@ def get_dword(recvbytes, element):
     """
     data = struct.unpack('!I', bytes(recvbytes[0:4]))[0]
     data = format(data, '#04x')
-    data = "16#{data}".format(data=data[2:])
+    data = "16#{data}".format(data=data[2:]).upper()
     element["value"] = data
     recvbytes.pop(0)
     recvbytes.pop(0)
@@ -79,7 +79,7 @@ def get_lword(recvbytes, element):
     """
     data = struct.unpack('!Q', bytes(recvbytes[0:8]))[0]
     data = format(data, '#08x')
-    data = "16#{data}".format(data=data[2:])
+    data = "16#{data}".format(data=data[2:]).upper()
     element["value"] = data
     recvbytes.pop(0)
     recvbytes.pop(0)

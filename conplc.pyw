@@ -173,6 +173,9 @@ class Controller(object):
         """
         error = False
         errormessage = ""
+        # stop server if server is running
+        if self.view.runstop.get():
+            self.view.cbx_runstop.invoke()
         # clear data in datatree
         self.view.datatree_clear()
         # get the filepath of udt and its sub udts
@@ -275,12 +278,8 @@ class Controller(object):
             self.view.eventframe_post(message)
             # work with received data
             readplc.get_plc_data(receivedbytes=receivedbytes, datastructure=self.projectfile["udt_datastructure"])
-            # TODO
-            children = self.view.datatree.get_children()
-            a = self.view.datatree.item(children[0])
-            my_item = next((item for item in self.projectfile["udt_datastructure"] if item['name'] == a["text"]), None)
-            # refresh variables on screen data
-            #self.view.datatree_update()
+            # set the values in datatree with the new received data
+            self.view.datatree_set_values()
             # convert list of integer to bytestring
             sendbytes = bytes(receivedbytes)
             # put data back in sendbuffer

@@ -204,7 +204,7 @@ def get_offset(datatype, filedata):
             # if actual address is not ".0" then insert 1 bool offset
             while ".0" not in get_address(filedata=filedata):
                 entry = {
-                    "name": "offset",
+                    "name": "offset_{address}".format(address=get_address(filedata=filedata)),
                     "datatype": "Bool",
                     "byte": get_address(filedata=filedata),
                     "comment": "offset",
@@ -223,7 +223,7 @@ def get_offset(datatype, filedata):
             # if actual address is not even then insert 1 byte offset
             if int(float(get_address(filedata=filedata))) % 2 != 0:
                 entry = {
-                    "name": "offset",
+                    "name": "offset_{address}".format(address=get_address(filedata=filedata)),
                     "datatype": "Byte",
                     "byte": get_address(filedata=filedata),
                     "comment": "offset",
