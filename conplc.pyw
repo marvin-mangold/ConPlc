@@ -1,6 +1,6 @@
 """
 ConPlc - connect PLC and PC
-Copyright (C) 2020  Marvin Mangold (marvin@mangoldx.de)
+Copyright (C) 2021  Marvin Mangold (Marvin.Mangold00@googlemail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -59,6 +59,8 @@ class Controller(object):
         self.view.datatree_update()
         # refresh variables on screen setup
         self.view.setup_update()
+        # refresh variables on screen csv
+        self.view.csv_update()
         # refresh windowsize and scaling
         self.view.window_update()
         # write eventmessage
@@ -113,6 +115,8 @@ class Controller(object):
         self.view.datatree_update()
         # refresh variables on screen setup
         self.view.setup_update()
+        # refresh variables on screen csv
+        self.view.csv_update()
         # refresh windowsize and scaling
         self.view.window_update()
         # write eventmessage
@@ -136,6 +140,8 @@ class Controller(object):
             self.view.datatree_update()
             # refresh variables on screen setup
             self.view.setup_update()
+            # refresh variables on screen csv
+            self.view.csv_update()
             # refresh windowsize and scaling
             self.view.window_update()
             # write eventmessage
@@ -307,4 +313,3 @@ class Controller(object):
 if __name__ == '__main__':
     app = Controller()
     app.run()
-    # TODO error log to file all modules all errors

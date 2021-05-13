@@ -1,9 +1,9 @@
 {
-    "udt_name": "UDT_sub_udt_1",
+    "udt_name": "Daten",
     "udt_description": "has no title",
     "udt_version": "0.1",
     "udt_info": "some comment",
-    "udt_datasize": "290.0",
+    "udt_datasize": "282.0",
     "udt_datastructure": [
         {
             "name": "",
@@ -18,16 +18,16 @@
             "variable": null
         },
         {
-            "name": "_A",
+            "name": "Aktiv",
             "datatype": "Bool",
             "byte": "0.0",
-            "comment": "comment _A",
+            "comment": "Anlage an oder aus",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "False",
+            "value": "True",
             "size": 0.125,
-            "variable": "I09F"
+            "variable": "I001"
         },
         {
             "name": "offset_0.1",
@@ -37,7 +37,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "True",
+            "value": "False",
             "size": 0.125,
             "variable": null
         },
@@ -73,7 +73,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "True",
+            "value": "False",
             "size": 0.125,
             "variable": null
         },
@@ -85,7 +85,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "True",
+            "value": "False",
             "size": 0.125,
             "variable": null
         },
@@ -97,7 +97,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "True",
+            "value": "False",
             "size": 0.125,
             "variable": null
         },
@@ -114,141 +114,81 @@
             "variable": null
         },
         {
-            "name": "_B",
+            "name": "Codierung",
             "datatype": "Byte",
             "byte": "1.0",
-            "comment": "comment _B",
+            "comment": "Codierung",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "16#7E",
+            "value": "16#2",
             "size": 1,
-            "variable": "I0A0"
+            "variable": "I002"
         },
         {
-            "name": "_C",
+            "name": "Status",
             "datatype": "Word",
             "byte": "2.0",
-            "comment": "comment _C",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "16#159",
-            "size": 2,
-            "variable": "I0A1"
-        },
-        {
-            "name": "_D",
-            "datatype": "DWord",
-            "byte": "4.0",
-            "comment": "comment _D",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "16#21F",
-            "size": 4,
-            "variable": "I0A2"
-        },
-        {
-            "name": "_E",
-            "datatype": "Word",
-            "byte": "8.0",
-            "comment": "comment _E",
+            "comment": "Status",
             "visible": true,
             "access": true,
             "action": null,
             "value": "16#FF",
             "size": 2,
-            "variable": "I0A3"
+            "variable": "I003"
         },
         {
-            "name": "_F",
-            "datatype": "SInt",
-            "byte": "10.0",
-            "comment": "comment _F",
+            "name": "Status_erweitert",
+            "datatype": "DWord",
+            "byte": "4.0",
+            "comment": "Erweiterter Status",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "34",
-            "size": 1,
-            "variable": "I0A4"
+            "value": "16#FFFF",
+            "size": 4,
+            "variable": "I004"
         },
         {
-            "name": "offset_11.0",
-            "datatype": "Byte",
-            "byte": "11.0",
-            "comment": "offset",
-            "visible": false,
-            "access": false,
-            "action": "offset",
-            "value": "16#B4",
-            "size": 1,
-            "variable": null
-        },
-        {
-            "name": "_G",
+            "name": "Programmnummer",
             "datatype": "Int",
-            "byte": "12.0",
-            "comment": "comment _G",
+            "byte": "8.0",
+            "comment": "Aktuelle Programmnummer",
             "visible": true,
             "access": true,
             "action": null,
             "value": "3",
             "size": 2,
-            "variable": "I0A5"
+            "variable": "I005"
         },
         {
-            "name": "_H",
-            "datatype": "Int",
-            "byte": "14.0",
-            "comment": "comment _H",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "455",
-            "size": 2,
-            "variable": "I0A6"
-        },
-        {
-            "name": "_I",
-            "datatype": "UInt",
-            "byte": "16.0",
-            "comment": "comment _I",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "16434",
-            "size": 2,
-            "variable": "I0A7"
-        },
-        {
-            "name": "_J",
+            "name": "Zaehler",
             "datatype": "DInt",
-            "byte": "18.0",
-            "comment": "comment _J",
+            "byte": "10.0",
+            "comment": "ZÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤hlerstand",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "234234234",
+            "value": "5",
             "size": 4,
-            "variable": "I0A8"
+            "variable": "I006"
         },
         {
-            "name": "s",
+            "name": "Stationsname",
             "datatype": "String[254]",
-            "byte": "22.0",
-            "comment": "",
+            "byte": "14.0",
+            "comment": "Name der Station",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "diese daten sind korrekt",
+            "value": "Anlage001",
             "size": 256,
-            "variable": "I0A9"
+            "variable": "I007"
         },
         {
             "name": "",
             "datatype": "START_DTL",
-            "byte": "278.0",
+            "byte": "270.0",
             "comment": "",
             "visible": false,
             "access": false,
@@ -258,117 +198,117 @@
             "variable": null
         },
         {
-            "name": "f",
+            "name": "Zeitstempel",
             "datatype": "DTL",
-            "byte": "278.0",
-            "comment": "",
+            "byte": "270.0",
+            "comment": "Aktueller Zeitstempel",
             "visible": true,
             "access": false,
             "action": "open",
             "value": "",
             "size": 0,
-            "variable": "I0AA"
+            "variable": "I008"
         },
         {
-            "name": "f.YEAR",
+            "name": "Zeitstempel.YEAR",
             "datatype": "UInt",
-            "byte": "278.0",
+            "byte": "270.0",
             "comment": "Year",
             "visible": true,
             "access": true,
             "action": null,
             "value": "2021",
             "size": 2,
-            "variable": "I0AB"
+            "variable": "I009"
         },
         {
-            "name": "f.MONTH",
+            "name": "Zeitstempel.MONTH",
             "datatype": "USInt",
-            "byte": "280.0",
+            "byte": "272.0",
             "comment": "Month",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "1",
+            "value": "5",
             "size": 1,
-            "variable": "I0AC"
+            "variable": "I00A"
         },
         {
-            "name": "f.DAY",
+            "name": "Zeitstempel.DAY",
             "datatype": "USInt",
-            "byte": "281.0",
+            "byte": "273.0",
             "comment": "Day",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "19",
+            "value": "13",
             "size": 1,
-            "variable": "I0AD"
+            "variable": "I00B"
         },
         {
-            "name": "f.WEEKDAY",
+            "name": "Zeitstempel.WEEKDAY",
             "datatype": "USInt",
-            "byte": "282.0",
+            "byte": "274.0",
             "comment": "Weekday",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "3",
+            "value": "5",
             "size": 1,
-            "variable": "I0AE"
+            "variable": "I00C"
         },
         {
-            "name": "f.HOUR",
+            "name": "Zeitstempel.HOUR",
             "datatype": "USInt",
-            "byte": "283.0",
+            "byte": "275.0",
             "comment": "Hour",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "11",
+            "value": "10",
             "size": 1,
-            "variable": "I0AF"
+            "variable": "I00D"
         },
         {
-            "name": "f.MINUTE",
+            "name": "Zeitstempel.MINUTE",
             "datatype": "USInt",
-            "byte": "284.0",
+            "byte": "276.0",
             "comment": "Minute",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "23",
+            "value": "57",
             "size": 1,
-            "variable": "I0B0"
+            "variable": "I00E"
         },
         {
-            "name": "f.SECOND",
+            "name": "Zeitstempel.SECOND",
             "datatype": "USInt",
-            "byte": "285.0",
+            "byte": "277.0",
             "comment": "Second",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "11",
+            "value": "34",
             "size": 1,
-            "variable": "I0B1"
+            "variable": "I00F"
         },
         {
-            "name": "f.NANOSECOND",
+            "name": "Zeitstempel.NANOSECOND",
             "datatype": "UDInt",
-            "byte": "286.0",
+            "byte": "278.0",
             "comment": "Nanosecond",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "0",
+            "value": "555157000",
             "size": 4,
-            "variable": "I0B2"
+            "variable": "I010"
         },
         {
             "name": "",
             "datatype": "END_DTL",
-            "byte": "290.0",
+            "byte": "282.0",
             "comment": "",
             "visible": false,
             "access": false,
@@ -380,7 +320,7 @@
         {
             "name": "",
             "datatype": "END_STRUCT",
-            "byte": "290.0",
+            "byte": "282.0",
             "comment": "",
             "visible": false,
             "access": false,
@@ -392,7 +332,7 @@
         {
             "name": "",
             "datatype": "END_UDT",
-            "byte": "290.0",
+            "byte": "282.0",
             "comment": "",
             "visible": false,
             "access": false,
@@ -411,5 +351,10 @@
     "con_ip_byte4": "96",
     "con_port": "1024",
     "con_autostart": false,
-    "con_show_recvdata": false
+    "con_show_recvdata": true,
+    "csv_active": true,
+    "csv_filename": "adefault",
+    "csv_filepath": "C:/Users/Marvi/Desktop/ConPlc",
+    "csv_filemode": 2,
+    "csv_triggermode": "minute"
 }

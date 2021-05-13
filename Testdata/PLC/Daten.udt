@@ -1,0 +1,17 @@
+﻿TYPE "Daten"
+TITLE = has no title
+VERSION : 0.1
+//some comment
+   STRUCT
+      Aktiv : Bool := True;   // Anlage an oder aus
+      Codierung : Byte := 16#2;   // Codierung
+      Status : Word := 16#FF;   // Status
+      Status_erweitert : DWord := 16#FFFF;   // Erweiterter Status
+      Programmnummer : Int := 3;   // Aktuelle Programmnummer
+      Zaehler : DInt := 5;   // Zählerstand
+      Stationsname : String := 'Anlage001';   // Name der Station
+      Zeitstempel {InstructionName := 'DTL'; LibVersion := '1.0'} : DTL;   // Aktueller Zeitstempel
+   END_STRUCT;
+
+END_TYPE
+

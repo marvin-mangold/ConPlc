@@ -1,6 +1,6 @@
 """
 ConPlc - connect PLC and PC
-Copyright (C) 2020  Marvin Mangold (marvin@mangoldx.de)
+Copyright (C) 2021  Marvin Mangold (Marvin.Mangold00@googlemail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

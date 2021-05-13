@@ -14,5 +14,10 @@
     "con_ip_byte4": "000",
     "con_port": "0",
     "con_autostart" : false,
-    "con_show_recvdata": false
+    "con_show_recvdata": true,
+    "csv_active": false,
+    "csv_filename": "newfile",
+    "csv_filepath": "C:/Users/Username/Desktop/",
+    "csv_filemode": 1,
+    "csv_triggermode": "boolean"
 }

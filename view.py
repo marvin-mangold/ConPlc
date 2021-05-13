@@ -1,6 +1,6 @@
 """
 ConPlc - connect PLC and PC
-Copyright (C) 2020  Marvin Mangold (marvin@mangoldx.de)
+Copyright (C) 2021  Marvin Mangold (Marvin.Mangold00@googlemail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ class View(object):
         self.img_setup = tk.PhotoImage(file=Path(self.controller.configfile["media_setup"]))
         self.img_logo = tk.PhotoImage(file=Path(self.controller.configfile["media_logo"]))
         self.img_exit = tk.PhotoImage(file=Path(self.controller.configfile["media_exit"]))
+        self.img_csv = tk.PhotoImage(file=Path(self.controller.configfile["media_csv"]))
         self.img_clock = tk.PhotoImage(file=Path(self.controller.configfile["media_clock"]))
         self.img_version = tk.PhotoImage(file=Path(self.controller.configfile["media_version"]))
         self.img_play = tk.PhotoImage(file=Path(self.controller.configfile["media_play"]))
@@ -133,6 +134,12 @@ class View(object):
         self.style_treeview = ttk.Style()
         self.style_treeview.configure(
             "Treeview.Heading", font=("arial", 10))
+        self.style_rad_screen = ttk.Style()
+        self.style_rad_screen.configure(
+            "style_screen.TRadiobutton", font=("arial", 10), relief="solid", background=self.midcolor)
+        self.style_men_screen = ttk.Style()
+        self.style_men_screen.configure(
+            "style_screen.TMenubutton", font=("arial", 10), relief="solid", background=self.midcolor)
 
         # create Tabs----------------------------------------------------------
         self.screens = ttk.Notebook(self.mainframe, style="style_screen.TNotebook")
@@ -140,15 +147,17 @@ class View(object):
         self.screen_server = ttk.Frame(self.screens, style="style_screen.TFrame")
         self.screen_data = ttk.Frame(self.screens, style="style_screen.TFrame")
         self.screen_setup = ttk.Frame(self.screens, style="style_screen.TFrame")
+        self.screen_csv = ttk.Frame(self.screens, style="style_screen.TFrame")
         self.screens.add(self.screen_home, text="Home", image=self.img_home, compound=tk.TOP)
         self.screens.add(self.screen_server, text="Server", image=self.img_server, compound=tk.TOP)
         self.screens.add(self.screen_data, text="Data", image=self.img_data, compound=tk.TOP)
         self.screens.add(self.screen_setup, text="Setup", image=self.img_setup, compound=tk.TOP)
+        self.screens.add(self.screen_csv, text="CSV", image=self.img_csv, compound=tk.TOP)
 
         # menubar--------------------------------------------------------------
         self.menu = tk.Menu(self.window)
         self.window.config(menu=self.menu)
-        self.window.option_add('*tearOff', False)
+        self.window.option_add("*tearOff", False)
         # file menu
         self.filemenu = tk.Menu(self.menu)
         self.menu.add_cascade(label="File", menu=self.filemenu)
@@ -251,7 +260,7 @@ class View(object):
         self.autoscroll.set(True)
         self.btn_autoscroll = ttk.Button(master=self.eventframe,
                                          takefocus=0,
-                                         text='autoscroll',
+                                         text="autoscroll",
                                          style="style_eventframe.TButton",
                                          command=self.eventlog_autoscroll)
 
@@ -455,7 +464,7 @@ class View(object):
         # create button for datasructure import
         self.btn_import_datasructure = ttk.Button(master=self.screen_data,
                                                   takefocus=0,
-                                                  text='load Datastructure',
+                                                  text="load Datastructure",
                                                   style="style_screen.TButton",
                                                   command=self.controller.data_get)
 
@@ -490,6 +499,95 @@ class View(object):
                                               variable=self.opt_fullscreen,
                                               command=self.window_update,
                                               style="style_screen.TCheckbutton")
+
+        # screen csv---------------------------------------------------------
+        # create checkbox for option fullscreen
+        self.csv_active = tk.BooleanVar()
+        self.csv_active.set(self.controller.projectfile["csv_active"])
+        self.cbx_active = ttk.Checkbutton(master=self.screen_csv,
+                                          text="Active",
+                                          variable=self.csv_active,
+                                          command=self.entry_after,
+                                          style="style_screen.TCheckbutton")
+
+        # create and place label for filename
+        self.lbl_csv_filename = ttk.Label(master=self.screen_csv,
+                                          style="style_screen.TLabel",
+                                          text="Filename:",
+                                          anchor="w")
+
+        # create and place entry for filename
+        self.csv_filename = tk.StringVar()
+        self.csv_filename.set(self.controller.projectfile["csv_filename"])
+        self.entry_csv_filename = ttk.Entry(master=self.screen_csv,
+                                            style="style_screen.TEntry",
+                                            textvariable=self.csv_filename)
+        self.entry_csv_filename.bind("<KeyRelease>", lambda x: self.entry_after())
+
+        # create and place label for filepath
+        self.lbl_csv_filepath = ttk.Label(master=self.screen_csv,
+                                          style="style_screen.TLabel",
+                                          text="Filepath:",
+                                          anchor="w")
+
+        # create and place entry for filepath
+        self.csv_filepath = tk.StringVar()
+        self.csv_filepath.set(self.controller.projectfile["csv_filepath"])
+        self.entry_csv_filepath = ttk.Entry(master=self.screen_csv,
+                                            style="style_screen.TEntry",
+                                            textvariable=self.csv_filepath)
+        self.entry_csv_filepath.bind("<KeyRelease>", lambda x: self.entry_after())
+
+        # create button for set filepath
+        self.btn_csv_filepath = ttk.Button(master=self.screen_csv,
+                                           takefocus=0,
+                                           text="set Filepath",
+                                           style="style_screen.TButton",
+                                           command=self.csv_filepath_get)
+
+        # create and place label for filemode
+        self.lbl_csv_filemode = ttk.Label(master=self.screen_csv,
+                                          style="style_screen.TLabel",
+                                          text="Filemode:",
+                                          anchor="w")
+
+        # create radiobutton for filemode1
+        self.csv_filemode = tk.IntVar()
+        self.csv_filemode.set(self.controller.projectfile["csv_filemode"])
+        self.rad_csv_filemode1 = ttk.Radiobutton(master=self.screen_csv,
+                                                 takefocus=0,
+                                                 text="one file per day",
+                                                 style="style_screen.TRadiobutton",
+                                                 value=1,
+                                                 variable=self.csv_filemode,
+                                                 command=self.entry_after)
+
+        # create radiobutton for filemode2
+        self.rad_csv_filemode2 = ttk.Radiobutton(master=self.screen_csv,
+                                                 takefocus=0,
+                                                 text="one big file",
+                                                 style="style_screen.TRadiobutton",
+                                                 value=2,
+                                                 variable=self.csv_filemode,
+                                                 command=self.entry_after)
+
+        # create label for Triggermode
+        self.lbl_csv_Trigger = ttk.Label(master=self.screen_csv,
+                                         style="style_screen.TLabel",
+                                         text="Trigger:",
+                                         anchor="w")
+
+        # create menu for triggermode
+        self.csv_triggermode = tk.StringVar()
+        self.csv_triggermode.set(self.controller.projectfile["csv_triggermode"])
+        self.triggerchoices = ["boolean", "second", "minute", "hour"]
+        self.men_csv_trigger = ttk.OptionMenu(self.screen_csv,  # master=
+                                              self.csv_triggermode,  # value=
+                                              None,  # default=
+                                              *self.triggerchoices,  # values=
+                                              style="style_screen.TMenubutton")
+
+        self.csv_triggermode.trace("w", lambda *args: self.entry_after())
 
         # Key events-----------------------------------------------------------
         self.window.bind("<KeyPress>", self.keydown)
@@ -564,6 +662,18 @@ class View(object):
         self.cbx_show_offset.place(x=580 + ox, y=465 + oy, width=100, height=25)
         # scale gui elements from screen setup---------------------------------
         self.cbx_fullscreen.place(x=50, y=25, width=90, height=40)
+        # scale gui elements from screen csv-----------------------------------
+        self.cbx_active.place(x=50, y=25, width=90, height=40)
+        self.lbl_csv_filename.place(x=50, y=58, width=80, height=25)
+        self.entry_csv_filename.place(x=135, y=58, width=300, height=25)
+        self.lbl_csv_filepath.place(x=50, y=91, width=80, height=25)
+        self.entry_csv_filepath.place(x=135, y=91, width=300, height=25)
+        self.btn_csv_filepath.place(x=440, y=91, width=100, height=25)
+        self.lbl_csv_filemode.place(x=50, y=124, width=80, height=25)
+        self.rad_csv_filemode1.place(x=135, y=124, width=120, height=25)
+        self.rad_csv_filemode2.place(x=280, y=124, width=95, height=25)
+        self.lbl_csv_Trigger.place(x=50, y=157, width=80, height=25)
+        self.men_csv_trigger.place(x=135, y=157, width=95, height=25)
         if not self.controller.projectfile["opt_fullscreen"]:
             self.controller.projectfile["opt_windowwidth"] = self.window.winfo_width()
             self.controller.projectfile["opt_windowheight"] = self.window.winfo_height()
@@ -612,7 +722,7 @@ class View(object):
         self.txt_eventframe.insert(tk.END, "{timestamp}: {text}\n".format(timestamp=timestamp, text=text))
         self.txt_eventframe.configure(state="disabled")
         if self.autoscroll.get():
-            self.txt_eventframe.yview_moveto('1.0')
+            self.txt_eventframe.yview_moveto("1.0")
 
     def keyup(self, event):
         """
@@ -680,6 +790,11 @@ class View(object):
         self.controller.projectfile["con_ip_byte3"] = self.con_ip_byte3.get()
         self.controller.projectfile["con_ip_byte4"] = self.con_ip_byte4.get()
         self.controller.projectfile["con_port"] = self.con_port.get()
+        self.controller.projectfile["csv_active"] = self.csv_active.get()
+        self.controller.projectfile["csv_filename"] = self.csv_filename.get()
+        self.controller.projectfile["csv_filepath"] = self.csv_filepath.get()
+        self.controller.projectfile["csv_filemode"] = self.csv_filemode.get()
+        self.controller.projectfile["csv_triggermode"] = self.csv_triggermode.get()
 
     def filepath_open(self, message=None, filetypes=((), ("all files", "*.*"))):
         """
@@ -696,9 +811,16 @@ class View(object):
         """
         open file dialog and return the filepath
         """
-        path = tk.filedialog.asksaveasfilename(initialdir=self.desktoppath, title="Save as...",
+        path = tk.filedialog.asksaveasfilename(initialdir=self.desktoppath, title="save as...",
                                                filetypes=filetypes,
                                                defaultextension=filetypes[0][1])
+        return path
+
+    def filepath_directory(self):
+        """
+        open file dialog and return the directory path
+        """
+        path = tk.filedialog.askdirectory(initialdir=self.desktoppath, title="choose Folder")
         return path
 
     def about_show(self):
@@ -827,6 +949,16 @@ class View(object):
         """
         self.opt_fullscreen.set(self.controller.projectfile["opt_fullscreen"])
 
+    def csv_update(self):
+        """
+        update data on screen csv
+        """
+        self.csv_active.set(self.controller.projectfile["csv_active"])
+        self.csv_filename.set(self.controller.projectfile["csv_filename"])
+        self.csv_filepath.set(self.controller.projectfile["csv_filepath"])
+        self.csv_filemode.set(self.controller.projectfile["csv_filemode"])
+        self.csv_triggermode.set(self.controller.projectfile["csv_triggermode"])
+
     def led_state(self, state="error"):
         """
         change image of led element depending on its state
@@ -880,3 +1012,11 @@ class View(object):
         trigger datatree_update after state has changed
         """
         self.datatree_update()
+
+    def csv_filepath_get(self):
+        """
+        save content of chosen directory path
+        """
+        filepath = self.filepath_directory()
+        self.csv_filepath.set(filepath)
+        self.entry_after()
