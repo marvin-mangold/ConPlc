@@ -5,19 +5,24 @@
     "udt_info": "",
     "udt_datasize": "0",
     "udt_datastructure": [],
-    "opt_windowwidth": 1015,
-    "opt_windowheight": 710,
+    "opt_windowwidth": 800,
+    "opt_windowheight": 600,
     "opt_fullscreen": false,
     "con_ip_byte1": "000",
     "con_ip_byte2": "000",
     "con_ip_byte3": "000",
     "con_ip_byte4": "000",
     "con_port": "0",
-    "con_autostart" : false,
+    "con_autostart": false,
     "con_show_recvdata": true,
     "csv_active": false,
     "csv_filename": "newfile",
     "csv_filepath": "C:/Users/Username/Desktop/",
     "csv_filemode": 1,
-    "csv_triggermode": "boolean"
+    "csv_triggermode": "minutes",
+    "csv_time": "1",
+    "csv_booltrigger": "",
+    "csv_booltriggers" : {
+        "None": null
+    }
 }

@@ -20,6 +20,7 @@ import view
 import readudt
 import readplc
 import tcpserver
+import csv
 import json
 import time
 import queue
@@ -48,6 +49,9 @@ class Controller(object):
 
         # call server (handles the tcp connection)
         self.server = tcpserver.Server()
+
+        # call csv handler
+        self.csv = csv.CSV()
 
     def run(self):
         """
@@ -100,6 +104,8 @@ class Controller(object):
         self.server_message()
         # check new serverdata
         self.server_data()
+        # check if csv needs to me saved
+        self.csv_save()
 
     def file_new(self):
         """
@@ -220,17 +226,18 @@ class Controller(object):
                 self.view.datatree_update()
                 # write eventmessage
                 self.view.eventframe_post("Datastructure loaded")
-            else:
-                self.projectfile["udt_name"] = ""
-                self.projectfile["udt_description"] = ""
-                self.projectfile["udt_version"] = ""
-                self.projectfile["udt_info"] = ""
-                self.projectfile["udt_datasize"] = "0"
-                self.projectfile["udt_datastructure"] = []
-                # refresh variables on screen data
-                self.view.datatree_update()
         if error:
+            self.projectfile["udt_name"] = ""
+            self.projectfile["udt_description"] = ""
+            self.projectfile["udt_version"] = ""
+            self.projectfile["udt_info"] = ""
+            self.projectfile["udt_datasize"] = "0"
+            self.projectfile["udt_datastructure"] = []
+            # refresh variables on screen data
+            self.view.datatree_update()
             self.view.eventframe_post(errormessage)
+        # update the list of possible boolean csv triggers
+        self.view.csv_booltrigger_get()
 
     def server_start(self):
         """
@@ -308,6 +315,37 @@ class Controller(object):
             self.view.led_state("warn")
         elif self.server.active and self.server.connected:
             self.view.led_state("ok")
+
+    def csv_save(self):
+        """
+        exchange data with csv-handler
+        """
+        message = None
+        self.csv.active = self.projectfile["csv_active"]
+        self.csv.filename = self.projectfile["csv_filename"]
+        self.csv.filepath = self.projectfile["csv_filepath"]
+        self.csv.filemode = self.projectfile["csv_filemode"]
+        self.csv.triggermode = self.projectfile["csv_triggermode"]
+        self.csv.time = self.projectfile["csv_time"]
+        # set csv trigger from boolean variable
+        if self.csv.triggermode == "boolean" and self.view.csv_booltrigger.get() != "None":
+            data = self.projectfile["udt_datastructure"]
+            index = int(self.view.csv_booltriggers[self.view.csv_booltrigger.get()])
+            state = data[index]["value"].lower() == "true"
+            self.csv.trigger = state
+        # check if csv should run
+        if self.csv.active and self.server.active and self.server.connected and not self.view.csv_timechange:
+            message = self.csv.trigger_check()
+
+        else:
+            self.csv.trigger_reset()
+            self.view.csv_timechange = False
+        nexttrigger = time.strftime("%H:%M:%S", time.localtime(self.csv.nexttrigger))
+        nexttrigger = "{text}: {next}".format(text="next Trigger", next=nexttrigger)
+        self.view.csv_nexttrigger.set(nexttrigger)
+        if message is not None:
+            # write eventmessage
+            self.view.eventframe_post(message)
 
 
 if __name__ == '__main__':

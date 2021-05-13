@@ -578,16 +578,56 @@ class View(object):
                                          anchor="w")
 
         # create menu for triggermode
+        self.csv_timechange = False
         self.csv_triggermode = tk.StringVar()
         self.csv_triggermode.set(self.controller.projectfile["csv_triggermode"])
-        self.triggerchoices = ["boolean", "second", "minute", "hour"]
+        self.csv_triggerchoices = ["boolean", "seconds", "minutes", "hours"]
         self.men_csv_trigger = ttk.OptionMenu(self.screen_csv,  # master=
                                               self.csv_triggermode,  # value=
                                               None,  # default=
-                                              *self.triggerchoices,  # values=
-                                              style="style_screen.TMenubutton")
-
+                                              *self.csv_triggerchoices,  # values=
+                                              style="style_screen.TMenubutton",
+                                              command=lambda x: self.csv_triggermode_change())
         self.csv_triggermode.trace("w", lambda *args: self.entry_after())
+
+        # create entry for time value to save csv
+        self.csv_time = tk.StringVar()
+        self.csv_time.set(self.controller.projectfile["csv_time"])
+        self.csv_time.trace("w", lambda *args: self.entry_validate(var=self.csv_time, mode="number", length=2))
+        self.entry_csv_time = ttk.Entry(master=self.screen_csv,
+                                        style="style_screen.TEntry",
+                                        textvariable=self.csv_time)
+        self.entry_csv_time.bind("<KeyRelease>", lambda x: self.entry_after())
+
+        # create button for set trigger time
+        self.btn_csv_timeset = ttk.Button(master=self.screen_csv,
+                                          takefocus=0,
+                                          text="set",
+                                          style="style_screen.TButton",
+                                          command=self.csv_time_change)
+
+        # create label for next trigger time
+        self.csv_nexttrigger = tk.StringVar()
+        self.lbl_csv_nexttrigger = ttk.Label(master=self.screen_csv,
+                                             style="style_screen.TLabel",
+                                             textvariable=self.csv_nexttrigger,
+                                             anchor="w")
+        # create menu for boolean trigger
+        self.csv_booltrigger = tk.StringVar()
+        self.csv_booltrigger.set(self.controller.projectfile["csv_booltrigger"])
+        self.csv_booltriggers = self.controller.projectfile["csv_booltriggers"]
+
+        # get list with the names of the found elements
+        triggernames = []
+        for element in self.csv_booltriggers:
+            triggernames.append(element)
+
+        self.men_csv_booltrigger = ttk.OptionMenu(self.screen_csv,  # master=
+                                                  self.csv_booltrigger,  # value=
+                                                  None,  # default=
+                                                  *triggernames,  # values=
+                                                  style="style_screen.TMenubutton")
+        self.csv_booltrigger.trace("w", lambda *args: self.entry_after())
 
         # Key events-----------------------------------------------------------
         self.window.bind("<KeyPress>", self.keydown)
@@ -674,6 +714,16 @@ class View(object):
         self.rad_csv_filemode2.place(x=280, y=124, width=95, height=25)
         self.lbl_csv_Trigger.place(x=50, y=157, width=80, height=25)
         self.men_csv_trigger.place(x=135, y=157, width=95, height=25)
+        if self.csv_triggermode.get() == "boolean":
+            self.entry_csv_time.place_forget()
+            self.btn_csv_timeset.place_forget()
+            self.lbl_csv_nexttrigger.place_forget()
+            self.men_csv_booltrigger.place(x=240, y=157, width=300, height=25)
+        else:
+            self.men_csv_booltrigger.place_forget()
+            self.entry_csv_time.place(x=240, y=157, width=30, height=25)
+            self.btn_csv_timeset.place(x=280, y=157, width=40, height=25)
+            self.lbl_csv_nexttrigger.place(x=330, y=157, width=440, height=25)
         if not self.controller.projectfile["opt_fullscreen"]:
             self.controller.projectfile["opt_windowwidth"] = self.window.winfo_width()
             self.controller.projectfile["opt_windowheight"] = self.window.winfo_height()
@@ -779,6 +829,16 @@ class View(object):
                     text = "0"
                 elif int(text) > 255:
                     text = "255"
+        if mode == "number":
+            # set text to maximum length
+            if len(text) > length:
+                text = text[:length]
+            # delete all non digits
+            newtext = ""
+            for char in text:
+                if str.isdigit(char):
+                    newtext += char
+            text = newtext
         var.set(text)
 
     def entry_after(self):
@@ -795,6 +855,9 @@ class View(object):
         self.controller.projectfile["csv_filepath"] = self.csv_filepath.get()
         self.controller.projectfile["csv_filemode"] = self.csv_filemode.get()
         self.controller.projectfile["csv_triggermode"] = self.csv_triggermode.get()
+        self.controller.projectfile["csv_time"] = self.csv_time.get()
+        self.controller.projectfile["csv_booltrigger"] = self.csv_booltrigger.get()
+        self.controller.projectfile["csv_booltriggers"] = self.csv_booltriggers
 
     def filepath_open(self, message=None, filetypes=((), ("all files", "*.*"))):
         """
@@ -958,6 +1021,9 @@ class View(object):
         self.csv_filepath.set(self.controller.projectfile["csv_filepath"])
         self.csv_filemode.set(self.controller.projectfile["csv_filemode"])
         self.csv_triggermode.set(self.controller.projectfile["csv_triggermode"])
+        self.csv_time.set(self.controller.projectfile["csv_time"])
+        self.csv_booltrigger.set(self.controller.projectfile["csv_booltrigger"])
+        self.csv_booltriggers = self.controller.projectfile["csv_booltriggers"]
 
     def led_state(self, state="error"):
         """
@@ -1020,3 +1086,40 @@ class View(object):
         filepath = self.filepath_directory()
         self.csv_filepath.set(filepath)
         self.entry_after()
+
+    def csv_triggermode_change(self):
+        """
+        if triggermode is changed
+        call window scale to hide or show the depending elements
+        refresh list of all possible boolean triggers
+        """
+        self.window_scale()
+        self.csv_booltrigger_get()
+
+    def csv_time_change(self):
+        """
+        set csv trigger time
+        """
+        self.csv_timechange = True
+
+    def csv_booltrigger_get(self):
+        """
+        get a list of all possible boolean trigger in data
+        """
+        data = self.controller.projectfile["udt_datastructure"]
+        self.csv_booltriggers = {"None": None}
+        for element in data:
+            # find the elements which are variables and "datatype" is "Bool"
+            if element["variable"] is not None and element["datatype"] == "Bool":
+                # save name and index in list
+                name = element["name"]
+                index = data.index(element)
+                self.csv_booltriggers[name] = index
+        # get list with the names of the found elements
+        triggernames = []
+        for element in self.csv_booltriggers:
+            triggernames.append(element)
+        # save list of names in OptionMenu
+        self.men_csv_booltrigger.set_menu(None, *triggernames)
+        # set default to None after changing the data
+        self.csv_booltrigger.set(triggernames[0])

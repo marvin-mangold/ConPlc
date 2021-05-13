@@ -113,7 +113,7 @@ class Server(object):
                         break
                     else:
                         self.buffer_package += recv  # save received data in package buffer
-                        print("Server received {x}/{y} bytes".format(x=len(self.buffer_package), y=self.datasize))
+                        # print("Server received {x}/{y} bytes".format(x=len(self.buffer_package), y=self.datasize))
                         # check if all bytes (defined by self.datasize) are collected
                         if len(self.buffer_package) >= self.datasize:
                             # if more bytes in package buffer than expected put the expected bytes in receive buffer
