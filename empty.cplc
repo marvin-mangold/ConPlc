@@ -21,8 +21,15 @@
     "csv_filemode": 1,
     "csv_triggermode": "minutes",
     "csv_time": "1",
-    "csv_booltrigger": "",
+    "csv_booltrigger": "None",
     "csv_booltriggers" : {
         "None": null
-    }
+    },
+    "csv_rowdata": [
+        {
+            "Text": "",
+            "Variable": null,
+            "Index": null
+        }
+    ]
 }

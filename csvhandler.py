@@ -17,6 +17,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import time
+import csv
+import os
 
 
 class CSV(object):
@@ -33,6 +35,8 @@ class CSV(object):
         self.trigger = False
         self.trigger_lastcheck = False
         self.nexttrigger = time.time()
+        self.header = []
+        self.data = []
 
     def trigger_reset(self):
         """
@@ -67,6 +71,25 @@ class CSV(object):
         self.trigger_lastcheck = self.trigger
         if save:
             self.trigger_reset()
-            # TODO save
-            message = "CSV saved"
+            # check filemode 1 = new file everyday, 2 = one big file
+            if self.filemode == 1:
+                # create filename (C:/Users/Username/Desktop/newfile_2021_05_14.csv)
+                date = time.strftime("%Y_%m_%d")
+            else:
+                # create filename (C:/Users/Username/Desktop/newfile.csv)
+                date = ""
+            # create filepath
+            filepath = "{dir}/{file}_{date}.csv".format(dir=self.filepath, file=self.filename, date=date)
+            # check if file already exists
+            if os.path.exists(filepath):
+                with open(filepath, mode="a", newline='') as file:
+                    filewriter = csv.writer(file, delimiter=",")
+                    filewriter.writerow(self.data)  # write data
+                    message = "CSV - {path} appended".format(path=filepath)
+            else:
+                with open(filepath, mode="w", newline='') as file:
+                    filewriter = csv.writer(file, delimiter=",")
+                    filewriter.writerow(self.header)  # write header
+                    filewriter.writerow(self.data)  # write data
+                    message = "CSV - {path} saved".format(path=filepath)
         return message

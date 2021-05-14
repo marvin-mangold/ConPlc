@@ -20,7 +20,7 @@ import view
 import readudt
 import readplc
 import tcpserver
-import csv
+import csvhandler
 import json
 import time
 import queue
@@ -51,7 +51,7 @@ class Controller(object):
         self.server = tcpserver.Server()
 
         # call csv handler
-        self.csv = csv.CSV()
+        self.csv = csvhandler.CSV()
 
     def run(self):
         """
@@ -238,6 +238,10 @@ class Controller(object):
             self.view.eventframe_post(errormessage)
         # update the list of possible boolean csv triggers
         self.view.csv_booltrigger_get()
+        # reset csv data
+        self.view.csv_rowdata = [{"Text": "", "Variable": None, "Index": None}]
+        self.view.csv_row.set(1)
+        self.view.csv_numrows.set(len(self.view.csv_rowdata))
 
     def server_start(self):
         """
@@ -327,6 +331,9 @@ class Controller(object):
         self.csv.filemode = self.projectfile["csv_filemode"]
         self.csv.triggermode = self.projectfile["csv_triggermode"]
         self.csv.time = self.projectfile["csv_time"]
+        # refresh csv header and data
+        #self.csv.header =
+        #self.csv.data =
         # set csv trigger from boolean variable
         if self.csv.triggermode == "boolean" and self.view.csv_booltrigger.get() != "None":
             data = self.projectfile["udt_datastructure"]
@@ -336,7 +343,6 @@ class Controller(object):
         # check if csv should run
         if self.csv.active and self.server.active and self.server.connected and not self.view.csv_timechange:
             message = self.csv.trigger_check()
-
         else:
             self.csv.trigger_reset()
             self.view.csv_timechange = False
