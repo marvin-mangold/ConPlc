@@ -37,6 +37,7 @@ class CSV(object):
         self.nexttrigger = time.time()
         self.header = []
         self.data = []
+        self.delimiter = ";"
 
     def trigger_reset(self):
         """
@@ -78,17 +79,20 @@ class CSV(object):
             else:
                 # create filename (C:/Users/Username/Desktop/newfile.csv)
                 date = ""
+            # check delimiter
+            if len(self.delimiter) > 1 or len(self.delimiter) < 1:
+                self.delimiter = ";"
             # create filepath
             filepath = "{dir}/{file}_{date}.csv".format(dir=self.filepath, file=self.filename, date=date)
             # check if file already exists
             if os.path.exists(filepath):
                 with open(filepath, mode="a", newline='') as file:
-                    filewriter = csv.writer(file, delimiter=",")
+                    filewriter = csv.writer(file, delimiter=self.delimiter)
                     filewriter.writerow(self.data)  # write data
                     message = "CSV - {path} appended".format(path=filepath)
             else:
                 with open(filepath, mode="w", newline='') as file:
-                    filewriter = csv.writer(file, delimiter=",")
+                    filewriter = csv.writer(file, delimiter=self.delimiter)
                     filewriter.writerow(self.header)  # write header
                     filewriter.writerow(self.data)  # write data
                     message = "CSV - {path} saved".format(path=filepath)

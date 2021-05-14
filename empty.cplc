@@ -19,17 +19,14 @@
     "csv_filename": "newfile",
     "csv_filepath": "C:/Users/Username/Desktop/",
     "csv_filemode": 1,
+    "csv_delimiter": ";",
     "csv_triggermode": "minutes",
     "csv_time": "1",
-    "csv_booltrigger": "None",
-    "csv_booltriggers" : {
-        "None": null
-    },
+    "csv_booltrigger": 0,
     "csv_rowdata": [
         {
             "Text": "",
-            "Variable": null,
-            "Index": null
+            "Variable": 0
         }
     ]
 }

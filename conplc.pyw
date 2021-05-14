@@ -236,10 +236,11 @@ class Controller(object):
             # refresh variables on screen data
             self.view.datatree_update()
             self.view.eventframe_post(errormessage)
-        # update the list of possible boolean csv triggers
-        self.view.csv_booltrigger_get()
         # reset csv data
-        self.view.csv_rowdata = [{"Text": "", "Variable": None, "Index": None}]
+        self.projectfile["csv_booltrigger"] = 0
+        self.view.csv_rowdata = [{"Text": "", "Variable": 0}]
+        self.projectfile["csv_rowdata"] = self.view.csv_rowdata.copy()
+        self.view.csv_update()
         self.view.csv_row.set(1)
         self.view.csv_numrows.set(len(self.view.csv_rowdata))
 
@@ -325,19 +326,25 @@ class Controller(object):
         exchange data with csv-handler
         """
         message = None
+        data = self.projectfile["udt_datastructure"]
         self.csv.active = self.projectfile["csv_active"]
         self.csv.filename = self.projectfile["csv_filename"]
         self.csv.filepath = self.projectfile["csv_filepath"]
         self.csv.filemode = self.projectfile["csv_filemode"]
         self.csv.triggermode = self.projectfile["csv_triggermode"]
         self.csv.time = self.projectfile["csv_time"]
+        self.csv.delimiter = self.projectfile["csv_delimiter"]
         # refresh csv header and data
-        #self.csv.header =
-        #self.csv.data =
+        self.csv.header = []
+        self.csv.data = []
+        if len(data) > 0:
+            for element in self.projectfile["csv_rowdata"]:
+                self.csv.header.append(element["Text"])
+                index = element["Variable"]
+                self.csv.data.append(data[index]["value"])
         # set csv trigger from boolean variable
-        if self.csv.triggermode == "boolean" and self.view.csv_booltrigger.get() != "None":
-            data = self.projectfile["udt_datastructure"]
-            index = int(self.view.csv_booltriggers[self.view.csv_booltrigger.get()])
+        if self.csv.triggermode == "boolean" and self.projectfile["csv_booltrigger"] > 0:
+            index = self.projectfile["csv_booltrigger"]
             state = data[index]["value"].lower() == "true"
             self.csv.trigger = state
         # check if csv should run
