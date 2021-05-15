@@ -64,13 +64,16 @@ class CSV(object):
         save csv if trigger is True rising edge
         """
         message = None
+        save_timetriger = False
+        save_booltrigger = False
         # if trigger in time mode and time is up --> set Trigger True
-        if self.triggermode != "boolean" and time.time() > self.nexttrigger:
-            self.trigger = True
-        # check if trigger is True rising edge
-        save = self.trigger and not self.trigger_lastcheck
-        self.trigger_lastcheck = self.trigger
-        if save:
+        if self.triggermode != "boolean":
+            save_timetriger = time.time() > self.nexttrigger
+        elif self.triggermode == "boolean":
+            # check if trigger is True rising edge
+            save_booltrigger = self.trigger and not self.trigger_lastcheck
+            self.trigger_lastcheck = self.trigger
+        if save_timetriger or save_booltrigger:
             self.trigger_reset()
             # check filemode 1 = new file everyday, 2 = one big file
             if self.filemode == 1:
