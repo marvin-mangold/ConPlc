@@ -1,0 +1,18 @@
+﻿TYPE "_CSV_Data"
+TITLE = has no title
+VERSION : 0.1
+//some comment
+   STRUCT
+      Save_Data : Bool := True;   // Trigger to save the data
+      example_Byte : Byte := 16#2;   // this is a comment for example_Byte
+      example_Word : Word := 16#FF;   // this is a comment for this is a comment for example_Word
+      example_Dword : DWord := 16#FFFF;   // this is a comment for example_Dword
+      example_Int : Int := 3;   // this is a comment for example_Int
+      example_Dint : DInt := 5;   // this is a comment for example_Dint
+      example_String : String := 'This is an example Text';   // this is a comment for example_String
+      example_array : Array[0..5] of Bool;   // this is a comment for example_array
+      example_UDT : "_CSV_Data_UDT";   // this is a comment for example UDT
+   END_STRUCT;
+
+END_TYPE
+

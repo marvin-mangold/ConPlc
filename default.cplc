@@ -1,9 +1,9 @@
 {
-    "udt_name": "Daten",
+    "udt_name": "_CSV_Data",
     "udt_description": "has no title",
     "udt_version": "0.1",
     "udt_info": "some comment",
-    "udt_datasize": "282.0",
+    "udt_datasize": "274.0",
     "udt_datastructure": [
         {
             "name": "",
@@ -18,16 +18,16 @@
             "variable": null
         },
         {
-            "name": "Aktiv",
+            "name": "Save_Data",
             "datatype": "Bool",
             "byte": "0.0",
-            "comment": "Anlage an oder aus",
+            "comment": "Trigger to save the data",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "False",
+            "value": "",
             "size": 0.125,
-            "variable": "I001"
+            "variable": "I02A"
         },
         {
             "name": "offset_0.1",
@@ -37,7 +37,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "False",
+            "value": "",
             "size": 0.125,
             "variable": null
         },
@@ -49,7 +49,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "False",
+            "value": "",
             "size": 0.125,
             "variable": null
         },
@@ -61,7 +61,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "False",
+            "value": "",
             "size": 0.125,
             "variable": null
         },
@@ -73,7 +73,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "False",
+            "value": "",
             "size": 0.125,
             "variable": null
         },
@@ -85,7 +85,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "False",
+            "value": "",
             "size": 0.125,
             "variable": null
         },
@@ -97,7 +97,7 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "False",
+            "value": "",
             "size": 0.125,
             "variable": null
         },
@@ -109,85 +109,85 @@
             "visible": false,
             "access": false,
             "action": "offset",
-            "value": "False",
+            "value": "",
             "size": 0.125,
             "variable": null
         },
         {
-            "name": "Codierung",
+            "name": "example_Byte",
             "datatype": "Byte",
             "byte": "1.0",
-            "comment": "Codierung",
+            "comment": "this is a comment for example_Byte",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "16#6",
+            "value": "",
             "size": 1,
-            "variable": "I002"
+            "variable": "I02B"
         },
         {
-            "name": "Status",
+            "name": "example_Word",
             "datatype": "Word",
             "byte": "2.0",
-            "comment": "Status",
+            "comment": "this is a comment for this is a comment for example_Word",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "16#FF",
+            "value": "",
             "size": 2,
-            "variable": "I003"
+            "variable": "I02C"
         },
         {
-            "name": "Status_erweitert",
+            "name": "example_Dword",
             "datatype": "DWord",
             "byte": "4.0",
-            "comment": "Erweiterter Status",
+            "comment": "this is a comment for example_Dword",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "16#FFFF",
+            "value": "",
             "size": 4,
-            "variable": "I004"
+            "variable": "I02D"
         },
         {
-            "name": "Programmnummer",
+            "name": "example_Int",
             "datatype": "Int",
             "byte": "8.0",
-            "comment": "Aktuelle Programmnummer",
+            "comment": "this is a comment for example_Int",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "3",
+            "value": "",
             "size": 2,
-            "variable": "I005"
+            "variable": "I02E"
         },
         {
-            "name": "Zaehler",
+            "name": "example_Dint",
             "datatype": "DInt",
             "byte": "10.0",
-            "comment": "ZÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤hlerstand",
+            "comment": "this is a comment for example_Dint",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "5",
+            "value": "",
             "size": 4,
-            "variable": "I006"
+            "variable": "I02F"
         },
         {
-            "name": "Stationsname",
+            "name": "example_String",
             "datatype": "String[254]",
             "byte": "14.0",
-            "comment": "Name der Station",
+            "comment": "this is a comment for example_String",
             "visible": true,
             "access": true,
             "action": null,
-            "value": "Anlage001",
+            "value": "",
             "size": 256,
-            "variable": "I007"
+            "variable": "I030"
         },
         {
             "name": "",
-            "datatype": "START_DTL",
+            "datatype": "START_ARRAY",
             "byte": "270.0",
             "comment": "",
             "visible": false,
@@ -198,117 +198,141 @@
             "variable": null
         },
         {
-            "name": "Zeitstempel",
-            "datatype": "DTL",
+            "name": "example_array",
+            "datatype": "Array[0..5] of Bool",
             "byte": "270.0",
-            "comment": "Aktueller Zeitstempel",
+            "comment": "this is a comment for example_array",
             "visible": true,
             "access": false,
             "action": "open",
             "value": "",
             "size": 0,
-            "variable": "I008"
-        },
-        {
-            "name": "Zeitstempel.YEAR",
-            "datatype": "UInt",
-            "byte": "270.0",
-            "comment": "Year",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "2021",
-            "size": 2,
-            "variable": "I009"
-        },
-        {
-            "name": "Zeitstempel.MONTH",
-            "datatype": "USInt",
-            "byte": "272.0",
-            "comment": "Month",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "5",
-            "size": 1,
-            "variable": "I00A"
-        },
-        {
-            "name": "Zeitstempel.DAY",
-            "datatype": "USInt",
-            "byte": "273.0",
-            "comment": "Day",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "15",
-            "size": 1,
-            "variable": "I00B"
-        },
-        {
-            "name": "Zeitstempel.WEEKDAY",
-            "datatype": "USInt",
-            "byte": "274.0",
-            "comment": "Weekday",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "7",
-            "size": 1,
-            "variable": "I00C"
-        },
-        {
-            "name": "Zeitstempel.HOUR",
-            "datatype": "USInt",
-            "byte": "275.0",
-            "comment": "Hour",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "14",
-            "size": 1,
-            "variable": "I00D"
-        },
-        {
-            "name": "Zeitstempel.MINUTE",
-            "datatype": "USInt",
-            "byte": "276.0",
-            "comment": "Minute",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "7",
-            "size": 1,
-            "variable": "I00E"
-        },
-        {
-            "name": "Zeitstempel.SECOND",
-            "datatype": "USInt",
-            "byte": "277.0",
-            "comment": "Second",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "59",
-            "size": 1,
-            "variable": "I00F"
-        },
-        {
-            "name": "Zeitstempel.NANOSECOND",
-            "datatype": "UDInt",
-            "byte": "278.0",
-            "comment": "Nanosecond",
-            "visible": true,
-            "access": true,
-            "action": null,
-            "value": "554468000",
-            "size": 4,
-            "variable": "I010"
+            "variable": "I031"
         },
         {
             "name": "",
-            "datatype": "END_DTL",
-            "byte": "282.0",
+            "datatype": "START_DIMENSION",
+            "byte": "270.0",
+            "comment": "",
+            "visible": false,
+            "access": false,
+            "action": null,
+            "value": "",
+            "size": 0,
+            "variable": null
+        },
+        {
+            "name": "example_array.[0]",
+            "datatype": "Bool",
+            "byte": "270.0",
+            "comment": "",
+            "visible": true,
+            "access": true,
+            "action": null,
+            "value": "",
+            "size": 0.125,
+            "variable": "I032"
+        },
+        {
+            "name": "example_array.[1]",
+            "datatype": "Bool",
+            "byte": "270.1",
+            "comment": "",
+            "visible": true,
+            "access": true,
+            "action": null,
+            "value": "",
+            "size": 0.125,
+            "variable": "I033"
+        },
+        {
+            "name": "example_array.[2]",
+            "datatype": "Bool",
+            "byte": "270.2",
+            "comment": "",
+            "visible": true,
+            "access": true,
+            "action": null,
+            "value": "",
+            "size": 0.125,
+            "variable": "I034"
+        },
+        {
+            "name": "example_array.[3]",
+            "datatype": "Bool",
+            "byte": "270.3",
+            "comment": "",
+            "visible": true,
+            "access": true,
+            "action": null,
+            "value": "",
+            "size": 0.125,
+            "variable": "I035"
+        },
+        {
+            "name": "example_array.[4]",
+            "datatype": "Bool",
+            "byte": "270.4",
+            "comment": "",
+            "visible": true,
+            "access": true,
+            "action": null,
+            "value": "",
+            "size": 0.125,
+            "variable": "I036"
+        },
+        {
+            "name": "example_array.[5]",
+            "datatype": "Bool",
+            "byte": "270.5",
+            "comment": "",
+            "visible": true,
+            "access": true,
+            "action": null,
+            "value": "",
+            "size": 0.125,
+            "variable": "I037"
+        },
+        {
+            "name": "offset_270.6",
+            "datatype": "Bool",
+            "byte": "270.6",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 0.125,
+            "variable": null
+        },
+        {
+            "name": "offset_270.7",
+            "datatype": "Bool",
+            "byte": "270.7",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 0.125,
+            "variable": null
+        },
+        {
+            "name": "",
+            "datatype": "END_DIMENSION",
+            "byte": "271.0",
+            "comment": "",
+            "visible": false,
+            "access": false,
+            "action": null,
+            "value": "",
+            "size": 0,
+            "variable": null
+        },
+        {
+            "name": "",
+            "datatype": "END_ARRAY",
+            "byte": "271.0",
             "comment": "",
             "visible": false,
             "access": false,
@@ -319,8 +343,152 @@
         },
         {
             "name": "",
+            "datatype": "START_UDT",
+            "byte": "271.0",
+            "comment": "",
+            "visible": false,
+            "access": false,
+            "action": null,
+            "value": "",
+            "size": 0,
+            "variable": null
+        },
+        {
+            "name": "offset_271.0",
+            "datatype": "Byte",
+            "byte": "271.0",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 1,
+            "variable": null
+        },
+        {
+            "name": "example_UDT",
+            "datatype": "\"_CSV_Data_UDT\"",
+            "byte": "272.0",
+            "comment": "this is a comment for example UDT",
+            "visible": true,
+            "access": false,
+            "action": "open",
+            "value": "",
+            "size": 0,
+            "variable": "I038"
+        },
+        {
+            "name": "",
+            "datatype": "START_STRUCT",
+            "byte": "272.0",
+            "comment": "",
+            "visible": false,
+            "access": false,
+            "action": null,
+            "value": "",
+            "size": 0,
+            "variable": null
+        },
+        {
+            "name": "example_UDT.\"example Bool\"",
+            "datatype": "Bool",
+            "byte": "272.0",
+            "comment": "this is a comment for Bool in UDT",
+            "visible": true,
+            "access": true,
+            "action": null,
+            "value": "",
+            "size": 0.125,
+            "variable": "I039"
+        },
+        {
+            "name": "offset_272.1",
+            "datatype": "Bool",
+            "byte": "272.1",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 0.125,
+            "variable": null
+        },
+        {
+            "name": "offset_272.2",
+            "datatype": "Bool",
+            "byte": "272.2",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 0.125,
+            "variable": null
+        },
+        {
+            "name": "offset_272.3",
+            "datatype": "Bool",
+            "byte": "272.3",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 0.125,
+            "variable": null
+        },
+        {
+            "name": "offset_272.4",
+            "datatype": "Bool",
+            "byte": "272.4",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 0.125,
+            "variable": null
+        },
+        {
+            "name": "offset_272.5",
+            "datatype": "Bool",
+            "byte": "272.5",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 0.125,
+            "variable": null
+        },
+        {
+            "name": "offset_272.6",
+            "datatype": "Bool",
+            "byte": "272.6",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 0.125,
+            "variable": null
+        },
+        {
+            "name": "offset_272.7",
+            "datatype": "Bool",
+            "byte": "272.7",
+            "comment": "offset",
+            "visible": false,
+            "access": false,
+            "action": "offset",
+            "value": "",
+            "size": 0.125,
+            "variable": null
+        },
+        {
+            "name": "",
             "datatype": "END_STRUCT",
-            "byte": "282.0",
+            "byte": "273.0",
             "comment": "",
             "visible": false,
             "access": false,
@@ -332,7 +500,31 @@
         {
             "name": "",
             "datatype": "END_UDT",
-            "byte": "282.0",
+            "byte": "273.0",
+            "comment": "",
+            "visible": false,
+            "access": false,
+            "action": null,
+            "value": "",
+            "size": 0,
+            "variable": null
+        },
+        {
+            "name": "",
+            "datatype": "END_STRUCT",
+            "byte": "273.0",
+            "comment": "",
+            "visible": false,
+            "access": false,
+            "action": "close",
+            "value": "",
+            "size": 0,
+            "variable": null
+        },
+        {
+            "name": "",
+            "datatype": "END_UDT",
+            "byte": "273.0",
             "comment": "",
             "visible": false,
             "access": false,
@@ -357,29 +549,13 @@
     "csv_filepath": "C:/Users/Marvi/Desktop",
     "csv_filemode": 1,
     "csv_delimiter": ";",
-    "csv_triggermode": "seconds",
+    "csv_triggermode": "boolean",
     "csv_time": "1",
     "csv_booltrigger": 1,
     "csv_rowdata": [
         {
-            "Text": "test",
-            "Variable": 9
-        },
-        {
-            "Text": "222",
-            "Variable": 11
-        },
-        {
-            "Text": "333",
-            "Variable": 14
-        },
-        {
-            "Text": "444",
-            "Variable": 23
-        },
-        {
-            "Text": "555",
-            "Variable": 17
+            "Text": "asd",
+            "Variable": 10
         }
     ]
 }

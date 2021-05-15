@@ -25,8 +25,6 @@ import json
 import time
 import queue
 
-# TODO check if win 7
-# TODO PLC Blocks s7 and TIA
 
 class Controller(object):
     def __init__(self):
@@ -108,8 +106,6 @@ class Controller(object):
         self.server_message()
         # check new serverdata
         self.server_data()
-        # check if csv needs to me saved
-        self.csv_save()
 
     def file_new(self):
         """
@@ -307,10 +303,13 @@ class Controller(object):
             readplc.get_plc_data(receivedbytes=receivedbytes, datastructure=self.projectfile["udt_datastructure"])
             # update the values in datatree with the new received data
             self.view.datatree_values_set()
-            # convert list of integer to bytestring
-            # TODO answer length to long, timeout when sending
-            sendbytes = bytes(receivedbytes)
-            # put data back in sendbuffer
+            # check if csv needs to me saved
+            csv_saved = self.csv_save()
+            if csv_saved:
+                sendbytes = str.encode("Saved     ")
+            else:
+                sendbytes = str.encode("Recieved  ")
+            # put data in sendbuffer (answer)
             self.server.buffer_send.put(sendbytes)
 
     @staticmethod
@@ -371,7 +370,11 @@ class Controller(object):
             self.view.eventframe_post(message)
             # save data in screen home
             self.view.csv_table_insert(self.timestamp_get(), self.csv.header, self.csv.data)
+            csv_saved = True
+        else:
+            csv_saved = False
         self.view.csv_table_scroll()
+        return csv_saved
 
 
 if __name__ == '__main__':

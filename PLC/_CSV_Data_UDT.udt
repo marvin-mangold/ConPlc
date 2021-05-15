@@ -1,0 +1,8 @@
+﻿TYPE "_CSV_Data_UDT"
+VERSION : 0.1
+   STRUCT
+      "example Bool" : Bool;   // this is a comment for Bool in UDT
+   END_STRUCT;
+
+END_TYPE
+

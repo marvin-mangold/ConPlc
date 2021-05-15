@@ -104,7 +104,7 @@ class Server(object):
                         break
                 else:  # data received
                     self.timeout = False
-                    if self.encode_decode:  # if activated the data will be  decoded
+                    if self.encode_decode:  # if activated the data will be decoded
                         recv = recv.decode(self.format, 'ignore')  # format received data
                     if not recv:  # if no data in received data, partner closed connection
                         self.message("", "Server lost connection to {partner}".format(partner=self.partner_ip))
@@ -124,7 +124,7 @@ class Server(object):
                             self.buffer_package = nextdata  # save the leftover bytes
                             # send answer to partner
                             send = self.buffer_send.get(block=True)  # waiting for data in buffer
-                            if self.encode_decode:  # if activated the data will be  encoded
+                            if self.encode_decode:  # if activated the data will be encoded
                                 send = send.encode(self.format, 'ignore')  # format send data
                             try:  # try to send data
                                 self.partner_id.send(send)
