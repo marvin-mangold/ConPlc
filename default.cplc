@@ -165,7 +165,7 @@
             "name": "Zaehler",
             "datatype": "DInt",
             "byte": "10.0",
-            "comment": "ZÃƒÆ’Ã‚Â¤hlerstand",
+            "comment": "ZÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤hlerstand",
             "visible": true,
             "access": true,
             "action": null,
@@ -241,7 +241,7 @@
             "visible": true,
             "access": true,
             "action": null,
-            "value": "14",
+            "value": "15",
             "size": 1,
             "variable": "I00B"
         },
@@ -253,7 +253,7 @@
             "visible": true,
             "access": true,
             "action": null,
-            "value": "6",
+            "value": "7",
             "size": 1,
             "variable": "I00C"
         },
@@ -265,7 +265,7 @@
             "visible": true,
             "access": true,
             "action": null,
-            "value": "23",
+            "value": "14",
             "size": 1,
             "variable": "I00D"
         },
@@ -277,7 +277,7 @@
             "visible": true,
             "access": true,
             "action": null,
-            "value": "27",
+            "value": "7",
             "size": 1,
             "variable": "I00E"
         },
@@ -289,7 +289,7 @@
             "visible": true,
             "access": true,
             "action": null,
-            "value": "45",
+            "value": "59",
             "size": 1,
             "variable": "I00F"
         },
@@ -301,7 +301,7 @@
             "visible": true,
             "access": true,
             "action": null,
-            "value": "862338000",
+            "value": "554468000",
             "size": 4,
             "variable": "I010"
         },
@@ -350,7 +350,7 @@
     "con_ip_byte3": "0",
     "con_ip_byte4": "96",
     "con_port": "1024",
-    "con_autostart": false,
+    "con_autostart": true,
     "con_show_recvdata": false,
     "csv_active": true,
     "csv_filename": "newfile",
@@ -358,7 +358,7 @@
     "csv_filemode": 1,
     "csv_delimiter": ";",
     "csv_triggermode": "seconds",
-    "csv_time": "2",
+    "csv_time": "1",
     "csv_booltrigger": 1,
     "csv_rowdata": [
         {

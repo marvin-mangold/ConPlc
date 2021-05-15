@@ -97,12 +97,18 @@ class View(object):
         self.style_lbl_infobar = ttk.Style()
         self.style_lbl_infobar.configure(
             "style_infobar.TLabel", foreground=self.textcolor, background=self.backcolor)
-        # eventframe
+        # eventframe_autoscroll
         self.style_btn_eventframe = ttk.Style()
         self.style_btn_eventframe.configure(
             "style_eventframe.TButton", relief="flat", background="#000000")
         self.style_btn_eventframe.map(
             "style_eventframe.TButton", background=[("selected", self.midcolor), ("active", "#111111")])
+        # csv_table_autoscroll
+        self.style_btn_csv_table = ttk.Style()
+        self.style_btn_csv_table.configure(
+            "style_csv_table.TButton", relief="flat", background="#000000", anchor=tk.N)
+        self.style_btn_csv_table.map(
+            "style_csv_table.TButton", background=[("selected", self.midcolor), ("active", "#111111")])
         # screen
         self.style_btn_screen = ttk.Style()
         self.style_btn_screen.configure(
@@ -132,8 +138,7 @@ class View(object):
         self.style_nb_screen.map(
             "style_screen.TNotebook.Tab", background=[("selected", self.midcolor), ("active", "#000000")])
         self.style_treeview = ttk.Style()
-        self.style_treeview.configure(
-            "Treeview.Heading", font=("arial", 10))
+        self.style_treeview.configure("Treeview", bordercolor="black")
         self.style_rad_screen = ttk.Style()
         self.style_rad_screen.configure(
             "style_screen.TRadiobutton", font=("arial", 10), relief="solid", background=self.midcolor)
@@ -234,6 +239,32 @@ class View(object):
                                      anchor="w")
 
         # screen home--------------------------------------------------------
+
+        # signal to rebuild table
+        self.csv_table_rebuild = True
+        # create and place treeview for data structure
+        self.csv_table = ttk.Treeview(self.screen_home, style="Treeview")
+        # add scrollbar to treeview
+        self.csv_table_scrollx = ttk.Scrollbar(self.screen_home,
+                                               orient="horizontal",
+                                               command=self.csv_table.xview,
+                                               cursor="hand2")
+        self.csv_table_scrolly = ttk.Scrollbar(self.screen_home,
+                                               orient="vertical",
+                                               command=self.csv_table.yview,
+                                               cursor="hand2")
+        self.csv_table.configure(xscrollcommand=self.csv_table_scrollx.set)
+        self.csv_table.configure(yscrollcommand=self.csv_table_scrolly.set)
+
+        # create an place button autoscroll on csv_table
+        self.csv_table_autoscroll_var = tk.BooleanVar()
+        self.csv_table_autoscroll_var.set(True)
+        self.btn_csv_autoscroll = ttk.Button(master=self.csv_table,
+                                             takefocus=0,
+                                             text="autoscroll",
+                                             style="style_csv_table.TButton",
+                                             command=self.csv_table_autoscroll)
+
         # create and place eventframe on screen home
         self.eventframe = tk.Canvas(master=self.screen_home,
                                     relief="flat",
@@ -256,13 +287,13 @@ class View(object):
         self.lbl_eventframe.bind("<ButtonRelease-1>", lambda x: self.eventframe_drag(mode="stop"))
 
         # create an place button autoscroll on eventframe
-        self.autoscroll = tk.BooleanVar()
-        self.autoscroll.set(True)
-        self.btn_autoscroll = ttk.Button(master=self.eventframe,
-                                         takefocus=0,
-                                         text="autoscroll",
-                                         style="style_eventframe.TButton",
-                                         command=self.eventlog_autoscroll)
+        self.eventlog_autoscroll_var = tk.BooleanVar()
+        self.eventlog_autoscroll_var.set(True)
+        self.btn_eve_autoscroll = ttk.Button(master=self.eventframe,
+                                             takefocus=0,
+                                             text="autoscroll",
+                                             style="style_eventframe.TButton",
+                                             command=self.eventlog_autoscroll)
 
         # create an place textfield on eventframe
         self.txt_eventframe = tk.Text(self.eventframe,
@@ -275,8 +306,14 @@ class View(object):
                                       relief="flat")
 
         # add scrollbar to eventframe
-        self.eventframe_scrollx = ttk.Scrollbar(self.eventframe, orient="horizontal", command=self.txt_eventframe.xview)
-        self.eventframe_scrolly = ttk.Scrollbar(self.eventframe, orient="vertical", command=self.txt_eventframe.yview)
+        self.eventframe_scrollx = ttk.Scrollbar(self.eventframe,
+                                                orient="horizontal",
+                                                command=self.txt_eventframe.xview,
+                                                cursor="hand2")
+        self.eventframe_scrolly = ttk.Scrollbar(self.eventframe,
+                                                orient="vertical",
+                                                command=self.txt_eventframe.yview,
+                                                cursor="hand2")
         self.txt_eventframe.configure(xscrollcommand=self.eventframe_scrollx.set)
         self.txt_eventframe.configure(yscrollcommand=self.eventframe_scrolly.set)
 
@@ -584,7 +621,7 @@ class View(object):
         self.entry_csv_delimiter = ttk.Entry(master=self.screen_csv,
                                              style="style_screen.TEntry",
                                              textvariable=self.csv_delimiter,
-                                             justify='center')
+                                             justify="center")
         self.entry_csv_delimiter.bind("<KeyRelease>", lambda x: self.entry_after())
 
         # create label for Triggermode
@@ -714,7 +751,7 @@ class View(object):
         self.entry_csv_rowname = ttk.Entry(master=self.screen_csv,
                                            style="style_screen.TEntry",
                                            textvariable=self.csv_rowname,
-                                           justify='center')
+                                           justify="center")
 
         # create button for set csv name of row
         self.btn_csv_rowname = ttk.Button(master=self.screen_csv,
@@ -777,9 +814,13 @@ class View(object):
         self.icon_version.place(x=5, y=3, width=20, height=20)
         self.lbl_version.place(x=25, y=3, width=150, height=18)
         # scale gui elements from screen home----------------------------------
+        self.csv_table.place(x=10, y=10, width=772 + ox, height=325 + oy)
+        self.csv_table_scrollx.place(x=10, y=335 + oy, width=759 + ox)
+        self.csv_table_scrolly.place(x=768 + ox, y=30, height=319 + oy)
+        self.btn_csv_autoscroll.place(x=700 + ox, y=-4, width=74, height=24)
         self.eventframe.place(x=0, y=482 + oy - self.eventframeoffs, height=35 + self.eventframeoffs, width=797 + ox)
         self.lbl_eventframe.place(x=1, y=1, width=795 + ox, height=20)
-        self.btn_autoscroll.place(x=724 + ox, y=-10, width=74, height=40)
+        self.btn_eve_autoscroll.place(x=724 + ox, y=-10, width=74, height=40)
         self.txt_eventframe.place(x=1, y=20, width=782 + ox, height=10 + self.eventframeoffs)
         self.eventframe_scrollx.place(x=1, y=20 + self.eventframeoffs, width=782 + ox)
         self.eventframe_scrolly.place(x=782 + ox, y=20, height=15 + self.eventframeoffs)
@@ -903,7 +944,7 @@ class View(object):
         timestamp = self.controller.timestamp_get()
         self.txt_eventframe.insert(tk.END, "{timestamp}: {text}\n".format(timestamp=timestamp, text=text))
         self.txt_eventframe.configure(state="disabled")
-        if self.autoscroll.get():
+        if self.eventlog_autoscroll_var.get():
             self.txt_eventframe.yview_moveto("1.0")
 
     def keyup(self, event):
@@ -1143,6 +1184,60 @@ class View(object):
                 # save values
                 self.datatree.item(element["variable"], values=entry_values)
 
+    def csv_table_clear(self):
+        """
+        clear data on screen home csv table
+        delete all entries in datatree
+        """
+        self.csv_table_rebuild = True
+        for element in self.csv_table.get_children():
+            self.csv_table.delete(element)
+        self.csv_table["columns"] = ""
+        self.csv_table.column("#0", width=self.csv_table.winfo_width())
+        self.csv_table.heading("#0", text="")
+
+    def csv_table_insert(self, timestamp, header, data):
+        """
+        fill table with data
+        """
+        if self.csv_table_rebuild:
+            self.csv_table.column("#0", width=120, minwidth=50, stretch=tk.YES, anchor="center")
+            self.csv_table.heading("#0", text="Time", anchor="center")
+            header.append("last")
+            self.csv_table["columns"] = header
+            for col in self.csv_table["columns"]:
+                self.csv_table.column(col, width=100, minwidth=50, stretch=tk.YES, anchor="center")
+                self.csv_table.heading(col, text=col, anchor="center")
+            self.csv_table.column("last", width=100, minwidth=100, stretch=tk.NO, anchor="center")
+            self.csv_table.heading("last", text="", anchor="center")
+            self.csv_table_rebuild = False
+        self.csv_table.insert("", "end", text=timestamp, values=" ".join(data))
+        self.csv_table_scroll()
+
+    def csv_table_scroll(self):
+        """
+        scroll Treeview to the end if scroll is activated
+        """
+        if self.csv_table_autoscroll_var.get():
+            self.csv_table.yview_moveto(1)
+
+    def csv_table_autoscroll(self):
+        """
+        toggle autoscroll
+        """
+        if self.csv_table_autoscroll_var.get():
+            self.csv_table_autoscroll_var.set(False)
+            self.style_btn_csv_table.configure("style_csv_table.TButton", foreground=self.midcolor, anchor=tk.N)
+        else:
+            self.csv_table_autoscroll_var.set(True)
+            self.style_btn_csv_table.configure("style_csv_table.TButton", foreground="#FFFFFF", anchor=tk.S)
+
+    def home_update(self):
+        """
+        update data on screen home
+        """
+        self.csv_table_clear()
+
     def server_update(self):
         """
         update data on screen server
@@ -1220,11 +1315,11 @@ class View(object):
         """
         toggle autoscroll
         """
-        if self.autoscroll.get():
-            self.autoscroll.set(False)
+        if self.eventlog_autoscroll_var.get():
+            self.eventlog_autoscroll_var.set(False)
             self.style_btn_eventframe.configure("style_eventframe.TButton", foreground=self.midcolor)
         else:
-            self.autoscroll.set(True)
+            self.eventlog_autoscroll_var.set(True)
             self.style_btn_eventframe.configure("style_eventframe.TButton", foreground="#FFFFFF")
 
     def treeview_show_offset(self):
@@ -1276,6 +1371,7 @@ class View(object):
         self.csv_numrows.set(len(self.csv_rowdata))
         self.csv_rowname_name()
         self.csv_rowvariable_name()
+        self.csv_table_clear()
 
     def csv_actualrow_change(self, mode=""):
         """
@@ -1336,6 +1432,7 @@ class View(object):
                 self.csv_rowdata[self.csv_row.get() - 1]["Variable"] = data.index(element)
                 self.controller.projectfile["csv_rowdata"] = self.csv_rowdata.copy()
         self.csv_rowvariable_name()
+        self.csv_table_clear()
 
     def csv_rowvariable_name(self):
         """
@@ -1357,6 +1454,7 @@ class View(object):
         self.csv_rowdata[self.csv_row.get() - 1]["Text"] = self.csv_rowname.get()
         self.controller.projectfile["csv_rowdata"] = self.csv_rowdata.copy()
         self.csv_rowvariable_name()
+        self.csv_table_clear()
 
     def csv_rowname_name(self):
         """

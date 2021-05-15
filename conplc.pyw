@@ -60,6 +60,8 @@ class Controller(object):
         start mainloop of programm
         """
         # refresh variables on screen server
+        self.view.home_update()
+        # refresh variables on screen server
         self.view.server_update()
         # refresh variables on screen data
         self.view.datatree_update()
@@ -118,6 +120,8 @@ class Controller(object):
         with open("empty.cplc") as file:
             self.projectfile = json.load(file)
         # refresh variables on screen server
+        self.view.home_update()
+        # refresh variables on screen server
         self.view.server_update()
         # refresh variables on screen data
         self.view.datatree_update()
@@ -142,6 +146,8 @@ class Controller(object):
             # read JSON file
             with open(path) as file:
                 self.projectfile = json.load(file)
+            # refresh variables on screen server
+            self.view.home_update()
             # refresh variables on screen server
             self.view.server_update()
             # refresh variables on screen data
@@ -238,10 +244,12 @@ class Controller(object):
             # refresh variables on screen data
             self.view.datatree_update()
             self.view.eventframe_post(errormessage)
-        # reset csv data
+        # reset data
+        self.view.datatree_update()
         self.projectfile["csv_booltrigger"] = 0
         self.view.csv_rowdata = [{"Text": "", "Variable": 0}]
         self.projectfile["csv_rowdata"] = self.view.csv_rowdata.copy()
+        self.view.home_update()
         self.view.csv_update()
         self.view.csv_row.set(1)
         self.view.csv_numrows.set(len(self.view.csv_rowdata))
@@ -361,6 +369,9 @@ class Controller(object):
         if message is not None:
             # write eventmessage
             self.view.eventframe_post(message)
+            # save data in screen home
+            self.view.csv_table_insert(self.timestamp_get(), self.csv.header, self.csv.data)
+        self.view.csv_table_scroll()
 
 
 if __name__ == '__main__':
