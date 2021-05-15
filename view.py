@@ -594,7 +594,6 @@ class View(object):
                                          anchor="w")
 
         # create menu for triggermode
-        self.csv_timechange = False
         self.csv_triggermode = tk.StringVar()
         self.csv_triggermode.set(self.controller.projectfile["csv_triggermode"])
         self.csv_triggerchoices = ["boolean", "seconds", "minutes", "hours"]
@@ -606,6 +605,7 @@ class View(object):
                                               command=lambda x: self.csv_triggermode_change())
 
         # create entry for time value to save csv
+        self.csv_timechange = False
         self.csv_time = tk.StringVar()
         self.csv_time.set(self.controller.projectfile["csv_time"])
         self.csv_time.trace("w", lambda *args: self.entry_validate(var=self.csv_time, mode="min_1", length=2))
@@ -1247,12 +1247,14 @@ class View(object):
         call window scale to hide or show the depending elements
         refresh list of all possible boolean triggers
         """
+        self.controller.projectfile["csv_triggermode"] = self.csv_triggermode.get()
         self.window_scale()
 
     def csv_time_change(self):
         """
         set csv trigger time
         """
+        self.controller.projectfile["csv_time"] = self.csv_time.get()
         self.csv_timechange = True
 
     def csv_numrows_change(self, mode=""):

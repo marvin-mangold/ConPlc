@@ -25,6 +25,8 @@ import json
 import time
 import queue
 
+# TODO check if win 7
+# TODO PLC Blocks s7 and TIA
 
 class Controller(object):
     def __init__(self):
