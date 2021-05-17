@@ -1211,7 +1211,7 @@ class View(object):
             self.csv_table.column("last", width=100, minwidth=100, stretch=tk.NO, anchor="center")
             self.csv_table.heading("last", text="", anchor="center")
             self.csv_table_rebuild = False
-        self.csv_table.insert("", "end", text=timestamp, values=" ".join(data))
+        self.csv_table.insert("", "end", text=timestamp, values=data)
         self.csv_table_scroll()
 
     def csv_table_scroll(self):
