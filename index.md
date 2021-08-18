@@ -1,37 +1,23 @@
-## Welcome to GitHub Pages
+# ConPLC
+ConPLC is a Software to recieve data from Siemens SIMATIC S7 PLC and show the live data or save it as CSV-File.
+- tested with S7-300, S7-1200 and S7-1500
+- example TIA-Portal project included
 
-You can use the [editor on GitHub](https://github.com/marvin-mangold/ConPlc/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+PLC:
+The PLC-Block "ConPLC" sends an UDT (User Defined Datatype) via TCP to the PC.
+- in the PLC-Software call the FB "ConPLC"
+- connect it with the datablock where the UDT-data is saved
+- setup the IP-address and portnumber
+- save the UDT source on your local machine
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Software:
+The PC-Programm recieves data from the PLC and show the live data or saves it as CSV-File.
+- setup the IP-address and portnumber for the TCP-Server
+- open the UDT source to sync the datastructure
+- define the CSV - name, path, seperator and rows
+- select the data for each row
+- select the triggermode (time based or rising edge of a boolean datapoint)
 
-### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+https://user-images.githubusercontent.com/10088323/119235272-ed106b80-bb31-11eb-926f-328e9d561289.mp4
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/marvin-mangold/ConPlc/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
