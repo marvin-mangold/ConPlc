@@ -1,5 +1,3 @@
-# ConPLC
-ConPLC is a Software to recieve data from Siemens SIMATIC S7 PLC and show the live data or save it as CSV-File.
 - tested with S7-300, S7-1200 and S7-1500
 - example TIA-Portal project included
 
