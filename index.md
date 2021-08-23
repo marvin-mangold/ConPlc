@@ -1,6 +1,5 @@
-{% if site.google_verify %}
-    <meta name="google-site-verification" content="{{ site.google_verify }}">
-{% endif %}
+<meta name="google-site-verification" content="{{ site.google_verify }}">
+
 
 - tested with S7-300, S7-1200 and S7-1500
 - example TIA-Portal project included
