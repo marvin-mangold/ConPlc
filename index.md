@@ -16,4 +16,5 @@ The PC-Programm recieves data from the PLC and show the live data or saves it as
 - select the data for each row
 - select the triggermode (time based or rising edge of a boolean datapoint)
 
-<div align="center"><iframe align="center" width="100%" height="400" src="https://user-images.githubusercontent.com/10088323/119235272-ed106b80-bb31-11eb-926f-328e9d561289.mp4" title="YouTube video player" frameborder="5" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+Video : 
+ <video src="https://user-images.githubusercontent.com/10088323/119235272-ed106b80-bb31-11eb-926f-328e9d561289.mp4" controls="controls" style="max-width: 730px;"> </video>
